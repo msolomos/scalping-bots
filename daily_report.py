@@ -37,12 +37,14 @@ bot_files = [
     '/opt/python/scalping-bot/ETHEREUM/state.json', 
     '/opt/python/scalping-bot/BITCOIN/state.json', 
     '/opt/python/scalping-bot/XRP/state.json',
-    '/opt/python/scalping-bot/CARDANO/state.json',  # Νέο bot
-    '/opt/python/scalping-bot/POLKADOT/state.json'  # Νέο bot
+    '/opt/python/scalping-bot/CARDANO/state.json',
+    '/opt/python/scalping-bot/POLKADOT/state.json',
+    '/opt/python/scalping-bot/DOGECOIN/state.json', # Νέο bot
+    '/opt/python/scalping-bot/POLYGON/state.json'   # Νέο bot
 ]
 
 # Λίστα με τα ονόματα των bots
-bot_names = ['AVAX', 'SOLANA', 'LITECOIN', 'ETHEREUM', 'BITCOIN', 'XRP', 'CARDANO', 'POLKADOT']
+bot_names = ['AVAX', 'SOLANA', 'LITECOIN', 'ETHEREUM', 'BITCOIN', 'XRP', 'CARDANO', 'POLKADOT', 'DOGECOIN', 'POLYGON']
 
 # Συνάρτηση για ανάγνωση των δεδομένων από το state.json κάθε bot
 def analyze_bot_data(file_path):
@@ -172,7 +174,7 @@ api_key = SENDGRID_API_KEY
 sender_email = "info@f2d.gr"
 recipient_email = "info@f2d.gr"
 cc_email = ""
-subject = f"Ημερήσια Αναφορά {current_date}"
+subject = f"Scalping bots - Ημερήσια Αναφορά {current_date}"
 
 # Κλήση της συνάρτησης αποστολής email
 send_email_report(api_key, sender_email, recipient_email, cc_email, subject, report_html, report_html)

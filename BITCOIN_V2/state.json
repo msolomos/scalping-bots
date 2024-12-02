@@ -1,1 +1,1 @@
-{"daily_profit": 835.48, "total_profit": 0, "current_trades": 2, "active_trade": 0, "trade_amount": 0, "highest_price": 0, "trailing_profit_active": false, "start_bot": false, "score_history": []}
+{"daily_profit": -9.63, "total_profit": 0, "current_trades": 3, "active_trade": 92796.15, "trade_amount": 0.25, "highest_price": 92997.21, "trailing_profit_active": false, "start_bot": true, "score_history": [], "second_trade_price": 0, "second_trade_amount": 0, "average_trade_price": 0, "highest_price_second_position": 0, "trailing_profit_second_position_active": false}

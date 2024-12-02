@@ -2,11 +2,40 @@ from flask import Flask, jsonify, request, render_template
 import json
 import os
 import re
+import logging
 
 
 
 
 app = Flask(__name__)
+
+
+
+# Διαδρομή του log αρχείου
+log_file_path = "/opt/python/scalping-bot/webhook.log"
+
+# Δημιουργία του φακέλου, αν δεν υπάρχει
+os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+
+# Δημιουργία του log αρχείου, αν δεν υπάρχει
+if not os.path.exists(log_file_path):
+    open(log_file_path, 'a').close()
+
+# Δημιουργία custom logger
+logger = logging.getLogger("webhook_logger")
+logger.setLevel(logging.INFO)
+
+# Ρύθμιση File Handler
+file_handler = logging.FileHandler(log_file_path)
+file_handler.setLevel(logging.INFO)
+
+# Ρύθμιση Formatter
+formatter = logging.Formatter("%(asctime)s - %(message)s")
+file_handler.setFormatter(formatter)
+
+# Προσθήκη Handler στον Logger
+logger.addHandler(file_handler)
+
 
 # Paths to JSON files and Euro pairs for each cryptocurrency
 crypto_info = {
@@ -17,7 +46,10 @@ crypto_info = {
     'BITCOIN': {'path': '/opt/python/scalping-bot/BITCOIN/state.json', 'euro_pair': 'BTC-EUR'},
     'XRP': {'path': '/opt/python/scalping-bot/XRP/state.json', 'euro_pair': 'XRP-EUR'},
     'CARDANO': {'path': '/opt/python/scalping-bot/CARDANO/state.json', 'euro_pair': 'ADA-EUR'},
-    'POLKADOT': {'path': '/opt/python/scalping-bot/POLKADOT/state.json', 'euro_pair': 'DOT-EUR'}
+    'POLKADOT': {'path': '/opt/python/scalping-bot/POLKADOT/state.json', 'euro_pair': 'DOT-EUR'},
+    'DOGECOIN': {'path': '/opt/python/scalping-bot/DOGECOIN/state.json', 'euro_pair': 'DOGE-EUR'},      #new bot
+    'POLYGON': {'path': '/opt/python/scalping-bot/POLYGON/state.json', 'euro_pair': 'MATIC-EUR'},       #new bot
+    'STELLAR': {'path': '/opt/python/scalping-bot/STELLAR/state.json', 'euro_pair': 'XLM-EUR'}          #new bot
 }
 
 
@@ -31,13 +63,33 @@ crypto_path_files = {
     'BITCOIN': {'path': '/opt/python/scalping-bot/BITCOIN/scalper_bitcoin.py'},
     'XRP': {'path': '/opt/python/scalping-bot/XRP/scalper_xrp.py'},
     'CARDANO': {'path': '/opt/python/scalping-bot/CARDANO/scalper_ada.py'},
-    'POLKADOT': {'path': '/opt/python/scalping-bot/POLKADOT/scalper_dot.py'}
+    'POLKADOT': {'path': '/opt/python/scalping-bot/POLKADOT/scalper_dot.py'},
+    'DOGECOIN': {'path': '/opt/python/scalping-bot/DOGECOIN/scalper_dogecoin.py'},      #new bot
+    'POLYGON': {'path': '/opt/python/scalping-bot/POLYGON/scalper_polygon.py'},          #new bot
+    'STELLAR': {'path': '/opt/python/scalping-bot/STELLAR/scalper_stellar.py'}          #new bot
 }
+
+
+# Ορισμός των paths των log αρχείων
+BOT_PATHS = {
+    "AVAX": "/opt/python/scalping-bot/AVAX/AVAX_bot.log",
+    "BTC": "/opt/python/scalping-bot/BITCOIN/BTC_bot.log",
+    "ADA": "/opt/python/scalping-bot/CARDANO/ADA_bot.log",
+    "ETH": "/opt/python/scalping-bot/ETHEREUM/ETH_bot.log",
+    "LTC": "/opt/python/scalping-bot/LITECOIN/LTC_bot.log",
+    "DOT": "/opt/python/scalping-bot/POLKADOT/DOT_bot.log",
+    "SOL": "/opt/python/scalping-bot/SOLANA/SOL_bot.log",
+    "XRP": "/opt/python/scalping-bot/XRP/XRP_bot.log",
+    "DOGE": "/opt/python/scalping-bot/DOGECOIN/DOGE_bot.log",
+    "MATIC": "/opt/python/scalping-bot/POLYGON/MATIC_bot.log",
+}
+
+
 
 # Define the static variables to read and update
 static_vars = [
     'SCALP_TARGET', 'BUY_THRESHOLD', 'RSI_THRESHOLD', 'ENABLE_STOP_LOSS', 'STOP_LOSS', 'ENABLE_TRAILING_PROFIT',
-    'TRAILING_PROFIT_THRESHOLD', 'MINIMUM_PROFIT_THRESHOLD', 'DAILY_PROFIT_TARGET'
+    'STATIC_TRAILING_PROFIT_THRESHOLD', 'MINIMUM_PROFIT_THRESHOLD', 'SELL_ON_TRAILING', 'DAILY_PROFIT_TARGET'
 ]
 
 
@@ -202,8 +254,8 @@ def read_static_variables(script_path):
     variables = {}
     try:
         with open(script_path, 'r') as f:
-            # Διαβάζουμε μόνο τις πρώτες 75 γραμμές
-            script_content = ''.join([next(f) for _ in range(75)])
+            # Διαβάζουμε μόνο τις πρώτες 100 γραμμές
+            script_content = ''.join([next(f) for _ in range(100)])
             for var in static_vars:
                 match = re.search(rf'^{var}\s*=\s*(.+)', script_content, re.MULTILINE)
                 if match:
@@ -266,6 +318,62 @@ def update_static_variables():
 def crypto_data():
     return render_template('crypto_info.html')  # Το όνομα του αρχείου HTML που έσωσες στον φάκελο templates
 
+
+
+
+@app.route("/logs", methods=["GET"])
+def log_viewer():
+    # Λήψη του επιλεγμένου log από το dropdown
+    selected_log_key = request.args.get("logfile")
+    log_content = None
+
+    if selected_log_key and selected_log_key in BOT_PATHS:
+        log_path = BOT_PATHS[selected_log_key]
+        # Ανάγνωση του αρχείου log αν υπάρχει
+        if os.path.exists(log_path):
+            with open(log_path, "r") as file:
+                lines = file.readlines()
+
+            # Διαχωρισμός σε sessions με βάση το διαχωριστικό
+            sessions = []
+            current_session = []
+
+            for line in reversed(lines):  # Ξεκινάμε από το τέλος
+                line = line.strip()  # Αφαίρεση περιττών κενών
+                if "Total Score for this round:" in line:  # Αν περιέχει το μοτίβο
+                    # Εντοπίζουμε το score και το χρωματίζουμε
+                    prefix, score = line.split("Total Score for this round:")
+                    score = score.strip()  # Παίρνουμε μόνο το score
+                    line = f'{prefix}Total Score for this round: <span class="highlight">{score}</span>'
+                current_session.append(line)
+                if "INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" in line:
+                    sessions.append(current_session[::-1])  # Αντιστρέφουμε το session για να διατηρήσει τη σωστή σειρά
+                    current_session = []
+
+            if current_session:  # Αν υπάρχει υπόλοιπο session
+                sessions.append(current_session[::-1])
+
+            # Τα sessions είναι έτοιμα και το πιο πρόσφατο είναι πρώτο
+            log_content = "\n".join(["\n".join(session) for session in sessions])
+
+    return render_template(
+        "log_viewer.html",
+        logs=BOT_PATHS.keys(),  # Μόνο τα keys για το dropdown
+        selected_log=selected_log_key,
+        log_content=log_content,
+    )
+
+
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    # Ελέγχει αν είναι POST request
+    if request.method == 'POST':
+        data = request.get_json()  # Ανάγνωση JSON δεδομένων από το request
+        logger.info(f"Webhook received: {data}")
+        return 'Webhook received', 200
+    else:
+        return 'Invalid request method', 400
 
 
 

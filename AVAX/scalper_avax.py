@@ -32,7 +32,7 @@ BINANCE_PAIR = "AVAXEUR"
 BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
-SCALP_TARGET = 1.02
+SCALP_TARGET = 1.01
 TRADE_AMOUNT = 70  # Μονάδα κρυπτονομίσματος
 
 # 4. Τεχνικοί Δείκτες
@@ -69,7 +69,7 @@ DAILY_PROFIT_TARGET = 100
 MAX_TRADES_PER_DAY = 100  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
 
 # 7. Μεταβλητές βραδυνού reset
-MINIMUM_PROFIT_THRESHOLD = 10       # Ελάχιστο επιθυμητό κέρδος σε ευρώ για βραδυνό reset
+MINIMUM_PROFIT_THRESHOLD = 15       # Ελάχιστο επιθυμητό κέρδος σε ευρώ για βραδυνό reset
 FEES_PERCENTAGE = 0.0025  # Εκτιμώμενο ποσοστό fees (0.25%)
 COOLDOWN_DURATION = 3600  # Χρόνος σε δευτερόλεπτα πριν το re-buy
 
@@ -1359,6 +1359,37 @@ def get_crypto_price(retries=3, delay=5):
     return None
 
 
+
+
+def lunarcrush_score(galaxy_score, alt_rank, weights):
+    """
+    Υπολογίζει το LunarCrush score με βάση το galaxy_score και το alt_rank,
+    καταγράφοντας όλα τα intermediate αποτελέσματα στο log.
+    """
+    # Υπολογισμός Galaxy Score Signal
+    galaxy_signal = 1 if galaxy_score > 70 else -1 if galaxy_score < 50 else 0
+    logging.debug(f"Galaxy Score: {galaxy_score} -> Signal: {galaxy_signal}")
+
+    # Υπολογισμός Alt Rank Signal
+    alt_rank_signal = 1 if alt_rank < 200 else -1 if alt_rank > 800 else 0
+    logging.info(f"Galaxy Score: {galaxy_score} -> Signal: {galaxy_signal}, Alt Rank: {alt_rank} -> Signal: {alt_rank_signal}")
+
+    # Υπολογισμός συνολικού score
+    combined_score = (weights['galaxy_score'] * galaxy_signal) + (weights['alt_rank'] * alt_rank_signal)
+    logging.debug(f"Weights -> Galaxy: {weights['galaxy_score']}, AltRank: {weights['alt_rank']}")
+    logging.info(f"Combined LunarCrush Score: {combined_score:.2f} (Galaxy Contribution: {weights['galaxy_score'] * galaxy_signal}, AltRank Contribution: {weights['alt_rank'] * alt_rank_signal})")
+
+    # Επιστροφή True αν το combined score είναι θετικό
+    return combined_score > 0
+
+
+
+
+
+
+
+
+
 # Main trading logic (updated)
 def execute_scalping_trade(CRYPTO_SYMBOL):
     global daily_profit, current_trades, highest_price, active_trade, trade_amount, start_bot, trailing_profit_active
@@ -1838,7 +1869,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         )
 
 
-        logging.info(
+        logging.debug(
             f"Sentimental Indicators: Galaxy Score={galaxy_score:.2f}, Alt Rank={alt_rank:.2f}"
 )
 
@@ -1903,10 +1934,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             scores['vwap'] = weights['vwap'] * (1 if df['close'].iloc[-1] > vwap_last else -1)
 
             # Galaxy Score βάσει του σήματος και του βάρους του
-            scores['galaxy_score'] = weights['galaxy_score'] * signals['galaxy_score']
+            #scores['galaxy_score'] = weights['galaxy_score'] * signals['galaxy_score']
 
             # Alt Rank βάσει του σήματος και του βάρους του
-            scores['alt_rank'] = weights['alt_rank'] * signals['alt_rank']
+            #scores['alt_rank'] = weights['alt_rank'] * signals['alt_rank']
 
             # Υπολογισμός συνολικής βαθμολογίας
             score = sum(scores.values())
@@ -2035,52 +2066,59 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
         else:
             if score >= BUY_THRESHOLD:
-                logging.info(f"Trade signal score is positive: {score:.2f}. Initiating a buy at {current_price}.")
+                logging.info(f"Trade signal score is positive: {score:.2f}. Proceeding with LunarCrush score evaluation.")
 
-                # Εξαγωγή του υπολοίπου του χαρτοφυλακίου
-                portfolio_summary = get_portfolio_balance(portfolio_uuid)  # Υποθέτουμε ότι έχεις το portfolio_uuid
-                if "error" not in portfolio_summary:
-                    available_cash = portfolio_summary['total_cash_equivalent_balance']
-                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR")
+                # Κλήση της συνάρτησης LunarCrush για περαιτέρω επιβεβαίωση
+                if lunarcrush_score(galaxy_score=galaxy_score, alt_rank=alt_rank, weights=weights):
+                    logging.info(f"Sentimental score (lunarcrush) is positive. Initiating a buy at {current_price}.")
 
-                    # Έλεγχος αν το ποσό της αγοράς επαρκεί
-                    if TRADE_AMOUNT <= available_cash:
-                        logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
-                        order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
+                    # Εξαγωγή του υπολοίπου του χαρτοφυλακίου
+                    portfolio_summary = get_portfolio_balance(portfolio_uuid)  # Υποθέτουμε ότι έχεις το portfolio_uuid
+                    if "error" not in portfolio_summary:
+                        available_cash = portfolio_summary['total_cash_equivalent_balance']
+                        logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR")
 
-                        if order_successful and execution_price:
-                            active_trade = execution_price  # Ενημέρωση της ανοιχτής θέσης με την τιμή εκτέλεσης
-                            trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
-                            logging.info(f"Order placed successfully at price: {execution_price:.2f} with fees: {fees}")
+                        # Έλεγχος αν το ποσό της αγοράς επαρκεί
+                        if TRADE_AMOUNT <= available_cash:
+                            logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
+                            order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
 
-                            # Προσθήκη των fees στο daily_profit                
-                            daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους
+                            if order_successful and execution_price:
+                                active_trade = execution_price  # Ενημέρωση της ανοιχτής θέσης με την τιμή εκτέλεσης
+                                trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
+                                logging.info(f"Order placed successfully at price: {execution_price:.2f} with fees: {fees}")
 
-                            # Δημιουργία του reasoning ως string για χρήση στην κλήση της sendgrid
-                            reasoning = (
-                                f"Indicators: MACD={round(macd_last, 3)}, Signal={round(signal_last, 3)}, "
-                                f"RSI={round(rsi_last, 3)}, Bollinger Upper={round(bollinger_upper_last, 3)}, "
-                                f"Bollinger Lower={round(bollinger_lower_last, 3)}, "
-                                f"VWAP={round(vwap_last, 3)}")
-                            
-                            # Δημιουργία του final_score ως string για χρήση στην κλήση της sendgrid
-                            final_score = f"Trade signal score is positive: {round(score, 3)}."
-                            
-                            # Κλήση της συνάρτησης για αποστολή email πριν μηδενιστούν οι τιμές
-                            sendgrid_email(trade_amount, "buy", execution_price, fees, final_score, reasoning)
+                                # Προσθήκη των fees στο daily_profit                
+                                daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους
 
-                            highest_price = execution_price
-                            current_trades += 1
-                            save_state()  # Αποθήκευση της κατάστασης μετά την αγορά
+                                # Δημιουργία του reasoning ως string για χρήση στην κλήση της sendgrid
+                                reasoning = (
+                                    f"Indicators: MACD={round(macd_last, 3)}, Signal={round(signal_last, 3)}, "
+                                    f"RSI={round(rsi_last, 3)}, Bollinger Upper={round(bollinger_upper_last, 3)}, "
+                                    f"Bollinger Lower={round(bollinger_lower_last, 3)}, "
+                                    f"VWAP={round(vwap_last, 3)}")
+                                
+                                # Δημιουργία του final_score ως string για χρήση στην κλήση της sendgrid
+                                final_score = f"Trade signal score is positive: {round(score, 3)}."
+                                
+                                # Κλήση της συνάρτησης για αποστολή email πριν μηδενιστούν οι τιμές
+                                sendgrid_email(trade_amount, "buy", execution_price, fees, final_score, reasoning)
+
+                                highest_price = execution_price
+                                current_trades += 1
+                                save_state()  # Αποθήκευση της κατάστασης μετά την αγορά
+                            else:
+                                logging.info(f"Order placement failed. No buy action taken.")
                         else:
-                            logging.info(f"Order placement failed. No buy action taken.")
+                            logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.2f} EUR, Available: {available_cash:.2f} EUR")
                     else:
-                        logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.2f} EUR, Available: {available_cash:.2f} EUR")
+                        logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
+                        logging.error(f"Error details: {portfolio_summary['message']}")
                 else:
-                    logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
-                    logging.error(f"Error details: {portfolio_summary['message']}")
+                    logging.info(f"Sentimental score (lunarcrush) is negative. No buy action taken.")
             else:
                 logging.info(f"Trade signal score ({score:.2f}) was below the buy threshold ({BUY_THRESHOLD}). No action taken.")
+
 
 
         # Έλεγχος αν επιτεύχθηκε το καθημερινό κέρδος ή το όριο συναλλαγών

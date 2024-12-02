@@ -2170,7 +2170,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"Checking Volume Confirmation...")
 
                 # Έλεγχος επιβεβαίωσης όγκου πριν την αγορά
-                confirmation, current_vol, avg_vol = calculate_volume_confirmation(df, window=30, threshold=0.8)
+                volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30, threshold=0.8)
+                
                 if not volume_confirmation:
                     logging.info(f"Volume confirmation failed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
                     logging.info("Buy action skipped due to insufficient volume confirmation.")
@@ -2221,9 +2222,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
                         logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.{current_decimals}f} EUR")
+                        send_push_notification(f"Insufficient funds for {CRYPTO_NAME} bot. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.{current_decimals}f} EUR")
                 else:
                     logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
                     logging.error(f"Error details: {portfolio_summary['message']}")
+                    send_push_notification(f"Failed to retrieve portfolio balance. No buy action taken for {CRYPTO_NAME} bot.")
             else:
                 logging.info(f"Trade signal score ({score:.2f}) was below the buy threshold ({BUY_THRESHOLD}). No action taken.")
                 logging.info(f"Score: {score:.8f}, Threshold: {BUY_THRESHOLD:.8f}")

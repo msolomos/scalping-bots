@@ -33,7 +33,7 @@ BINANCE_INTERVAL = "1m"
 
 # 3. Scalping variables
 SCALP_TARGET = 1.01
-TRADE_AMOUNT = 1  # Μονάδα κρυπτονομίσματος
+TRADE_AMOUNT = 0.25  # Μονάδα κρυπτονομίσματος
 
 # 4. Τεχνικοί Δείκτες
 short_ma_period = 10  # 5 περιόδων
@@ -42,8 +42,8 @@ RSI_THRESHOLD = 50
 ADX_THRESHOLD = 25
 STOCHASTIC_OVERSOLD_THRESHOLD = 40
 BUY_THRESHOLD = 0.5 # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά
-GRANULARITY = 300
-GRANULARITY_TEXT = "FIVE_MINUTE"
+GRANULARITY = 60
+GRANULARITY_TEXT = "ONE_MINUTE"
 ENABLE_TABULATE_INDICATORS = False      # αποτελέσματα δεικτών σε γραμμογραφημένη μορφή                                                                                                                                
 ENABLE_GEORGE_SAYS = False              # Εμφάνιση τεχνικών δεικτών μετά το buy                                                                                                                               
 
@@ -94,6 +94,17 @@ current_trades = 0
 active_trade = None
 highest_price = 0
 trailing_profit_active = False
+
+
+# Load decimal configuration from external JSON file
+with open("/opt/python/scalping-bot/decimal_config.json", "r") as f:
+    DECIMAL_CONFIG = json.load(f)
+
+# Get decimals for the current cryptocurrency
+if CRYPTO_NAME not in DECIMAL_CONFIG:
+    logging.warning(f"Crypto name '{CRYPTO_NAME}' not found in decimal_config.json. Using default decimals: 2")
+current_decimals = DECIMAL_CONFIG.get(CRYPTO_NAME, {}).get("decimals", 2)  # Default to 2 decimals
+
 
 
 
@@ -199,7 +210,7 @@ def check_sell_signal():
         logging.info("Sell signal executed and `sell_signal.txt` file deleted.")
         return True  # Return True to stop the bot execution for this round
     else:
-        logging.info("No sell signal found.")
+        logging.info("No external sell signal found.")
         return False  # Return False if no sell signal is found
 
 
@@ -209,7 +220,7 @@ def check_sell_signal():
 def send_push_notification(message):
     try:
         po = pushover.Client(user_key=PUSHOVER_USER, api_token=PUSHOVER_TOKEN)
-        po.send_message(message, title="Scalping Alert")
+        po.send_message(message, title="V2 - Scalping Alert")
         #logging.info("Push notification sent via Pushover")
     except Exception as e:
         logging.error(f"Error sending Push notification: {e}")
@@ -250,7 +261,7 @@ def sendgrid_email(quantity, transaction_type, price, net_profit, final_score, r
     message = Mail(
         from_email=EMAIL_SENDER,
         to_emails=EMAIL_RECIPIENT,
-        subject=f'Scalping bot - {transaction} {CRYPTO_SYMBOL}',
+        subject=f'Scalping bot Bitcoin V2 - {transaction}',
         html_content=html_content
     )
 
@@ -441,6 +452,9 @@ def reset_bot_state():
 # Load the state from the file
 def load_state():
     global daily_profit, total_profit, current_trades, active_trade, trade_amount, highest_price, trailing_profit_active, start_bot, score_history
+    global second_trade_price, second_trade_amount, average_trade_price  # Νέες μεταβλητές
+    global highest_price_second_position, trailing_profit_second_position_active  # Νέες μεταβλητές για τη δεύτερη θέση
+
     try:
         with open(state_file, "r") as f:
             state = json.load(f)
@@ -453,14 +467,28 @@ def load_state():
             trailing_profit_active = state.get("trailing_profit_active", False)
             start_bot = state.get("start_bot", True)  # Load the start_bot status
             score_history = state.get("score_history", [])  # Load the score history
+            
+            # Φόρτωση μεταβλητών για τη δεύτερη θέση
+            second_trade_price = state.get("second_trade_price", None)
+            second_trade_amount = state.get("second_trade_amount", 0)
+            average_trade_price = state.get("average_trade_price", None)
+            highest_price_second_position = state.get("highest_price_second_position", None)
+            trailing_profit_second_position_active = state.get("trailing_profit_second_position_active", False)
+
             logging.info(
-                f"Loaded state (1/2): daily_profit={daily_profit:.2f}, total_profit={total_profit:.2f}, "
-                f"current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}"
+                f"Loaded state 1/3: daily_profit={daily_profit:.2f}, total_profit={total_profit:.2f}, "
+                f"active_trade={active_trade:.{current_decimals}f}, trade_amount={trade_amount}"
             )
             logging.info(
-                f"Loaded state (2/2): highest_price={highest_price}, trailing_profit_active={trailing_profit_active}, "
-                f"start_bot={start_bot}, score_history={score_history}"
+                f"Loaded state 2/3: current_trades={current_trades}, highest_price={highest_price:.{current_decimals}f}, "
+                f"trailing_active={trailing_profit_active}, start_bot={start_bot}, score_history={score_history}"
             )
+            logging.info(
+                f"Loaded state 3/3: second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
+                f"average_trade_price={average_trade_price}, highest_price_second_position={highest_price_second_position}, "
+                f"trailing_profit_second_position_active={trailing_profit_second_position_active}"
+            )
+
     except FileNotFoundError:
         # Initialize defaults if state file is not found
         daily_profit = 0
@@ -472,38 +500,64 @@ def load_state():
         trailing_profit_active = False
         start_bot = True  # Default to True if no state file
         score_history = []  # Initialize score history as an empty list
+
+        # Αρχικοποίηση μεταβλητών για τη δεύτερη θέση
+        second_trade_price = None
+        second_trade_amount = 0
+        average_trade_price = None
+        highest_price_second_position = None
+        trailing_profit_second_position_active = False
+
         save_state()  # Create the state file
         logging.info(
             f"State file not found. Initialized new state: daily_profit={daily_profit}, total_profit={total_profit}, "
             f"current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}, "
             f"highest_price={highest_price}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, "
-            f"score_history={score_history}"
+            f"score_history={score_history}, second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
+            f"average_trade_price={average_trade_price}, highest_price_second_position={highest_price_second_position}, "
+            f"trailing_profit_second_position_active={trailing_profit_second_position_active}"
         )
 
 
 
 
+
 # Save the state to the file
-def save_state():
+def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_info
     state = {
         "daily_profit": round(daily_profit, 2) if daily_profit is not None else 0,
         "total_profit": round(total_profit, 2) if total_profit is not None else 0,
         "current_trades": current_trades,
-        "active_trade": round(active_trade, 2) if active_trade is not None else 0,
+        "active_trade": round(active_trade, current_decimals) if active_trade is not None else 0,
         "trade_amount": trade_amount,
-        "highest_price": round(highest_price, 2) if highest_price is not None else 0,
+        "highest_price": round(highest_price, current_decimals) if highest_price is not None else 0,
         "trailing_profit_active": trailing_profit_active,
         "start_bot": start_bot,  # Save the start_bot status
-        "score_history": [round(score, 2) for score in score_history]  # Round each score in score_history
+        "score_history": [round(score, 2) for score in score_history],  # Round each score in score_history
+
+        # Μεταβλητές για τη δεύτερη θέση
+        "second_trade_price": round(second_trade_price, current_decimals) if second_trade_price is not None else 0,
+        "second_trade_amount": second_trade_amount,
+        "average_trade_price": round(average_trade_price, current_decimals) if average_trade_price is not None else 0,
+        "highest_price_second_position": round(highest_price_second_position, current_decimals) if highest_price_second_position is not None else 0,
+        "trailing_profit_second_position_active": trailing_profit_second_position_active,
     }
+
+    # Save state to a file
     with open(state_file, "w") as f:
         json.dump(state, f)
-    logging.info(
-        f"Saved state: daily_profit={state['daily_profit']}, total_profit={state['total_profit']}, "
-        f"current_trades={current_trades}, active_trade={state['active_trade']}, trade_amount={trade_amount}, "
-        f"highest_price={state['highest_price']}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, "
-        f"score_history={state['score_history']}"
-    )
+
+    # Log the saved state dynamically with decimals if log_info is True
+    if log_info:
+        logging.info(
+            f"Saved state: daily_profit={state['daily_profit']:.2f}, total_profit={state['total_profit']:.2f}, "
+            f"current_trades={current_trades}, active_trade={state['active_trade']:.{current_decimals}f}, trade_amount={trade_amount}, "
+            f"highest_price={state['highest_price']:.{current_decimals}f}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, "
+            f"score_history={[round(score, 2) for score in score_history]}, "
+            f"second_trade_price={state['second_trade_price']:.{current_decimals}f}, second_trade_amount={second_trade_amount}, "
+            f"average_trade_price={state['average_trade_price']:.{current_decimals}f}, highest_price_second_position={state['highest_price_second_position']:.{current_decimals}f}, "
+            f"trailing_profit_second_position_active={state['trailing_profit_second_position_active']}"
+        )
 
 
 
@@ -1409,6 +1463,23 @@ def compute_indicators(df):
     rsi = calculate_rsi(df)
     bollinger_upper, bollinger_lower = calculate_bollinger_bands(df)
     vwap = calculate_vwap(df)
+    
+    # Λήψη των τελευταίων τιμών για κάθε δείκτη
+    macd_last = float(macd.iloc[-1]) if isinstance(macd.iloc[-1], (float, int, str)) else macd
+    signal_last = float(signal.iloc[-1]) if isinstance(signal.iloc[-1], (float, int, str)) else signal
+    rsi_last = float(rsi.iloc[-1]) if isinstance(rsi.iloc[-1], (float, int, str)) else rsi
+    bollinger_upper_last = float(bollinger_upper.iloc[-1]) if isinstance(bollinger_upper.iloc[-1], (float, int, str)) else bollinger_upper
+    bollinger_lower_last = float(bollinger_lower.iloc[-1]) if isinstance(bollinger_lower.iloc[-1], (float, int, str)) else bollinger_lower
+    vwap_last = float(vwap.iloc[-1]) if isinstance(vwap.iloc[-1], (float, int, str)) else vwap    
+    
+    logging.info(
+        f"Indicators: MACD={macd_last:.{current_decimals}f}, Signal={signal_last:.{current_decimals}f}, "
+        f"RSI={rsi_last:.{current_decimals}f}, Bollinger Upper={bollinger_upper_last:.{current_decimals}f}, "
+        f"Bollinger Lower={bollinger_lower_last:.{current_decimals}f}, "
+        f"VWAP={vwap_last:.{current_decimals}f}"
+    ) 
+
+ 
     return {
         "macd": macd.iloc[-1],
         "signal": signal.iloc[-1],
@@ -1484,6 +1555,7 @@ def calculate_trade_score(indicators, current_price):
         "vwap": weights['vwap'] * (1 if current_price > indicators['vwap'] else -1),
     }
     score = sum(scores.values())
+    logging.info(f"Score Analysis: {scores}, Total Score: {score:.2f}")
     logging.info(f"Total Score for this round: {score:.2f}")
     log_score_details(scores, indicators, current_price, score)
     return score
@@ -1508,8 +1580,11 @@ def evaluate_buy_signal(score, indicators, current_price):
     if ENABLE_SCORE_HISTORY:
         if len(score_history) == MAX_SCORE_HISTORY and sum(score >= BUY_THRESHOLD for score in score_history) >= POSITIVE_THRESHOLD:
             execute_buy_order(current_price, indicators, score)
-    elif score >= BUY_THRESHOLD:
-        execute_buy_order(current_price, indicators, score)
+    else:
+        if score >= BUY_THRESHOLD:
+            execute_buy_order(current_price, indicators, score)
+        else:
+            logging.info(f"Trade signal score ({score:.2f}) was below the buy threshold ({BUY_THRESHOLD}). No action taken.")            
 
 
 def execute_buy_order(current_price, indicators, score):
@@ -1565,6 +1640,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
     global daily_profit, current_trades, highest_price, active_trade, trade_amount, start_bot, trailing_profit_active
 
     logging.info(f"Executing trade logic for {CRYPTO_SYMBOL}")
+    if not active_trade:        
+        logging.info(f"Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.")    
 
     if not start_bot:
         logging.info("Bot is stopped.")
@@ -1599,8 +1676,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         if active_trade:
             handle_sell_logic(current_price, indicators)
         else:
-            # Εάν δεν υπάρχει ενεργή συναλλαγή, έλεγχος για αγορά
-            logging.info(f"{indicators}")
+            # Εάν δεν υπάρχει ενεργή συναλλαγή, έλεγχος για αγορά           
+            #logging.info(f"{indicators}")
             handle_buy_logic(current_price, indicators)
 
         # Έλεγχος αν έχουν επιτευχθεί τα ημερήσια όρια
@@ -1621,7 +1698,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 # Main loop (updated to load state)
 def run_bot():
     logging.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    logging.info("Starting bot...")
+    logging.info(f"Starting {CRYPTO_NAME} ({CRYPTO_SYMBOL}) bot...")
     
     # Check for URGENTG sell signal at the beginning (macro call via excel)
     if check_sell_signal():

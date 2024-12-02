@@ -1,15 +1,17 @@
 {
-    "BTC": {
-        "macd": 0.25,
-        "rsi": 0.3,
-        "bollinger": 0.25,
-        "vwap": 0.2
-    },
+	"BTC": {
+		"macd": 0.2,
+		"rsi": 0.25,
+		"bollinger": 0.2,
+		"vwap": 0.2,
+		"cup_and_handle": 0.1,
+		"elliott_wave": 0.05
+	},
     "ETH": {
-        "macd": 0.3,
-        "rsi": 0.3,
-        "bollinger": 0.2,
-        "vwap": 0.2
+        "macd": 0.25,
+        "rsi": 0.35,
+        "bollinger": 0.25,
+        "vwap": 0.15
     },
     "SOL": {
         "macd": 0.2,
@@ -60,5 +62,11 @@
 				"rsi": 0.2,
 				"bollinger": 0.25,
 				"vwap": 0.25
-		}		
+		},
+		"XLM": {
+				"macd": 0.25,
+				"rsi": 0.35,
+				"bollinger": 0.25,
+				"vwap": 0.15
+		}
 }
