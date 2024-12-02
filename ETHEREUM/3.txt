@@ -1,0 +1,1005 @@
+2024-11-29 00:40:15,881 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 00:40:15,956 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 00:40:15,970 INFO No external sell signal found.
+2024-11-29 00:40:15,986 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 00:40:15,994 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 00:40:16,009 INFO Executing trade logic for ETH-EUR
+2024-11-29 00:40:16,019 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 00:40:17,429 INFO Fetched ETH price: 3401.16 EUR, equivalent to 3585.50 USD.
+2024-11-29 00:40:17,790 INFO Valid timedata found for general API.
+2024-11-29 00:40:18,229 INFO Indicators: MACD=-11.89, Signal=-11.86, RSI=31.15, Bollinger Upper=3409.72, Bollinger Lower=3359.26, Current Price=3401.16, VWAP=3412.67
+2024-11-29 00:40:18,251 INFO RSI Last: 31.15, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 00:40:18,264 INFO Current Price: 3401.16, VWAP: 3412.67, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 00:40:18,279 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.35
+2024-11-29 00:40:18,288 INFO Total Score for this round: -0.35
+2024-11-29 00:40:18,325 INFO Trade signal score (-0.35) was below the buy threshold (0.45). No action taken.
+2024-11-29 00:40:18,340 INFO Score: -0.35000000, Threshold: 0.45000000
+2024-11-29 00:40:18,353 INFO Bot execution completed.
+2024-11-29 00:45:13,507 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 00:45:13,533 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 00:45:13,552 INFO No external sell signal found.
+2024-11-29 00:45:13,579 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 00:45:13,600 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 00:45:13,609 INFO Executing trade logic for ETH-EUR
+2024-11-29 00:45:13,623 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 00:45:14,884 INFO Fetched ETH price: 3405.28 EUR, equivalent to 3589.85 USD.
+2024-11-29 00:45:15,757 INFO Valid timedata found for Binance API.
+2024-11-29 00:45:17,503 INFO Indicators: MACD=1.76, Signal=1.64, RSI=83.91, Bollinger Upper=3406.65, Bollinger Lower=3396.90, Current Price=3405.28, VWAP=3378.41
+2024-11-29 00:45:17,546 INFO RSI Last: 83.91, Raw Score: -0.50, Weighted Score: -0.17
+2024-11-29 00:45:17,546 INFO Current Price: 3405.28, VWAP: 3378.41, VWAP Diff: 0.01, Raw Score: 1
+2024-11-29 00:45:17,547 INFO Score Analysis: {'macd': 0.25, 'rsi': -0.17, 'bollinger': -0.12, 'vwap': 0.15}, Total Score: 0.1
+2024-11-29 00:45:17,547 INFO Total Score for this round: 0.10
+2024-11-29 00:45:17,548 INFO Trade signal score (0.10) was below the buy threshold (0.45). No action taken.
+2024-11-29 00:45:17,567 INFO Score: 0.10000000, Threshold: 0.45000000
+2024-11-29 00:45:17,583 INFO Bot execution completed.
+2024-11-29 00:50:15,806 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 00:50:15,834 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 00:50:15,851 INFO No external sell signal found.
+2024-11-29 00:50:15,868 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 00:50:15,878 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 00:50:15,905 INFO Executing trade logic for ETH-EUR
+2024-11-29 00:50:15,926 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 00:50:18,772 INFO Fetched ETH price: 3404.62 EUR, equivalent to 3589.15 USD.
+2024-11-29 00:50:19,520 INFO Valid timedata found for general API.
+2024-11-29 00:50:20,404 INFO Indicators: MACD=-12.71, Signal=-11.53, RSI=30.97, Bollinger Upper=3413.91, Bollinger Lower=3364.01, Current Price=3404.62, VWAP=3412.97
+2024-11-29 00:50:20,406 INFO RSI Last: 30.97, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 00:50:20,407 INFO Current Price: 3404.62, VWAP: 3412.97, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 00:50:20,412 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.35
+2024-11-29 00:50:20,412 INFO Total Score for this round: -0.35
+2024-11-29 00:50:20,413 INFO Trade signal score (-0.35) was below the buy threshold (0.45). No action taken.
+2024-11-29 00:50:20,413 INFO Score: -0.35000000, Threshold: 0.45000000
+2024-11-29 00:50:20,414 INFO Bot execution completed.
+2024-11-29 00:55:13,837 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 00:55:13,856 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 00:55:13,888 INFO No external sell signal found.
+2024-11-29 00:55:13,906 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 00:55:13,916 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 00:55:13,946 INFO Executing trade logic for ETH-EUR
+2024-11-29 00:55:13,964 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 00:55:14,575 INFO Fetched ETH price: 3402.9 EUR, equivalent to 3587.34 USD.
+2024-11-29 00:55:14,859 INFO Valid timedata found for general API.
+2024-11-29 00:55:15,270 INFO Indicators: MACD=-12.71, Signal=-11.53, RSI=30.97, Bollinger Upper=3413.91, Bollinger Lower=3364.01, Current Price=3402.90, VWAP=3412.97
+2024-11-29 00:55:15,292 INFO RSI Last: 30.97, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 00:55:15,309 INFO Current Price: 3402.9, VWAP: 3412.97, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 00:55:15,340 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.35
+2024-11-29 00:55:15,357 INFO Total Score for this round: -0.35
+2024-11-29 00:55:15,378 INFO Trade signal score (-0.35) was below the buy threshold (0.45). No action taken.
+2024-11-29 00:55:15,392 INFO Score: -0.35000000, Threshold: 0.45000000
+2024-11-29 00:55:15,404 INFO Bot execution completed.
+2024-11-29 01:00:45,093 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:00:45,195 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:00:45,195 INFO No external sell signal found.
+2024-11-29 01:00:45,278 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:00:45,279 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:00:45,280 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:00:45,281 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:00:47,074 INFO Fetched ETH price: 3404.45 EUR, equivalent to 3588.97 USD.
+2024-11-29 01:00:48,094 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 01:00:48,771 INFO Indicators: MACD=-12.27, Signal=-10.90, RSI=37.20, Bollinger Upper=3423.14, Bollinger Lower=3365.44, Current Price=3404.45, VWAP=3413.03
+2024-11-29 01:00:48,772 INFO RSI Last: 37.20, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 01:00:48,772 INFO Current Price: 3404.45, VWAP: 3413.03, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 01:00:48,773 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.35
+2024-11-29 01:00:48,773 INFO Total Score for this round: -0.35
+2024-11-29 01:00:48,786 INFO Trade signal score (-0.35) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:00:48,786 INFO Score: -0.35000000, Threshold: 0.45000000
+2024-11-29 01:00:48,787 INFO Bot execution completed.
+2024-11-29 01:05:13,545 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:05:13,569 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:05:13,588 INFO No external sell signal found.
+2024-11-29 01:05:13,606 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:05:13,625 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:05:13,643 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:05:13,650 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:05:14,451 INFO Fetched ETH price: 3397.2 EUR, equivalent to 3581.33 USD.
+2024-11-29 01:05:15,367 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 01:05:16,919 INFO Indicators: MACD=-11.81, Signal=-10.56, RSI=37.94, Bollinger Upper=3424.82, Bollinger Lower=3368.31, Current Price=3397.20, VWAP=3413.05
+2024-11-29 01:05:16,953 INFO RSI Last: 37.94, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 01:05:16,958 INFO Current Price: 3397.2, VWAP: 3413.05, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 01:05:16,958 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: -0.23
+2024-11-29 01:05:16,959 INFO Total Score for this round: -0.23
+2024-11-29 01:05:16,960 INFO Trade signal score (-0.23) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:05:16,960 INFO Score: -0.23000000, Threshold: 0.45000000
+2024-11-29 01:05:16,961 INFO Bot execution completed.
+2024-11-29 01:10:14,914 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:10:14,940 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:10:14,958 INFO No external sell signal found.
+2024-11-29 01:10:14,978 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:10:14,992 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:10:15,026 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:10:15,046 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:10:15,998 INFO Fetched ETH price: 3396.23 EUR, equivalent to 3580.31 USD.
+2024-11-29 01:10:17,151 INFO Valid timedata found for general API.
+2024-11-29 01:10:19,153 INFO Indicators: MACD=-11.72, Signal=-10.24, RSI=29.47, Bollinger Upper=3425.69, Bollinger Lower=3370.76, Current Price=3396.23, VWAP=3413.32
+2024-11-29 01:10:19,216 INFO RSI Last: 29.47, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 01:10:19,236 INFO Current Price: 3396.23, VWAP: 3413.32, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 01:10:19,261 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: -0.05
+2024-11-29 01:10:19,270 INFO Total Score for this round: -0.05
+2024-11-29 01:10:19,276 INFO Trade signal score (-0.05) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:10:19,286 INFO Score: -0.05000000, Threshold: 0.45000000
+2024-11-29 01:10:19,301 INFO Bot execution completed.
+2024-11-29 01:15:13,558 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:15:13,581 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:15:13,588 INFO No external sell signal found.
+2024-11-29 01:15:13,601 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:15:13,608 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:15:13,629 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:15:13,646 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:15:14,419 INFO Fetched ETH price: 3395.92 EUR, equivalent to 3579.98 USD.
+2024-11-29 01:15:15,153 INFO Valid timedata found for Binance API.
+2024-11-29 01:15:15,789 INFO Indicators: MACD=-1.81, Signal=-1.70, RSI=39.80, Bollinger Upper=3407.50, Bollinger Lower=3390.82, Current Price=3395.92, VWAP=3378.59
+2024-11-29 01:15:15,852 INFO RSI Last: 39.80, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 01:15:15,860 INFO Current Price: 3395.92, VWAP: 3378.59, VWAP Diff: 0.01, Raw Score: 1
+2024-11-29 01:15:15,876 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.12, 'vwap': 0.15}, Total Score: 0.2
+2024-11-29 01:15:15,887 INFO Total Score for this round: 0.20
+2024-11-29 01:15:15,908 INFO Trade signal score (0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:15:15,922 INFO Score: 0.20000000, Threshold: 0.45000000
+2024-11-29 01:15:15,928 INFO Bot execution completed.
+2024-11-29 01:20:15,603 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:20:15,629 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:20:15,646 INFO No external sell signal found.
+2024-11-29 01:20:15,663 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:20:15,682 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:20:15,699 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:20:15,708 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:20:17,175 INFO Fetched ETH price: 3391.85 EUR, equivalent to 3575.69 USD.
+2024-11-29 01:20:18,400 INFO Valid timedata found for general API.
+2024-11-29 01:20:19,523 INFO Indicators: MACD=-10.60, Signal=-9.87, RSI=27.36, Bollinger Upper=3424.92, Bollinger Lower=3375.84, Current Price=3391.85, VWAP=3413.33
+2024-11-29 01:20:19,543 INFO RSI Last: 27.36, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 01:20:19,563 INFO Current Price: 3391.85, VWAP: 3413.33, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 01:20:19,568 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: 0.07
+2024-11-29 01:20:19,571 INFO Total Score for this round: 0.07
+2024-11-29 01:20:19,587 INFO Trade signal score (0.07) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:20:19,591 INFO Score: 0.07000000, Threshold: 0.45000000
+2024-11-29 01:20:19,621 INFO Bot execution completed.
+2024-11-29 01:25:13,817 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:25:13,834 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:25:13,841 INFO No external sell signal found.
+2024-11-29 01:25:13,846 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:25:13,851 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:25:13,864 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:25:13,870 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:25:14,742 INFO Fetched ETH price: 3401.87 EUR, equivalent to 3586.25 USD.
+2024-11-29 01:25:15,073 INFO Valid timedata found for general API.
+2024-11-29 01:25:16,450 INFO Indicators: MACD=-10.60, Signal=-9.87, RSI=27.36, Bollinger Upper=3424.92, Bollinger Lower=3375.84, Current Price=3401.87, VWAP=3413.33
+2024-11-29 01:25:16,468 INFO RSI Last: 27.36, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 01:25:16,517 INFO Current Price: 3401.87, VWAP: 3413.33, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 01:25:16,529 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: -0.05
+2024-11-29 01:25:16,554 INFO Total Score for this round: -0.05
+2024-11-29 01:25:16,585 INFO Trade signal score (-0.05) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:25:16,615 INFO Score: -0.05000000, Threshold: 0.45000000
+2024-11-29 01:25:16,647 INFO Bot execution completed.
+2024-11-29 01:30:16,739 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:30:16,788 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:30:16,829 INFO No external sell signal found.
+2024-11-29 01:30:16,863 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:30:16,870 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:30:16,889 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:30:16,889 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:30:17,898 INFO Fetched ETH price: 3399.77 EUR, equivalent to 3584.04 USD.
+2024-11-29 01:30:18,800 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 01:30:19,540 INFO Indicators: MACD=-9.85, Signal=-9.86, RSI=31.82, Bollinger Upper=3424.08, Bollinger Lower=3383.14, Current Price=3399.77, VWAP=3413.79
+2024-11-29 01:30:19,563 INFO RSI Last: 31.82, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 01:30:19,578 INFO Current Price: 3399.77, VWAP: 3413.79, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 01:30:19,593 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.17, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: 0.1
+2024-11-29 01:30:19,599 INFO Total Score for this round: 0.10
+2024-11-29 01:30:19,610 INFO Trade signal score (0.10) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:30:19,620 INFO Score: 0.10000000, Threshold: 0.45000000
+2024-11-29 01:30:19,630 INFO Bot execution completed.
+2024-11-29 01:35:14,535 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:35:14,552 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:35:14,570 INFO No external sell signal found.
+2024-11-29 01:35:14,583 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:35:14,588 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:35:14,592 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:35:14,594 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:35:15,338 INFO Fetched ETH price: 3405.17 EUR, equivalent to 3589.73 USD.
+2024-11-29 01:35:16,291 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 01:35:17,495 INFO Indicators: MACD=-9.68, Signal=-9.86, RSI=37.59, Bollinger Upper=3426.11, Bollinger Lower=3384.37, Current Price=3405.17, VWAP=3413.94
+2024-11-29 01:35:17,496 INFO RSI Last: 37.59, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 01:35:17,496 INFO Current Price: 3405.17, VWAP: 3413.94, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 01:35:17,520 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.17, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: 0.1
+2024-11-29 01:35:17,520 INFO Total Score for this round: 0.10
+2024-11-29 01:35:17,521 INFO Trade signal score (0.10) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:35:17,521 INFO Score: 0.10000000, Threshold: 0.45000000
+2024-11-29 01:35:17,522 INFO Bot execution completed.
+2024-11-29 01:40:15,780 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:40:15,801 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:40:15,821 INFO No external sell signal found.
+2024-11-29 01:40:15,849 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:40:15,856 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:40:15,872 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:40:15,880 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:40:18,622 INFO Fetched ETH price: 3397.51 EUR, equivalent to 3581.66 USD.
+2024-11-29 01:40:18,836 INFO Valid timedata found for general API.
+2024-11-29 01:40:19,057 INFO Indicators: MACD=-9.68, Signal=-9.86, RSI=37.59, Bollinger Upper=3426.11, Bollinger Lower=3384.37, Current Price=3397.51, VWAP=3413.94
+2024-11-29 01:40:19,058 INFO RSI Last: 37.59, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 01:40:19,058 INFO Current Price: 3397.51, VWAP: 3413.94, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 01:40:19,058 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.17, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: 0.23
+2024-11-29 01:40:19,059 INFO Total Score for this round: 0.23
+2024-11-29 01:40:19,059 INFO Trade signal score (0.23) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:40:19,059 INFO Score: 0.23000000, Threshold: 0.45000000
+2024-11-29 01:40:19,060 INFO Bot execution completed.
+2024-11-29 01:45:14,439 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:45:14,454 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:45:14,466 INFO No external sell signal found.
+2024-11-29 01:45:14,484 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:45:14,506 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:45:14,538 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:45:14,566 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:45:15,369 INFO Fetched ETH price: 3391.95 EUR, equivalent to 3575.79 USD.
+2024-11-29 01:45:15,942 INFO Valid timedata found for general API.
+2024-11-29 01:45:16,544 INFO Indicators: MACD=-9.54, Signal=-9.91, RSI=40.61, Bollinger Upper=3428.06, Bollinger Lower=3385.55, Current Price=3391.95, VWAP=3413.91
+2024-11-29 01:45:16,567 INFO RSI Last: 40.61, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 01:45:16,574 INFO Current Price: 3391.95, VWAP: 3413.91, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 01:45:16,582 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.03, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: 0.08
+2024-11-29 01:45:16,586 INFO Total Score for this round: 0.08
+2024-11-29 01:45:16,610 INFO Trade signal score (0.08) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:45:16,643 INFO Score: 0.08000000, Threshold: 0.45000000
+2024-11-29 01:45:16,646 INFO Bot execution completed.
+2024-11-29 01:50:16,189 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:50:16,207 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:50:16,221 INFO No external sell signal found.
+2024-11-29 01:50:16,240 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:50:16,257 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:50:16,270 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:50:16,281 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:50:16,955 INFO Fetched ETH price: 3392.81 EUR, equivalent to 3576.70 USD.
+2024-11-29 01:50:18,075 INFO Valid timedata found for Binance API.
+2024-11-29 01:50:21,346 INFO Indicators: MACD=-2.63, Signal=-2.05, RSI=32.24, Bollinger Upper=3410.27, Bollinger Lower=3384.00, Current Price=3392.81, VWAP=3380.94
+2024-11-29 01:50:21,386 INFO RSI Last: 32.24, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 01:50:21,422 INFO Current Price: 3392.81, VWAP: 3380.94, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 01:50:21,434 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.12, 'vwap': 0.15}, Total Score: 0.2
+2024-11-29 01:50:21,442 INFO Total Score for this round: 0.20
+2024-11-29 01:50:21,454 INFO Trade signal score (0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:50:21,466 INFO Score: 0.20000000, Threshold: 0.45000000
+2024-11-29 01:50:21,477 INFO Bot execution completed.
+2024-11-29 01:55:14,355 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 01:55:14,376 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 01:55:14,400 INFO No external sell signal found.
+2024-11-29 01:55:14,421 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 01:55:14,436 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 01:55:14,448 INFO Executing trade logic for ETH-EUR
+2024-11-29 01:55:14,457 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 01:55:15,264 INFO Fetched ETH price: 3389.59 EUR, equivalent to 3573.31 USD.
+2024-11-29 01:55:16,183 INFO Valid timedata found for Binance API.
+2024-11-29 01:55:18,438 INFO Indicators: MACD=-2.75, Signal=-2.57, RSI=41.63, Bollinger Upper=3404.33, Bollinger Lower=3382.31, Current Price=3389.59, VWAP=3381.09
+2024-11-29 01:55:18,461 INFO RSI Last: 41.63, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 01:55:18,470 INFO Current Price: 3389.59, VWAP: 3381.09, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 01:55:18,481 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.12, 'vwap': 0.15}, Total Score: 0.06
+2024-11-29 01:55:18,494 INFO Total Score for this round: 0.06
+2024-11-29 01:55:18,505 INFO Trade signal score (0.06) was below the buy threshold (0.45). No action taken.
+2024-11-29 01:55:18,517 INFO Score: 0.06000000, Threshold: 0.45000000
+2024-11-29 01:55:18,537 INFO Bot execution completed.
+2024-11-29 02:00:16,105 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:00:16,118 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:00:16,189 INFO No external sell signal found.
+2024-11-29 02:00:16,208 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:00:16,217 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:00:16,249 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:00:16,261 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:00:17,055 INFO Fetched ETH price: 3390.63 EUR, equivalent to 3574.40 USD.
+2024-11-29 02:00:17,970 INFO Valid timedata found for general API.
+2024-11-29 02:00:18,846 INFO Indicators: MACD=-10.27, Signal=-10.00, RSI=43.09, Bollinger Upper=3436.63, Bollinger Lower=3386.55, Current Price=3390.63, VWAP=3413.97
+2024-11-29 02:00:18,872 INFO RSI Last: 43.09, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 02:00:18,897 INFO Current Price: 3390.63, VWAP: 3413.97, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 02:00:18,926 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: -0.24
+2024-11-29 02:00:18,954 INFO Total Score for this round: -0.24
+2024-11-29 02:00:18,963 INFO Trade signal score (-0.24) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:00:18,998 INFO Score: -0.24000000, Threshold: 0.45000000
+2024-11-29 02:00:19,011 INFO Bot execution completed.
+2024-11-29 02:05:14,058 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:05:14,075 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:05:14,086 INFO No external sell signal found.
+2024-11-29 02:05:14,095 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:05:14,102 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:05:14,112 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:05:14,126 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:05:14,868 INFO Fetched ETH price: 3393.32 EUR, equivalent to 3577.24 USD.
+2024-11-29 02:05:15,638 INFO Valid timedata found for Binance API.
+2024-11-29 02:05:17,111 INFO Indicators: MACD=-0.97, Signal=-1.66, RSI=69.38, Bollinger Upper=3393.97, Bollinger Lower=3386.76, Current Price=3393.32, VWAP=3381.42
+2024-11-29 02:05:17,113 INFO RSI Last: 69.38, Raw Score: -0.50, Weighted Score: -0.17
+2024-11-29 02:05:17,114 INFO Current Price: 3393.32, VWAP: 3381.42, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 02:05:17,115 INFO Score Analysis: {'macd': 0.07, 'rsi': -0.17, 'bollinger': -0.12, 'vwap': 0.15}, Total Score: -0.07
+2024-11-29 02:05:17,115 INFO Total Score for this round: -0.07
+2024-11-29 02:05:17,115 INFO Trade signal score (-0.07) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:05:17,115 INFO Score: -0.07000000, Threshold: 0.45000000
+2024-11-29 02:05:17,116 INFO Bot execution completed.
+2024-11-29 02:10:16,857 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:10:16,917 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:10:16,933 INFO No external sell signal found.
+2024-11-29 02:10:16,956 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:10:16,984 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:10:17,001 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:10:17,011 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:10:17,710 INFO Fetched ETH price: 3383.6 EUR, equivalent to 3566.99 USD.
+2024-11-29 02:10:18,597 INFO Valid timedata found for Binance API.
+2024-11-29 02:10:20,124 INFO Indicators: MACD=-1.81, Signal=-1.41, RSI=40.03, Bollinger Upper=3394.99, Bollinger Lower=3384.36, Current Price=3383.60, VWAP=3381.78
+2024-11-29 02:10:20,206 INFO RSI Last: 40.03, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 02:10:20,206 INFO Current Price: 3383.6, VWAP: 3381.78, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 02:10:20,207 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': 0.15}, Total Score: 0.18
+2024-11-29 02:10:20,207 INFO Total Score for this round: 0.18
+2024-11-29 02:10:20,208 INFO Trade signal score (0.18) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:10:20,208 INFO Score: 0.18000000, Threshold: 0.45000000
+2024-11-29 02:10:20,209 INFO Bot execution completed.
+2024-11-29 02:15:14,643 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:15:14,665 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:15:14,674 INFO No external sell signal found.
+2024-11-29 02:15:14,681 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:15:14,689 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:15:14,707 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:15:14,730 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:15:15,620 INFO Fetched ETH price: 3384.05 EUR, equivalent to 3567.47 USD.
+2024-11-29 02:15:16,241 INFO Valid timedata found for general API.
+2024-11-29 02:15:17,176 INFO Indicators: MACD=-10.77, Signal=-9.35, RSI=26.81, Bollinger Upper=3442.04, Bollinger Lower=3390.71, Current Price=3384.05, VWAP=3413.87
+2024-11-29 02:15:17,177 INFO RSI Last: 26.81, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 02:15:17,189 INFO Current Price: 3384.05, VWAP: 3413.87, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 02:15:17,190 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.2
+2024-11-29 02:15:17,190 INFO Total Score for this round: 0.20
+2024-11-29 02:15:17,196 INFO Trade signal score (0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:15:17,196 INFO Score: 0.20000000, Threshold: 0.45000000
+2024-11-29 02:15:17,197 INFO Bot execution completed.
+2024-11-29 02:20:18,175 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:20:18,190 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:20:18,198 INFO No external sell signal found.
+2024-11-29 02:20:18,218 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:20:18,224 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:20:18,239 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:20:18,248 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:20:18,955 INFO Fetched ETH price: 3382.28 EUR, equivalent to 3565.60 USD.
+2024-11-29 02:20:19,621 INFO Valid timedata found for Binance API.
+2024-11-29 02:20:20,349 INFO Indicators: MACD=-2.12, Signal=-2.13, RSI=36.11, Bollinger Upper=3395.93, Bollinger Lower=3377.93, Current Price=3382.28, VWAP=3383.54
+2024-11-29 02:20:20,369 INFO RSI Last: 36.11, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 02:20:20,374 INFO Current Price: 3382.28, VWAP: 3383.54, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 02:20:20,380 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.17, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: 0.23
+2024-11-29 02:20:20,388 INFO Total Score for this round: 0.23
+2024-11-29 02:20:20,398 INFO Trade signal score (0.23) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:20:20,401 INFO Score: 0.23000000, Threshold: 0.45000000
+2024-11-29 02:20:20,405 INFO Bot execution completed.
+2024-11-29 02:25:14,870 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:25:14,899 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:25:14,916 INFO No external sell signal found.
+2024-11-29 02:25:14,929 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:25:14,948 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:25:14,960 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:25:14,964 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:25:15,769 INFO Fetched ETH price: 3380.11 EUR, equivalent to 3563.31 USD.
+2024-11-29 02:25:17,193 INFO Valid timedata found for Binance API.
+2024-11-29 02:25:17,540 INFO Indicators: MACD=-2.10, Signal=-1.96, RSI=53.59, Bollinger Upper=3391.94, Bollinger Lower=3377.51, Current Price=3380.11, VWAP=3383.80
+2024-11-29 02:25:18,115 INFO RSI Last: 53.59, Raw Score: -0.10, Weighted Score: -0.03
+2024-11-29 02:25:18,132 INFO Current Price: 3380.11, VWAP: 3383.80, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 02:25:18,156 INFO Score Analysis: {'macd': -0.25, 'rsi': -0.03, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: -0.31
+2024-11-29 02:25:18,167 INFO Total Score for this round: -0.31
+2024-11-29 02:25:18,191 INFO Trade signal score (-0.31) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:25:18,206 INFO Score: -0.31000000, Threshold: 0.45000000
+2024-11-29 02:25:18,213 INFO Bot execution completed.
+2024-11-29 02:30:17,422 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:30:17,447 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:30:17,469 INFO No external sell signal found.
+2024-11-29 02:30:17,508 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:30:17,534 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:30:17,551 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:30:17,571 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:30:18,382 INFO Fetched ETH price: 3379.46 EUR, equivalent to 3562.63 USD.
+2024-11-29 02:30:19,656 INFO Valid timedata found for Binance API.
+2024-11-29 02:30:21,301 INFO Indicators: MACD=-2.75, Signal=-2.45, RSI=33.75, Bollinger Upper=3389.50, Bollinger Lower=3375.27, Current Price=3379.46, VWAP=3384.02
+2024-11-29 02:30:21,319 INFO RSI Last: 33.75, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 02:30:21,327 INFO Current Price: 3379.46, VWAP: 3384.02, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 02:30:21,338 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: -0.1
+2024-11-29 02:30:21,348 INFO Total Score for this round: -0.10
+2024-11-29 02:30:21,358 INFO Trade signal score (-0.10) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:30:21,365 INFO Score: -0.10000000, Threshold: 0.45000000
+2024-11-29 02:30:21,372 INFO Bot execution completed.
+2024-11-29 02:35:13,164 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:35:13,178 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:35:13,205 INFO No external sell signal found.
+2024-11-29 02:35:13,233 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:35:13,243 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:35:13,254 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:35:13,271 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:35:14,212 INFO Fetched ETH price: 3380.4 EUR, equivalent to 3563.62 USD.
+2024-11-29 02:35:15,205 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 02:35:15,946 INFO Indicators: MACD=-8.83, Signal=-9.17, RSI=40.92, Bollinger Upper=3450.75, Bollinger Lower=3399.53, Current Price=3380.40, VWAP=3413.70
+2024-11-29 02:35:15,947 INFO RSI Last: 40.92, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 02:35:15,947 INFO Current Price: 3380.4, VWAP: 3413.70, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 02:35:15,947 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.21
+2024-11-29 02:35:15,948 INFO Total Score for this round: 0.21
+2024-11-29 02:35:15,948 INFO Trade signal score (0.21) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:35:15,949 INFO Score: 0.21000000, Threshold: 0.45000000
+2024-11-29 02:35:15,949 INFO Bot execution completed.
+2024-11-29 02:40:16,267 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:40:16,415 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:40:16,422 INFO No external sell signal found.
+2024-11-29 02:40:16,425 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:40:16,427 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:40:16,429 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:40:16,431 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:40:17,878 INFO Fetched ETH price: 3384.15 EUR, equivalent to 3567.57 USD.
+2024-11-29 02:40:19,383 INFO Valid timedata found for Binance API.
+2024-11-29 02:40:20,222 INFO Indicators: MACD=-0.81, Signal=-1.87, RSI=55.66, Bollinger Upper=3387.56, Bollinger Lower=3372.49, Current Price=3384.15, VWAP=3384.26
+2024-11-29 02:40:20,237 INFO RSI Last: 55.66, Raw Score: -0.10, Weighted Score: -0.03
+2024-11-29 02:40:20,242 INFO Current Price: 3384.15, VWAP: 3384.26, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 02:40:20,247 INFO Score Analysis: {'macd': 0.07, 'rsi': -0.03, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.23
+2024-11-29 02:40:20,253 INFO Total Score for this round: -0.23
+2024-11-29 02:40:20,257 INFO Trade signal score (-0.23) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:40:20,270 INFO Score: -0.23000000, Threshold: 0.45000000
+2024-11-29 02:40:20,270 INFO Bot execution completed.
+2024-11-29 02:45:14,168 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:45:14,181 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:45:14,195 INFO No external sell signal found.
+2024-11-29 02:45:14,206 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:45:14,220 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:45:14,238 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:45:14,251 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:45:15,078 INFO Fetched ETH price: 3381.39 EUR, equivalent to 3564.66 USD.
+2024-11-29 02:45:16,431 INFO Valid timedata found for Binance API.
+2024-11-29 02:45:17,332 INFO Indicators: MACD=-0.37, Signal=-0.90, RSI=66.17, Bollinger Upper=3386.01, Bollinger Lower=3373.08, Current Price=3381.39, VWAP=3384.29
+2024-11-29 02:45:17,407 INFO RSI Last: 66.17, Raw Score: -0.50, Weighted Score: -0.17
+2024-11-29 02:45:17,457 INFO Current Price: 3381.39, VWAP: 3384.29, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 02:45:17,525 INFO Score Analysis: {'macd': 0.07, 'rsi': -0.17, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.38
+2024-11-29 02:45:17,542 INFO Total Score for this round: -0.38
+2024-11-29 02:45:17,553 INFO Trade signal score (-0.38) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:45:17,567 INFO Score: -0.38000000, Threshold: 0.45000000
+2024-11-29 02:45:17,575 INFO Bot execution completed.
+2024-11-29 02:50:15,402 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:50:15,418 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:50:15,443 INFO No external sell signal found.
+2024-11-29 02:50:15,468 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:50:15,480 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:50:15,505 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:50:15,513 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:50:16,328 INFO Fetched ETH price: 3377.28 EUR, equivalent to 3560.33 USD.
+2024-11-29 02:50:17,085 INFO Valid timedata found for Binance API.
+2024-11-29 02:50:19,884 INFO Indicators: MACD=-0.68, Signal=-0.57, RSI=39.72, Bollinger Upper=3386.33, Bollinger Lower=3374.10, Current Price=3377.28, VWAP=3385.01
+2024-11-29 02:50:19,922 INFO RSI Last: 39.72, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 02:50:19,923 INFO Current Price: 3377.28, VWAP: 3385.01, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 02:50:19,923 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.12, 'vwap': -0.15}, Total Score: -0.1
+2024-11-29 02:50:19,923 INFO Total Score for this round: -0.10
+2024-11-29 02:50:19,924 INFO Trade signal score (-0.10) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:50:19,924 INFO Score: -0.10000000, Threshold: 0.45000000
+2024-11-29 02:50:19,937 INFO Bot execution completed.
+2024-11-29 02:55:14,168 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 02:55:14,177 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 02:55:14,185 INFO No external sell signal found.
+2024-11-29 02:55:14,195 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 02:55:14,202 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 02:55:14,215 INFO Executing trade logic for ETH-EUR
+2024-11-29 02:55:14,237 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 02:55:15,050 INFO Fetched ETH price: 3369.02 EUR, equivalent to 3551.62 USD.
+2024-11-29 02:55:15,934 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 02:55:18,086 INFO Indicators: MACD=-10.60, Signal=-8.33, RSI=19.63, Bollinger Upper=3457.01, Bollinger Lower=3403.51, Current Price=3369.02, VWAP=3413.52
+2024-11-29 02:55:18,106 INFO RSI Last: 19.63, Raw Score: 1.50, Weighted Score: 0.52
+2024-11-29 02:55:18,107 INFO Current Price: 3369.02, VWAP: 3413.52, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 02:55:18,107 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.52, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.37
+2024-11-29 02:55:18,125 INFO Total Score for this round: 0.37
+2024-11-29 02:55:18,128 INFO Trade signal score (0.37) was below the buy threshold (0.45). No action taken.
+2024-11-29 02:55:18,132 INFO Score: 0.37000000, Threshold: 0.45000000
+2024-11-29 02:55:18,133 INFO Bot execution completed.
+2024-11-29 03:00:16,260 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:00:17,351 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:00:17,360 INFO No external sell signal found.
+2024-11-29 03:00:17,376 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:00:17,395 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:00:17,413 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:00:17,432 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:00:23,563 WARNING The primary API for the exchange rate delayed or failed. Trying the backup API...
+2024-11-29 03:00:23,987 WARNING Error retrieving from the backup API as well: 429 Client Error: Too Many Requests for url: https://v6.exchangerate-api.com/v6/d19c5232df02126152e43f60/pair/EUR/USD
+2024-11-29 03:00:23,988 INFO Fetched ETH price: 3369.56 EUR
+2024-11-29 03:00:24,440 INFO Valid timedata found for general API.
+2024-11-29 03:00:25,829 INFO Indicators: MACD=-10.51, Signal=-8.77, RSI=35.27, Bollinger Upper=3457.27, Bollinger Lower=3401.45, Current Price=3369.56, VWAP=3413.52
+2024-11-29 03:00:25,842 INFO RSI Last: 35.27, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 03:00:25,842 INFO Current Price: 3369.56, VWAP: 3413.52, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:00:25,843 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.02
+2024-11-29 03:00:25,843 INFO Total Score for this round: 0.02
+2024-11-29 03:00:25,844 INFO Trade signal score (0.02) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:00:25,844 INFO Score: 0.02000000, Threshold: 0.45000000
+2024-11-29 03:00:25,858 INFO Bot execution completed.
+2024-11-29 03:05:25,919 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:05:25,988 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:05:25,988 INFO No external sell signal found.
+2024-11-29 03:05:26,044 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:05:26,044 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:05:26,044 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:05:26,045 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:05:27,141 INFO Fetched ETH price: 3374.74 EUR, equivalent to 3557.65 USD.
+2024-11-29 03:05:27,401 INFO Valid timedata found for general API.
+2024-11-29 03:05:27,593 INFO Indicators: MACD=-9.54, Signal=-7.76, RSI=23.74, Bollinger Upper=3455.01, Bollinger Lower=3408.27, Current Price=3374.74, VWAP=3413.47
+2024-11-29 03:05:27,594 INFO RSI Last: 23.74, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 03:05:27,595 INFO Current Price: 3374.74, VWAP: 3413.47, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:05:27,595 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.2
+2024-11-29 03:05:27,595 INFO Total Score for this round: 0.20
+2024-11-29 03:05:27,596 INFO Trade signal score (0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:05:27,596 INFO Score: 0.20000000, Threshold: 0.45000000
+2024-11-29 03:05:27,596 INFO Bot execution completed.
+2024-11-29 03:10:17,624 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:10:17,769 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:10:17,770 INFO No external sell signal found.
+2024-11-29 03:10:17,858 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:10:17,860 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:10:17,862 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:10:17,862 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:10:19,782 INFO Fetched ETH price: 3370.09 EUR, equivalent to 3552.75 USD.
+2024-11-29 03:10:20,863 INFO Valid timedata found for Binance API.
+2024-11-29 03:10:21,686 INFO Indicators: MACD=-1.72, Signal=-1.85, RSI=43.91, Bollinger Upper=3376.16, Bollinger Lower=3365.41, Current Price=3370.09, VWAP=3386.21
+2024-11-29 03:10:21,687 INFO RSI Last: 43.91, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 03:10:21,687 INFO Current Price: 3370.09, VWAP: 3386.21, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 03:10:21,691 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.03, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: -0.04
+2024-11-29 03:10:21,691 INFO Total Score for this round: -0.04
+2024-11-29 03:10:21,692 INFO Trade signal score (-0.04) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:10:21,692 INFO Score: -0.04000000, Threshold: 0.45000000
+2024-11-29 03:10:21,693 INFO Bot execution completed.
+2024-11-29 03:15:15,234 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:15:15,268 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:15:15,277 INFO No external sell signal found.
+2024-11-29 03:15:15,322 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:15:15,356 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:15:15,375 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:15:15,387 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:15:15,998 INFO Fetched ETH price: 3368.51 EUR, equivalent to 3551.08 USD.
+2024-11-29 03:15:16,541 INFO Valid timedata found for general API.
+2024-11-29 03:15:17,188 INFO Indicators: MACD=-7.62, Signal=-7.07, RSI=31.81, Bollinger Upper=3452.51, Bollinger Lower=3416.52, Current Price=3368.51, VWAP=3413.41
+2024-11-29 03:15:17,273 INFO RSI Last: 31.81, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 03:15:17,280 INFO Current Price: 3368.51, VWAP: 3413.41, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:15:17,287 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.02
+2024-11-29 03:15:17,291 INFO Total Score for this round: 0.02
+2024-11-29 03:15:17,310 INFO Trade signal score (0.02) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:15:17,312 INFO Score: 0.02000000, Threshold: 0.45000000
+2024-11-29 03:15:17,315 INFO Bot execution completed.
+2024-11-29 03:20:19,574 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:20:19,589 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:20:19,608 INFO No external sell signal found.
+2024-11-29 03:20:19,673 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:20:19,673 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:20:19,674 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:20:19,674 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:20:20,914 INFO Fetched ETH price: 3366.96 EUR, equivalent to 3549.45 USD.
+2024-11-29 03:20:21,561 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 03:20:22,544 INFO Indicators: MACD=-6.99, Signal=-6.83, RSI=50.40, Bollinger Upper=3453.16, Bollinger Lower=3419.56, Current Price=3366.96, VWAP=3413.32
+2024-11-29 03:20:22,564 INFO RSI Last: 50.40, Raw Score: -0.10, Weighted Score: -0.03
+2024-11-29 03:20:22,564 INFO Current Price: 3366.96, VWAP: 3413.32, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:20:22,565 INFO Score Analysis: {'macd': -0.25, 'rsi': -0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.18
+2024-11-29 03:20:22,583 INFO Total Score for this round: -0.18
+2024-11-29 03:20:22,583 INFO Trade signal score (-0.18) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:20:22,584 INFO Score: -0.18000000, Threshold: 0.45000000
+2024-11-29 03:20:22,584 INFO Bot execution completed.
+2024-11-29 03:25:14,957 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:25:15,025 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:25:15,042 INFO No external sell signal found.
+2024-11-29 03:25:15,052 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:25:15,058 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:25:15,066 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:25:15,074 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:25:15,804 INFO Fetched ETH price: 3374.13 EUR, equivalent to 3557.01 USD.
+2024-11-29 03:25:16,120 INFO Valid timedata found for general API.
+2024-11-29 03:25:17,412 INFO Indicators: MACD=-6.99, Signal=-6.83, RSI=50.40, Bollinger Upper=3453.16, Bollinger Lower=3419.56, Current Price=3374.13, VWAP=3413.30
+2024-11-29 03:25:17,414 INFO RSI Last: 50.40, Raw Score: -0.10, Weighted Score: -0.03
+2024-11-29 03:25:17,414 INFO Current Price: 3374.13, VWAP: 3413.30, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:25:17,432 INFO Score Analysis: {'macd': -0.25, 'rsi': -0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.18
+2024-11-29 03:25:17,433 INFO Total Score for this round: -0.18
+2024-11-29 03:25:17,433 INFO Trade signal score (-0.18) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:25:17,433 INFO Score: -0.18000000, Threshold: 0.45000000
+2024-11-29 03:25:17,434 INFO Bot execution completed.
+2024-11-29 03:30:19,932 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:30:20,036 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:30:20,037 INFO No external sell signal found.
+2024-11-29 03:30:20,071 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:30:20,075 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:30:20,075 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:30:20,075 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:30:20,833 INFO Fetched ETH price: 3375.02 EUR, equivalent to 3557.95 USD.
+2024-11-29 03:30:21,380 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 03:30:22,075 INFO Indicators: MACD=-7.46, Signal=-6.68, RSI=42.62, Bollinger Upper=3455.94, Bollinger Lower=3420.13, Current Price=3375.02, VWAP=3413.06
+2024-11-29 03:30:22,077 INFO RSI Last: 42.62, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 03:30:22,077 INFO Current Price: 3375.02, VWAP: 3413.06, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:30:22,078 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.11
+2024-11-29 03:30:22,078 INFO Total Score for this round: -0.11
+2024-11-29 03:30:22,078 INFO Trade signal score (-0.11) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:30:22,079 INFO Score: -0.11000000, Threshold: 0.45000000
+2024-11-29 03:30:22,079 INFO Bot execution completed.
+2024-11-29 03:35:14,393 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:35:14,404 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:35:14,423 INFO No external sell signal found.
+2024-11-29 03:35:14,452 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:35:14,467 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:35:14,499 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:35:14,508 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:35:15,585 INFO Fetched ETH price: 3369.74 EUR, equivalent to 3552.38 USD.
+2024-11-29 03:35:16,408 INFO Valid timedata found for general API.
+2024-11-29 03:35:16,689 INFO Indicators: MACD=-7.46, Signal=-6.68, RSI=42.62, Bollinger Upper=3455.94, Bollinger Lower=3420.13, Current Price=3369.74, VWAP=3413.00
+2024-11-29 03:35:16,690 INFO RSI Last: 42.62, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 03:35:16,690 INFO Current Price: 3369.74, VWAP: 3413.00, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:35:16,691 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.11
+2024-11-29 03:35:16,691 INFO Total Score for this round: -0.11
+2024-11-29 03:35:16,691 INFO Trade signal score (-0.11) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:35:16,691 INFO Score: -0.11000000, Threshold: 0.45000000
+2024-11-29 03:35:16,692 INFO Bot execution completed.
+2024-11-29 03:40:18,477 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:40:18,643 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:40:18,643 INFO No external sell signal found.
+2024-11-29 03:40:18,686 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:40:18,687 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:40:18,687 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:40:18,688 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:40:19,496 INFO Fetched ETH price: 3366.39 EUR, equivalent to 3548.85 USD.
+2024-11-29 03:40:20,298 INFO Valid timedata found for general API.
+2024-11-29 03:40:20,979 INFO Indicators: MACD=-7.19, Signal=-6.29, RSI=38.71, Bollinger Upper=3461.59, Bollinger Lower=3420.46, Current Price=3366.39, VWAP=3412.86
+2024-11-29 03:40:20,981 INFO RSI Last: 38.71, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 03:40:20,981 INFO Current Price: 3366.39, VWAP: 3412.86, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:40:20,982 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.02
+2024-11-29 03:40:20,982 INFO Total Score for this round: 0.02
+2024-11-29 03:40:20,982 INFO Trade signal score (0.02) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:40:20,983 INFO Score: 0.02000000, Threshold: 0.45000000
+2024-11-29 03:40:20,983 INFO Bot execution completed.
+2024-11-29 03:45:16,750 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:45:16,780 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:45:16,798 INFO No external sell signal found.
+2024-11-29 03:45:16,802 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:45:16,804 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:45:16,805 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:45:16,806 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:45:17,757 INFO Fetched ETH price: 3371.38 EUR, equivalent to 3554.11 USD.
+2024-11-29 03:45:18,427 INFO Valid timedata found for Binance API.
+2024-11-29 03:45:18,882 INFO Indicators: MACD=-0.24, Signal=-0.57, RSI=48.42, Bollinger Upper=3376.80, Bollinger Lower=3364.25, Current Price=3371.38, VWAP=3388.25
+2024-11-29 03:45:18,883 INFO RSI Last: 48.42, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 03:45:18,884 INFO Current Price: 3371.38, VWAP: 3388.25, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 03:45:18,884 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.03, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: -0.04
+2024-11-29 03:45:18,885 INFO Total Score for this round: -0.04
+2024-11-29 03:45:18,885 INFO Trade signal score (-0.04) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:45:18,886 INFO Score: -0.04000000, Threshold: 0.45000000
+2024-11-29 03:45:18,887 INFO Bot execution completed.
+2024-11-29 03:50:15,778 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:50:15,797 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:50:15,805 INFO No external sell signal found.
+2024-11-29 03:50:15,835 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:50:15,856 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:50:15,878 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:50:15,902 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:50:17,759 INFO Fetched ETH price: 3370.54 EUR, equivalent to 3553.22 USD.
+2024-11-29 03:50:18,358 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 03:50:19,206 INFO Indicators: MACD=-6.75, Signal=-5.90, RSI=45.21, Bollinger Upper=3472.80, Bollinger Lower=3417.68, Current Price=3370.54, VWAP=3412.62
+2024-11-29 03:50:19,221 INFO RSI Last: 45.21, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 03:50:19,262 INFO Current Price: 3370.54, VWAP: 3412.62, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 03:50:19,282 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.11
+2024-11-29 03:50:19,289 INFO Total Score for this round: -0.11
+2024-11-29 03:50:19,308 INFO Trade signal score (-0.11) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:50:19,319 INFO Score: -0.11000000, Threshold: 0.45000000
+2024-11-29 03:50:19,325 INFO Bot execution completed.
+2024-11-29 03:55:14,919 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 03:55:14,974 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 03:55:14,983 INFO No external sell signal found.
+2024-11-29 03:55:14,995 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 03:55:15,004 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 03:55:15,023 INFO Executing trade logic for ETH-EUR
+2024-11-29 03:55:15,039 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 03:55:15,735 INFO Fetched ETH price: 3374.85 EUR, equivalent to 3557.77 USD.
+2024-11-29 03:55:16,924 INFO Valid timedata found for Binance API.
+2024-11-29 03:55:19,319 INFO Indicators: MACD=1.06, Signal=0.45, RSI=67.94, Bollinger Upper=3377.33, Bollinger Lower=3364.19, Current Price=3374.85, VWAP=3388.27
+2024-11-29 03:55:19,320 INFO RSI Last: 67.94, Raw Score: -0.50, Weighted Score: -0.17
+2024-11-29 03:55:19,385 INFO Current Price: 3374.85, VWAP: 3388.27, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 03:55:19,401 INFO Score Analysis: {'macd': 0.25, 'rsi': -0.17, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.2
+2024-11-29 03:55:19,425 INFO Total Score for this round: -0.20
+2024-11-29 03:55:19,428 INFO Trade signal score (-0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 03:55:19,430 INFO Score: -0.20000000, Threshold: 0.45000000
+2024-11-29 03:55:19,432 INFO Bot execution completed.
+2024-11-29 04:00:18,297 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:00:18,431 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:00:18,438 INFO No external sell signal found.
+2024-11-29 04:00:18,541 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:00:18,550 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:00:18,558 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:00:18,568 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:00:19,802 INFO Fetched ETH price: 3377.57 EUR, equivalent to 3560.63 USD.
+2024-11-29 04:00:20,583 INFO Valid timedata found for general API.
+2024-11-29 04:00:20,970 INFO Indicators: MACD=-5.36, Signal=-5.47, RSI=38.24, Bollinger Upper=3480.34, Bollinger Lower=3419.37, Current Price=3377.57, VWAP=3412.31
+2024-11-29 04:00:20,975 INFO RSI Last: 38.24, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 04:00:20,977 INFO Current Price: 3377.57, VWAP: 3412.31, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 04:00:20,978 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.17, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.35
+2024-11-29 04:00:20,978 INFO Total Score for this round: 0.35
+2024-11-29 04:00:20,978 INFO Trade signal score (0.35) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:00:20,979 INFO Score: 0.35000000, Threshold: 0.45000000
+2024-11-29 04:00:20,980 INFO Bot execution completed.
+2024-11-29 04:05:14,155 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:05:14,174 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:05:14,208 INFO No external sell signal found.
+2024-11-29 04:05:14,240 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:05:14,266 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:05:14,278 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:05:14,287 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:05:14,958 INFO Fetched ETH price: 3385.19 EUR, equivalent to 3568.67 USD.
+2024-11-29 04:05:15,584 INFO Valid timedata found for Binance API.
+2024-11-29 04:05:17,870 INFO Indicators: MACD=3.19, Signal=2.22, RSI=97.63, Bollinger Upper=3385.39, Bollinger Lower=3366.98, Current Price=3385.19, VWAP=3388.61
+2024-11-29 04:05:17,957 INFO RSI Last: 97.63, Raw Score: -0.50, Weighted Score: -0.17
+2024-11-29 04:05:17,994 INFO Current Price: 3385.19, VWAP: 3388.61, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 04:05:18,032 INFO Score Analysis: {'macd': 0.25, 'rsi': -0.17, 'bollinger': -0.12, 'vwap': -0.15}, Total Score: -0.2
+2024-11-29 04:05:18,103 INFO Total Score for this round: -0.20
+2024-11-29 04:05:18,112 INFO Trade signal score (-0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:05:18,127 INFO Score: -0.20000000, Threshold: 0.45000000
+2024-11-29 04:05:18,158 INFO Bot execution completed.
+2024-11-29 04:10:16,654 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:10:16,656 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:10:16,658 INFO No external sell signal found.
+2024-11-29 04:10:16,660 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:10:16,660 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:10:16,661 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:10:16,662 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:10:19,011 INFO Fetched ETH price: 3393.09 EUR, equivalent to 3577.00 USD.
+2024-11-29 04:10:19,324 INFO Valid timedata found for general API.
+2024-11-29 04:10:20,323 INFO Indicators: MACD=-4.70, Signal=-5.49, RSI=45.32, Bollinger Upper=3481.89, Bollinger Lower=3421.07, Current Price=3393.09, VWAP=3412.13
+2024-11-29 04:10:20,340 INFO RSI Last: 45.32, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 04:10:20,341 INFO Current Price: 3393.09, VWAP: 3412.13, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 04:10:20,346 INFO Score Analysis: {'macd': 0.07, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.21
+2024-11-29 04:10:20,346 INFO Total Score for this round: 0.21
+2024-11-29 04:10:20,347 INFO Trade signal score (0.21) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:10:20,347 INFO Score: 0.21000000, Threshold: 0.45000000
+2024-11-29 04:10:20,348 INFO Bot execution completed.
+2024-11-29 04:15:13,883 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:15:13,899 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:15:13,923 INFO No external sell signal found.
+2024-11-29 04:15:13,946 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:15:13,953 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:15:13,960 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:15:13,969 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:15:14,828 INFO Fetched ETH price: 3394.97 EUR, equivalent to 3578.98 USD.
+2024-11-29 04:15:15,388 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 04:15:17,185 INFO Indicators: MACD=-6.41, Signal=-5.70, RSI=34.20, Bollinger Upper=3483.33, Bollinger Lower=3421.48, Current Price=3394.97, VWAP=3411.45
+2024-11-29 04:15:17,186 INFO RSI Last: 34.20, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 04:15:17,187 INFO Current Price: 3394.97, VWAP: 3411.45, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 04:15:17,187 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.02
+2024-11-29 04:15:17,187 INFO Total Score for this round: 0.02
+2024-11-29 04:15:17,202 INFO Trade signal score (0.02) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:15:17,202 INFO Score: 0.02000000, Threshold: 0.45000000
+2024-11-29 04:15:17,203 INFO Bot execution completed.
+2024-11-29 04:20:15,017 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:20:15,028 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:20:15,040 INFO No external sell signal found.
+2024-11-29 04:20:15,049 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:20:15,058 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:20:15,065 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:20:15,069 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:20:17,144 INFO Fetched ETH price: 3390.97 EUR, equivalent to 3574.76 USD.
+2024-11-29 04:20:17,946 INFO Valid timedata found for general API.
+2024-11-29 04:20:19,283 INFO Indicators: MACD=-6.41, Signal=-5.70, RSI=34.20, Bollinger Upper=3483.33, Bollinger Lower=3421.48, Current Price=3390.97, VWAP=3411.41
+2024-11-29 04:20:19,308 INFO RSI Last: 34.20, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 04:20:19,326 INFO Current Price: 3390.97, VWAP: 3411.41, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 04:20:19,326 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.02
+2024-11-29 04:20:19,326 INFO Total Score for this round: 0.02
+2024-11-29 04:20:19,327 INFO Trade signal score (0.02) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:20:19,327 INFO Score: 0.02000000, Threshold: 0.45000000
+2024-11-29 04:20:19,328 INFO Bot execution completed.
+2024-11-29 04:25:14,351 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:25:14,360 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:25:14,381 INFO No external sell signal found.
+2024-11-29 04:25:14,398 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:25:14,410 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:25:14,430 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:25:14,443 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:25:15,485 INFO Fetched ETH price: 3389.67 EUR, equivalent to 3573.39 USD.
+2024-11-29 04:25:16,427 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 04:25:17,547 INFO Indicators: MACD=-8.32, Signal=-5.06, RSI=28.81, Bollinger Upper=3487.58, Bollinger Lower=3421.78, Current Price=3389.67, VWAP=3411.21
+2024-11-29 04:25:17,548 INFO RSI Last: 28.81, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 04:25:17,549 INFO Current Price: 3389.67, VWAP: 3411.21, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 04:25:17,549 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.2
+2024-11-29 04:25:17,550 INFO Total Score for this round: 0.20
+2024-11-29 04:25:17,553 INFO Trade signal score (0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:25:17,554 INFO Score: 0.20000000, Threshold: 0.45000000
+2024-11-29 04:25:17,554 INFO Bot execution completed.
+2024-11-29 04:30:16,168 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:30:16,197 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:30:16,209 INFO No external sell signal found.
+2024-11-29 04:30:16,223 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:30:16,231 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:30:16,245 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:30:16,262 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:30:16,993 INFO Fetched ETH price: 3393.18 EUR, equivalent to 3577.09 USD.
+2024-11-29 04:30:18,566 INFO Valid timedata found for general API.
+2024-11-29 04:30:19,479 INFO Indicators: MACD=-8.32, Signal=-5.06, RSI=28.81, Bollinger Upper=3487.58, Bollinger Lower=3421.78, Current Price=3393.18, VWAP=3411.19
+2024-11-29 04:30:19,514 INFO RSI Last: 28.81, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 04:30:19,564 INFO Current Price: 3393.18, VWAP: 3411.19, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 04:30:19,625 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.2
+2024-11-29 04:30:19,689 INFO Total Score for this round: 0.20
+2024-11-29 04:30:19,749 INFO Trade signal score (0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:30:19,772 INFO Score: 0.20000000, Threshold: 0.45000000
+2024-11-29 04:30:19,825 INFO Bot execution completed.
+2024-11-29 04:35:14,500 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:35:14,519 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:35:14,544 INFO No external sell signal found.
+2024-11-29 04:35:14,556 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:35:14,569 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:35:14,579 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:35:14,596 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:35:15,335 INFO Fetched ETH price: 3389.38 EUR, equivalent to 3573.08 USD.
+2024-11-29 04:35:15,601 INFO Valid timedata found for general API.
+2024-11-29 04:35:15,879 INFO Indicators: MACD=-8.32, Signal=-5.06, RSI=28.81, Bollinger Upper=3487.58, Bollinger Lower=3421.78, Current Price=3389.38, VWAP=3411.19
+2024-11-29 04:35:15,912 INFO RSI Last: 28.81, Raw Score: 1.00, Weighted Score: 0.35
+2024-11-29 04:35:15,919 INFO Current Price: 3389.38, VWAP: 3411.19, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 04:35:15,936 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.35, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.2
+2024-11-29 04:35:15,947 INFO Total Score for this round: 0.20
+2024-11-29 04:35:15,968 INFO Trade signal score (0.20) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:35:15,981 INFO Score: 0.20000000, Threshold: 0.45000000
+2024-11-29 04:35:16,002 INFO Bot execution completed.
+2024-11-29 04:40:15,223 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:40:15,226 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:40:15,228 INFO No external sell signal found.
+2024-11-29 04:40:15,231 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:40:15,236 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:40:15,246 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:40:15,299 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:40:16,290 INFO Fetched ETH price: 3388.67 EUR, equivalent to 3572.34 USD.
+2024-11-29 04:40:17,268 INFO Valid timedata found for Binance API.
+2024-11-29 04:40:18,176 INFO Indicators: MACD=0.16, Signal=0.57, RSI=40.46, Bollinger Upper=3392.92, Bollinger Lower=3385.07, Current Price=3388.67, VWAP=3389.15
+2024-11-29 04:40:18,208 INFO RSI Last: 40.46, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 04:40:18,222 INFO Current Price: 3388.67, VWAP: 3389.15, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 04:40:18,240 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.0, 'vwap': -0.15}, Total Score: -0.36
+2024-11-29 04:40:18,250 INFO Total Score for this round: -0.36
+2024-11-29 04:40:18,261 INFO Trade signal score (-0.36) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:40:18,274 INFO Score: -0.36000000, Threshold: 0.45000000
+2024-11-29 04:40:18,293 INFO Bot execution completed.
+2024-11-29 04:45:13,363 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:45:13,384 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:45:13,400 INFO No external sell signal found.
+2024-11-29 04:45:13,422 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:45:13,440 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:45:13,454 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:45:13,465 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:45:14,915 INFO Fetched ETH price: 3392.2 EUR, equivalent to 3576.06 USD.
+2024-11-29 04:45:15,860 INFO Valid timedata found for Binance API.
+2024-11-29 04:45:18,054 INFO Indicators: MACD=0.61, Signal=0.36, RSI=53.77, Bollinger Upper=3393.93, Bollinger Lower=3384.17, Current Price=3392.20, VWAP=3389.15
+2024-11-29 04:45:18,090 INFO RSI Last: 53.77, Raw Score: -0.10, Weighted Score: -0.03
+2024-11-29 04:45:18,098 INFO Current Price: 3392.2, VWAP: 3389.15, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 04:45:18,104 INFO Score Analysis: {'macd': 0.25, 'rsi': -0.03, 'bollinger': -0.12, 'vwap': 0.15}, Total Score: 0.24
+2024-11-29 04:45:18,140 INFO Total Score for this round: 0.24
+2024-11-29 04:45:18,147 INFO Trade signal score (0.24) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:45:18,151 INFO Score: 0.24000000, Threshold: 0.45000000
+2024-11-29 04:45:18,152 INFO Bot execution completed.
+2024-11-29 04:50:16,729 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:50:16,772 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:50:16,778 INFO No external sell signal found.
+2024-11-29 04:50:16,783 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:50:16,808 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:50:16,818 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:50:16,834 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:50:17,380 INFO Fetched ETH price: 3395.57 EUR, equivalent to 3579.61 USD.
+2024-11-29 04:50:18,182 INFO Valid timedata found for Binance API.
+2024-11-29 04:50:21,143 INFO Indicators: MACD=1.59, Signal=0.97, RSI=73.81, Bollinger Upper=3396.01, Bollinger Lower=3383.37, Current Price=3395.57, VWAP=3389.16
+2024-11-29 04:50:21,168 INFO RSI Last: 73.81, Raw Score: -0.30, Weighted Score: -0.10
+2024-11-29 04:50:21,172 INFO Current Price: 3395.57, VWAP: 3389.16, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 04:50:21,188 INFO Score Analysis: {'macd': 0.25, 'rsi': -0.1, 'bollinger': -0.12, 'vwap': 0.15}, Total Score: 0.17
+2024-11-29 04:50:21,217 INFO Total Score for this round: 0.17
+2024-11-29 04:50:21,235 INFO Trade signal score (0.17) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:50:21,253 INFO Score: 0.17000000, Threshold: 0.45000000
+2024-11-29 04:50:21,267 INFO Bot execution completed.
+2024-11-29 04:55:14,626 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 04:55:14,641 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 04:55:14,649 INFO No external sell signal found.
+2024-11-29 04:55:14,671 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 04:55:14,683 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 04:55:14,695 INFO Executing trade logic for ETH-EUR
+2024-11-29 04:55:14,706 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 04:55:15,481 INFO Fetched ETH price: 3394.94 EUR, equivalent to 3578.95 USD.
+2024-11-29 04:55:16,784 INFO Valid timedata found for Binance API.
+2024-11-29 04:55:18,578 INFO Indicators: MACD=1.73, Signal=1.56, RSI=68.76, Bollinger Upper=3398.59, Bollinger Lower=3383.96, Current Price=3394.94, VWAP=3389.22
+2024-11-29 04:55:18,579 INFO RSI Last: 68.76, Raw Score: -0.50, Weighted Score: -0.17
+2024-11-29 04:55:18,580 INFO Current Price: 3394.94, VWAP: 3389.22, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 04:55:18,580 INFO Score Analysis: {'macd': 0.25, 'rsi': -0.17, 'bollinger': -0.12, 'vwap': 0.15}, Total Score: 0.1
+2024-11-29 04:55:18,581 INFO Total Score for this round: 0.10
+2024-11-29 04:55:18,581 INFO Trade signal score (0.10) was below the buy threshold (0.45). No action taken.
+2024-11-29 04:55:18,581 INFO Score: 0.10000000, Threshold: 0.45000000
+2024-11-29 04:55:18,582 INFO Bot execution completed.
+2024-11-29 05:00:16,058 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 05:00:16,081 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 05:00:16,093 INFO No external sell signal found.
+2024-11-29 05:00:16,102 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 05:00:16,111 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 05:00:16,119 INFO Executing trade logic for ETH-EUR
+2024-11-29 05:00:16,124 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 05:00:17,015 INFO Fetched ETH price: 3407.0 EUR, equivalent to 3591.66 USD.
+2024-11-29 05:00:18,293 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 05:00:19,292 INFO Indicators: MACD=-1.76, Signal=1.97, RSI=34.22, Bollinger Upper=3489.17, Bollinger Lower=3446.55, Current Price=3407.00, VWAP=3410.27
+2024-11-29 05:00:19,332 INFO RSI Last: 34.22, Raw Score: 0.50, Weighted Score: 0.17
+2024-11-29 05:00:19,350 INFO Current Price: 3407.0, VWAP: 3410.27, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 05:00:19,356 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.17, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: 0.02
+2024-11-29 05:00:19,363 INFO Total Score for this round: 0.02
+2024-11-29 05:00:19,380 INFO Trade signal score (0.02) was below the buy threshold (0.45). No action taken.
+2024-11-29 05:00:19,392 INFO Score: 0.02000000, Threshold: 0.45000000
+2024-11-29 05:00:19,398 INFO Bot execution completed.
+2024-11-29 05:05:15,209 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 05:05:15,222 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 05:05:15,232 INFO No external sell signal found.
+2024-11-29 05:05:15,257 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 05:05:15,272 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 05:05:15,285 INFO Executing trade logic for ETH-EUR
+2024-11-29 05:05:15,294 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 05:05:16,397 INFO Fetched ETH price: 3400.22 EUR, equivalent to 3584.51 USD.
+2024-11-29 05:05:17,213 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 05:05:18,526 INFO Indicators: MACD=0.02, Signal=2.91, RSI=45.21, Bollinger Upper=3488.68, Bollinger Lower=3451.06, Current Price=3400.22, VWAP=3410.13
+2024-11-29 05:05:18,527 INFO RSI Last: 45.21, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 05:05:18,528 INFO Current Price: 3400.22, VWAP: 3410.13, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 05:05:18,528 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.11
+2024-11-29 05:05:18,529 INFO Total Score for this round: -0.11
+2024-11-29 05:05:18,530 INFO Trade signal score (-0.11) was below the buy threshold (0.45). No action taken.
+2024-11-29 05:05:18,530 INFO Score: -0.11000000, Threshold: 0.45000000
+2024-11-29 05:05:18,531 INFO Bot execution completed.
+2024-11-29 05:10:16,740 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 05:10:17,020 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 05:10:17,027 INFO No external sell signal found.
+2024-11-29 05:10:17,036 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 05:10:17,041 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 05:10:17,047 INFO Executing trade logic for ETH-EUR
+2024-11-29 05:10:17,054 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 05:10:17,803 INFO Fetched ETH price: 3399.92 EUR, equivalent to 3584.20 USD.
+2024-11-29 05:10:19,318 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 05:10:20,595 INFO Indicators: MACD=1.31, Signal=3.63, RSI=42.83, Bollinger Upper=3488.62, Bollinger Lower=3453.85, Current Price=3399.92, VWAP=3409.98
+2024-11-29 05:10:20,611 INFO RSI Last: 42.83, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 05:10:20,618 INFO Current Price: 3399.92, VWAP: 3409.98, VWAP Diff: 0.00, Raw Score: -1
+2024-11-29 05:10:20,638 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.11
+2024-11-29 05:10:20,648 INFO Total Score for this round: -0.11
+2024-11-29 05:10:20,651 INFO Trade signal score (-0.11) was below the buy threshold (0.45). No action taken.
+2024-11-29 05:10:20,653 INFO Score: -0.11000000, Threshold: 0.45000000
+2024-11-29 05:10:20,656 INFO Bot execution completed.
+2024-11-29 05:15:14,943 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 05:15:14,964 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 05:15:14,995 INFO No external sell signal found.
+2024-11-29 05:15:15,034 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 05:15:15,058 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 05:15:15,091 INFO Executing trade logic for ETH-EUR
+2024-11-29 05:15:15,112 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 05:15:16,150 INFO Fetched ETH price: 3397.02 EUR, equivalent to 3581.14 USD.
+2024-11-29 05:15:17,400 INFO Valid timedata found for Binance API.
+2024-11-29 05:15:19,296 INFO Indicators: MACD=0.96, Signal=1.80, RSI=40.39, Bollinger Upper=3406.48, Bollinger Lower=3391.88, Current Price=3397.02, VWAP=3388.76
+2024-11-29 05:15:19,318 INFO RSI Last: 40.39, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 05:15:19,334 INFO Current Price: 3397.02, VWAP: 3388.76, VWAP Diff: 0.00, Raw Score: 1
+2024-11-29 05:15:19,340 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.12, 'vwap': 0.15}, Total Score: 0.06
+2024-11-29 05:15:19,352 INFO Total Score for this round: 0.06
+2024-11-29 05:15:19,370 INFO Trade signal score (0.06) was below the buy threshold (0.45). No action taken.
+2024-11-29 05:15:19,379 INFO Score: 0.06000000, Threshold: 0.45000000
+2024-11-29 05:15:19,388 INFO Bot execution completed.
+2024-11-29 05:20:15,587 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 05:20:15,613 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 05:20:15,632 INFO No external sell signal found.
+2024-11-29 05:20:15,670 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 05:20:15,691 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 05:20:15,715 INFO Executing trade logic for ETH-EUR
+2024-11-29 05:20:15,734 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 05:20:16,673 INFO Fetched ETH price: 3392.07 EUR, equivalent to 3575.92 USD.
+2024-11-29 05:20:16,977 INFO Valid timedata found for general API.
+2024-11-29 05:20:17,313 INFO Indicators: MACD=2.47, Signal=4.21, RSI=45.83, Bollinger Upper=3488.03, Bollinger Lower=3455.94, Current Price=3392.07, VWAP=3409.50
+2024-11-29 05:20:17,358 INFO RSI Last: 45.83, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 05:20:17,391 INFO Current Price: 3392.07, VWAP: 3409.50, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 05:20:17,420 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.11
+2024-11-29 05:20:17,437 INFO Total Score for this round: -0.11
+2024-11-29 05:20:17,467 INFO Trade signal score (-0.11) was below the buy threshold (0.45). No action taken.
+2024-11-29 05:20:17,491 INFO Score: -0.11000000, Threshold: 0.45000000
+2024-11-29 05:20:17,509 INFO Bot execution completed.
+2024-11-29 05:25:14,570 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 05:25:14,586 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 05:25:14,602 INFO No external sell signal found.
+2024-11-29 05:25:14,620 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 05:25:14,639 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 05:25:14,655 INFO Executing trade logic for ETH-EUR
+2024-11-29 05:25:14,679 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 05:25:15,752 INFO Fetched ETH price: 3390.46 EUR, equivalent to 3574.22 USD.
+2024-11-29 05:25:17,335 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 05:25:18,489 INFO Indicators: MACD=4.49, Signal=4.90, RSI=52.36, Bollinger Upper=3487.67, Bollinger Lower=3457.08, Current Price=3390.46, VWAP=3408.75
+2024-11-29 05:25:18,511 INFO RSI Last: 52.36, Raw Score: -0.10, Weighted Score: -0.03
+2024-11-29 05:25:18,530 INFO Current Price: 3390.46, VWAP: 3408.75, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 05:25:18,541 INFO Score Analysis: {'macd': -0.25, 'rsi': -0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.18
+2024-11-29 05:25:18,555 INFO Total Score for this round: -0.18
+2024-11-29 05:25:18,586 INFO Trade signal score (-0.18) was below the buy threshold (0.45). No action taken.
+2024-11-29 05:25:18,593 INFO Score: -0.18000000, Threshold: 0.45000000
+2024-11-29 05:25:18,609 INFO Bot execution completed.
+2024-11-29 05:30:15,650 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-11-29 05:30:15,673 INFO Starting ETHEREUM (ETH) bot...
+2024-11-29 05:30:15,685 INFO No external sell signal found.
+2024-11-29 05:30:15,716 INFO Loaded state 1/2: daily_profit=0.00, total_profit=619.04, active_trade=0.00, trade_amount=0
+2024-11-29 05:30:15,733 INFO Loaded state 2/2: current_trades=0, highest_price=0.00, trailing_active=False, start_bot=True, score_history=[]
+2024-11-29 05:30:15,754 INFO Executing trade logic for ETH-EUR
+2024-11-29 05:30:15,769 INFO Analyzing technical indicators: MACD for momentum, RSI for overbought/oversold levels, Bollinger Bands for volatility, and VWAP for price-volume trends.
+2024-11-29 05:30:16,513 INFO Fetched ETH price: 3389.07 EUR, equivalent to 3572.76 USD.
+2024-11-29 05:30:17,580 INFO Valid timedata found for Coinbase Brokerage API.
+2024-11-29 05:30:18,406 INFO Indicators: MACD=3.94, Signal=5.00, RSI=46.72, Bollinger Upper=3487.79, Bollinger Lower=3454.28, Current Price=3389.07, VWAP=3408.29
+2024-11-29 05:30:18,450 INFO RSI Last: 46.72, Raw Score: 0.10, Weighted Score: 0.03
+2024-11-29 05:30:18,462 INFO Current Price: 3389.07, VWAP: 3408.29, VWAP Diff: 0.01, Raw Score: -1
+2024-11-29 05:30:18,488 INFO Score Analysis: {'macd': -0.25, 'rsi': 0.03, 'bollinger': 0.25, 'vwap': -0.15}, Total Score: -0.11
+2024-11-29 05:30:18,507 INFO Total Score for this round: -0.11
+2024-11-29 05:30:18,538 INFO Trade signal score (-0.11) was below the buy threshold (0.45). No action taken.
+2024-11-29 05:30:18,558 INFO Score: -0.11000000, Threshold: 0.45000000
+2024-11-29 05:30:18,568 INFO Bot execution completed.

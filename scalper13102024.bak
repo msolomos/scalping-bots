@@ -1,0 +1,416 @@
+import http.client
+import json
+import time
+import logging
+import secrets
+from datetime import datetime
+import pandas as pd
+import numpy as np
+from cryptography.hazmat.primitives import serialization
+import jwt
+import requests
+
+
+# Configure logging to both file and console
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    handlers=[
+                        logging.FileHandler("/opt/python/scalping-bot/scalping_bot.log"),  # Log to file
+                        logging.StreamHandler()  # Log to console
+                    ])
+
+
+# Path to the state file
+state_file = "/opt/python/scalping-bot/state.json"
+
+
+
+# Your Coinbase API details (you need to define these)
+key_name = "organizations/a935a9c0-1188-4df6-b289-3bc9c82328d8/apiKeys/cad2e31e-0159-4731-97d6-a43373845768"
+key_secret = "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIElQWMXqYUmD9J9ajFEUxYBqCxkDsLXfAgoKY87BynQaoAoGCCqGSM49\nAwEHoUQDQgAEe/nIxWZ27+bnVyIljVripEhfi5B59QgVcWNDqfiGn3PAvGGPqqK/\nGS95NnY0jDImKumL3AF4fcXOh+MaAebSaw==\n-----END EC PRIVATE KEY-----\n"
+
+
+# Βελτιστοποιημένες παράμετροι scalping
+SCALP_TARGET = 1.02  # 1% κέρδος
+STOP_LOSS = 0.95  # 3% κάτω από την τιμή αγοράς
+TRADE_AMOUNT = 1  # Σε ETH
+
+short_ma_period = 5  # 5 περιόδων
+long_ma_period = 20  # 20 περιόδων
+RSI_THRESHOLD = 50  # Βελτιστοποιημένο RSI όριο
+
+TRAILING_PROFIT_THRESHOLD = 0.05  # Το αφήνουμε όπως είναι
+DAILY_PROFIT_TARGET = 90  # Αφήνουμε το ημερήσιο στόχο
+MAX_TRADES_PER_DAY = 50  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
+start_bot = True
+
+# Tracking variables
+daily_profit = 0
+current_trades = 0
+active_trade = None
+highest_price = 0
+
+
+
+# Load the state from the file
+def load_state():
+    global daily_profit, current_trades, active_trade, trade_amount
+    try:
+        with open(state_file, 'r') as f:
+            state = json.load(f)
+            daily_profit = state.get('daily_profit', 0)
+            current_trades = state.get('current_trades', 0)
+            active_trade = state.get('active_trade', None)
+            trade_amount = state.get('trade_amount', 0)
+            logging.info(f"Loaded state: daily_profit={round(daily_profit,2)}, current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}")
+    except FileNotFoundError:
+        daily_profit = 0
+        current_trades = 0
+        active_trade = None
+        trade_amount = 0
+        save_state()  # Αρχικοποίηση του αρχείου αν δεν υπάρχει
+        logging.info(f"State file not found. Initialized new state: daily_profit={daily_profit}, current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}")
+
+
+# Save the state to the file
+def save_state():
+    state = {
+        'daily_profit': daily_profit,
+        'current_trades': current_trades,
+        'active_trade': active_trade,
+        'trade_amount': trade_amount
+    }
+    with open(state_file, 'w') as f:
+        json.dump(state, f)
+    logging.info(f"Saved state: daily_profit={round(daily_profit, 2)}, current_trades={current_trades}")
+    logging.info(f"Saved state: active_trade={active_trade}, trade_amount={trade_amount}")
+
+
+
+
+# Συνάρτηση για τη δημιουργία JWT token
+def build_jwt(uri):
+    #logging.debug(f"Building JWT token for URI: {uri}")
+    private_key_bytes = key_secret.encode('utf-8')
+    private_key = serialization.load_pem_private_key(private_key_bytes, password=None)
+
+    # JWT payload
+    jwt_payload = {
+        'sub': key_name,
+        'iss': "cdp",
+        'nbf': int(time.time()),
+        'exp': int(time.time()) + 120,  # Expire in 120 seconds
+        'uri': uri,
+    }
+
+    # Generate JWT token using ES256
+    jwt_token = jwt.encode(
+        jwt_payload,
+        private_key,
+        algorithm='ES256',
+        headers={'kid': key_name, 'nonce': secrets.token_hex()}
+    )
+    #logging.debug(f"JWT token generated successfully: {jwt_token}")
+    return jwt_token
+
+
+
+
+
+# Τοποθέτηση εντολών αγοράς/πώλησης με επιπλέον logging
+def place_order(side, size, price):
+    logging.debug(f"Placing {side.upper()} order for {size} at price {price}")
+    request_host = "api.coinbase.com"
+    place_order_path = "/api/v3/brokerage/orders"
+
+    # Order data
+    order_data = {
+        'client_order_id': secrets.token_hex(10),
+        'product_id': 'ETH-EUR',
+        'side': 'BUY' if side == 'buy' else 'SELL',
+        'order_configuration': {
+            'market_market_ioc': {
+                'base_size': str(size),
+            }
+        }
+    }
+
+    body = json.dumps(order_data)
+    logging.debug(f"Order data: {body}")
+
+    uri = f"POST {request_host}{place_order_path}"
+    jwt_token = build_jwt(uri)
+    #logging.debug(f"Generated JWT Token: {jwt_token}")
+
+    headers = {
+        'Authorization': f'Bearer {jwt_token}',
+        'Content-Type': 'application/json'
+    }
+
+    conn = http.client.HTTPSConnection(request_host)
+    try:
+        conn.request("POST", place_order_path, body, headers)
+        res = conn.getresponse()
+        data = res.read().decode('utf-8')
+
+        logging.debug(f"Response Status Code: {res.status}")
+        logging.debug(f"Response Data: {data}")
+
+        response_data = json.loads(data)
+        if res.status == 200 and response_data.get("success", False):
+            logging.info(f"Order placed successfully: {response_data}")
+            return response_data
+        else:
+            error_message = response_data.get('error_response', 'Unknown error')
+            logging.error(f"Failed to place order. Status: {res.status}, Error: {error_message}")
+            return None
+    except Exception as e:
+        logging.error(f"Error making request: {e}")
+        return None
+    finally:
+        conn.close()
+
+
+
+
+# Technical indicators (MA, MACD, RSI)
+def calculate_ma(df, period):
+    try:
+        #logging.debug(f"Calculating MA for period: {period}")
+        ma = df['close'].rolling(window=period).mean()
+        #logging.debug(f"MA for period {period}: {ma.iloc[-1]}")
+        return ma
+    except Exception as e:
+        logging.error(f"Error calculating MA: {e}")
+        return None
+
+
+
+def calculate_macd(df):
+    try:
+        #logging.debug("Calculating MACD")
+        short_ema = df['close'].ewm(span=12, adjust=False).mean()
+        long_ema = df['close'].ewm(span=26, adjust=False).mean()
+        macd = short_ema - long_ema
+        signal = macd.ewm(span=9, adjust=False).mean()
+        #logging.debug(f"MACD: {macd.iloc[-1]}, Signal: {signal.iloc[-1]}")
+        return macd, signal
+    except Exception as e:
+        logging.error(f"Error calculating MACD: {e}")
+        return None, None
+
+
+
+def calculate_rsi(df, period=14):
+    try:
+        #logging.debug(f"Calculating RSI for period: {period}")
+        delta = df['close'].diff(1)
+        gain = delta.where(delta > 0, 0)
+        loss = -delta.where(delta < 0, 0)
+        avg_gain = gain.rolling(window=period).mean()
+        avg_loss = loss.rolling(window=period).mean()
+        rs = avg_gain / avg_loss
+        rsi = 100 - (100 / (1 + rs))
+        #logging.debug(f"RSI: {rsi.iloc[-1]}")
+        return rsi
+    except Exception as e:
+        logging.error(f"Error calculating RSI: {e}")
+        return None
+
+
+
+
+# Fetch candlestick data from Coinbase API
+def fetch_data(symbol, granularity=60):
+    logging.debug(f"Fetching data for {symbol} with granularity: {granularity}")
+    request_host = "api.exchange.coinbase.com"
+    candles_path = f"/products/{symbol}/candles?granularity={granularity}"
+
+    conn = http.client.HTTPSConnection(request_host)
+    try:
+        conn.request("GET", candles_path)
+        res = conn.getresponse()
+        data = res.read().decode('utf-8')
+        candles = json.loads(data)
+
+        logging.debug(f"Data fetched successfully: {candles[:5]}")  # Log the first few entries
+        df = pd.DataFrame(candles, columns=['time', 'low', 'high', 'open', 'close', 'volume'])
+        df['time'] = pd.to_datetime(df['time'], unit='s')
+        return df
+    except Exception as e:
+        logging.error(f"Error fetching data: {e}")
+        return None
+    finally:
+        conn.close()
+
+
+
+
+# Νέα έκδοση της συνάρτησης get_eth_price για χρήση με public endpoint (χωρίς authentication)
+def get_eth_price(retries=3, delay=5):
+    method = 'GET'
+    # Δημόσιο endpoint για ETH-EUR
+    request_path = '/products/ETH-EUR/ticker'
+    public_base_url = "https://api.exchange.coinbase.com"
+
+    for attempt in range(retries):
+        try:
+            # Δημιουργία του πλήρους URL (χωρίς authentication)
+            #logging.debug(f"Making request to {public_base_url}{request_path}")
+            response = requests.get(f'{public_base_url}{request_path}')
+            #logging.debug(f"Response Status Code: {response.status_code}")
+            #logging.debug(f"Response Headers: {response.headers}")
+            #logging.debug(f"Response Text: {response.text}")
+
+            # Έλεγχος status code
+            if response.status_code != 200:
+                logging.error(f"Failed to fetch ETH price. Status code: {response.status_code}. Attempt {attempt + 1} of {retries}")
+                time.sleep(delay)  # Καθυστέρηση πριν την επόμενη προσπάθεια
+                continue
+
+            # Ανάλυση του JSON
+            data = response.json()
+            if 'price' not in data:
+                logging.error(f"'price' key missing in API response: {data}. Attempt {attempt + 1} of {retries}")
+                time.sleep(delay)  # Καθυστέρηση πριν την επόμενη προσπάθεια
+                continue
+
+            # Απόκτηση της τιμής
+            price = float(data['price'])
+            logging.info(f"Fetched ETH price: {price}")
+            return price
+
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error fetching ETH price: {e}. Attempt {attempt + 1} of {retries}")
+            time.sleep(delay)  # Καθυστέρηση πριν την επόμενη προσπάθεια
+
+    # Αν αποτύχουν όλες οι προσπάθειες
+    logging.error(f"Failed to fetch ETH price after {retries} attempts.")
+    return None
+
+
+
+
+
+# Main trading logic (updated)
+def execute_scalping_trade(symbol):
+    global daily_profit, current_trades, highest_price, active_trade, trade_amount, start_bot
+
+    logging.info(f"Executing trade logic for {symbol}")
+    
+    if not start_bot:
+        logging.info("Bot is stopped.")
+        return
+
+    try:
+        df = fetch_data(symbol, granularity=60)
+        if df is None:
+            logging.warning("No data fetched. Skipping trade execution.")
+            return
+
+        current_price = get_eth_price()
+
+        if current_price is None:
+            logging.error("Failed to fetch current price. Skipping trade execution.")
+            return
+        
+        logging.debug(f"Current price for {symbol}: {current_price}")
+        
+        # Έλεγχος αν υπάρχουν αρκετά δεδομένα για τον υπολογισμό των δεικτών
+        if len(df) < max(short_ma_period, long_ma_period, 26):  # Μακρύτερη περίοδος για MACD είναι 26
+            logging.warning(f"Not enough data to calculate indicators. Data length: {len(df)}")
+            return
+
+        # Αν υπάρχει ανοιχτή θέση, έλεγχος για πώληση
+        if active_trade:
+            logging.info(f"Active trade exists at {active_trade}. Checking for sell opportunity.")
+            try_to_sell_at = active_trade * SCALP_TARGET
+            logging.info(f"Trying to sell at {round(try_to_sell_at,2)}.")
+            
+            # Έλεγχος συνθηκών πώλησης
+            if current_price >= active_trade * SCALP_TARGET:
+                logging.info(f"Selling at {current_price} for profit")
+                place_order('sell', trade_amount, current_price)
+                daily_profit += (current_price - active_trade) * trade_amount
+                active_trade = None
+                trade_amount = 0
+                current_trades += 1
+                save_state()  # Αποθήκευση της κατάστασης μετά την πώληση
+
+            elif current_price <= active_trade * STOP_LOSS:
+                logging.info(f"Stop-loss triggered. Selling at {current_price}")
+                place_order('sell', trade_amount, current_price)
+                daily_profit -= (active_trade - current_price) * trade_amount
+                active_trade = None
+                trade_amount = 0
+                current_trades += 1
+                save_state()  # Αποθήκευση της κατάστασης μετά την πώληση
+
+            elif current_price < highest_price * (1 - TRAILING_PROFIT_THRESHOLD):
+                logging.info(f"Trailing profit sell at {current_price}")
+                place_order('sell', trade_amount, current_price)
+                daily_profit += (current_price - active_trade) * trade_amount
+                active_trade = None
+                trade_amount = 0
+                current_trades += 1
+                save_state()  # Αποθήκευση της κατάστασης μετά την πώληση
+
+            # Ενημέρωση του highest_price μόνο αν η τρέχουσα τιμή είναι μεγαλύτερη
+            if current_price > highest_price:
+                highest_price = current_price                
+
+            logging.debug(f"Updated highest_price to {highest_price}")
+            return  # Δεν κάνουμε νέα αγορά αν υπάρχει ανοιχτή θέση
+
+        # Calculate indicators (για αγορά)
+        ma_short = calculate_ma(df, short_ma_period).iloc[-1]
+        ma_long = calculate_ma(df, long_ma_period).iloc[-1]
+        macd, signal = calculate_macd(df)
+        rsi = calculate_rsi(df).iloc[-1]
+
+        
+
+        # Αγοραστικό σήμα
+        if ma_short > ma_long and macd.iloc[-1] > signal.iloc[-1] and rsi < RSI_THRESHOLD:
+        #if ma_short > ma_long or rsi < RSI_THRESHOLD:        ###### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< για δοκιμές
+            logging.info(f"All technical indicators are positive. Initiating a buy at {current_price}.")
+            place_order('buy', TRADE_AMOUNT, current_price)
+            active_trade = current_price  # Ενημέρωση της ανοιχτής θέσης
+            trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
+            highest_price = current_price
+            current_trades += 1
+            save_state()  # Αποθήκευση της κατάστασης μετά την αγορά
+        else:
+            logging.info(f"Not all technical indicators are favorable. No buy action will be taken at this time.")
+            logging.info(f"Indicators: MA_Short={ma_short}, MA_Long={ma_long}, MACD={macd.iloc[-1]}, Signal={signal.iloc[-1]}, RSI={rsi}, Current Price={current_price}")
+            
+
+        # Έλεγχος αν επιτεύχθηκε το καθημερινό κέρδος ή το όριο συναλλαγών
+        if daily_profit >= DAILY_PROFIT_TARGET or current_trades >= MAX_TRADES_PER_DAY:
+            logging.info(f"Daily profit target reached: {daily_profit}$ or maximum trades executed")
+            start_bot = False
+            save_state()  # Αποθήκευση κατάστασης όταν σταματάει το bot
+
+    except Exception as e:
+        logging.error(f"Exception occurred in execute_scalping_trade: {e}")
+        return
+
+
+
+
+
+
+
+
+# Main loop (updated to load state)
+def run_bot():
+    logging.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    logging.info("Starting bot...")
+    load_state()  # Load the previous state
+    symbol = 'ETH-EUR'
+    execute_scalping_trade(symbol)
+    #save_state()  # Save the state after each execution
+    logging.info("Bot execution completed")
+
+if __name__ == "__main__":
+    run_bot()

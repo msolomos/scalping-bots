@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Viewer</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			padding: 20px;
+			max-width: 90%;
+			margin: auto;
+		}
+		select, button {
+			width: 100%;
+			padding: 10px;
+			margin: 10px 0;
+		}
+		pre {
+			background: #f4f4f4;
+			padding: 10px;
+			border: 1px solid #ddd;
+			overflow-x: auto;
+			max-height: 500px;
+			white-space: pre-wrap;
+			word-wrap: break-word;
+		}
+		@media (min-width: 768px) {
+			body {
+				max-width: 80%;
+			}
+		}
+		h1 {
+			text-align: center;
+			margin-bottom: 20px;
+		}
+		form {
+			margin-bottom: 20px;
+		}
+		.highlight {
+			color: #ffffff;
+			background-color: #007bff; /* Μπλε φόντο */
+			font-weight: bold;
+			padding: 2px 4px;
+			border-radius: 4px;
+		}
+	</style>
+
+</head>
+<body>
+    <h1>Log Viewer</h1>
+    <form method="GET">
+        <label for="logfile">Select a log file:</label>
+        <select id="logfile" name="logfile">
+            {% for log in logs %}
+                <option value="{{ log }}" {% if log == selected_log %}selected{% endif %}>{{ log }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">View Log</button>
+    </form>
+    {% if log_content %}
+    <h2>Log Content</h2>
+    <pre>{{ log_content | safe }}</pre>
+    {% endif %}
+</body>
+</html>
+

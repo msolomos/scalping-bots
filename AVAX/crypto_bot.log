@@ -1,0 +1,236 @@
+2024-10-16 14:26:05,155 INFO 
+    Your selected options:
+    Cryptocurrency: MMM
+    Symbol: MMM-EUR
+    Full Name: MAKIS
+    Scalping Target: 1.05
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    
+2024-10-16 14:29:22,824 INFO 
+    Your selected options:
+    Cryptocurrency: AVAX
+    Symbol: AVAX-EUR
+    Full Name: AVALANCHE-2
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    
+2024-10-16 15:07:36,782 INFO 
+    Your selected options:
+    Cryptocurrency: AVAX
+    Symbol: AVAX-EUR
+    Full Name: AVA
+    Scalping Target: 1.05
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 40.0
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 50
+    RSI Threshold: 70
+    Granularity: 86400 seconds (ONE_DAY)
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:12:44,307 ERROR Invalid numeric input. Please enter numbers.
+2024-10-16 15:18:45,168 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.05
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: True
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 50 seconds (FIVE_MINUTE)
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:25:57,395 INFO 
+    Your selected options:
+    Cryptocurrency: AVAX
+    Symbol: AVAX-EUR
+    Full Name: AVALANCHE-2
+    Scalping Target: 1.05
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 50 seconds (FIVE_MINUTE)
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 20
+    
+2024-10-16 15:28:01,086 INFO 
+    Your selected options:
+    Cryptocurrency: XXX
+    Symbol: XXX-EUR
+    Full Name: XVIDEOS
+    Scalping Target: 1.05
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 60 seconds (ONE_MINUTE)
+    Trailing Profit Threshold: 0.03
+    Max Trades Per Day: 20
+    
+2024-10-16 15:32:25,331 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:34:01,173 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:37:13,090 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:38:43,484 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: True
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:38:50,827 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: True
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:39:01,494 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-16 15:43:54,421 INFO 
+    Your selected options:
+    Cryptocurrency: 
+    Symbol: 
+    Full Name: 
+    Scalping Target: 1.01
+    Trade Amount Per Transaction: 40.0
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: True
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    
+2024-10-17 09:27:21,870 INFO >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2024-10-17 09:27:21,880 INFO Starting bot...
+2024-10-17 09:27:21,902 INFO Saved state: daily_profit=0, current_trades=0, active_trade=None, TRADE_AMOUNT=40.0, highest_price=None, trailing=False
+2024-10-17 09:27:21,902 INFO State file not found. Initialized new state: daily_profit=0, current_trades=0, active_trade=None, TRADE_AMOUNT=40.0, highest_price=None, trailing_profit_active=False
+2024-10-17 09:27:21,903 INFO Executing trade logic for AVAX-EUR
+2024-10-17 09:27:22,232 INFO Fetched AVAX price: 25.46
+2024-10-17 09:27:22,576 WARNING Not enough data from https://api.coinbase.com/api/v3/brokerage/market/products/AVAX-EUR/candles?granularity=FIVE_MINUTE. Data length: 0. Trying next URL...
+2024-10-17 09:27:23,387 INFO Indicators: MA_Short=25.706, MA_Long=25.774, MACD=0.033, Signal=0.075, RSI=32.381, Current Price=25.46
+2024-10-17 09:27:23,447 INFO Additional check passed: MA_Short_Long=25.73, MA_Long_Long=25.646, MACD_Long=0.072, Signal_Long=0.083, RSI_Long=61.29
+2024-10-17 09:27:23,447 INFO Not all technical indicators are favorable. No buy action will be taken at this time.
+2024-10-17 09:27:23,448 INFO Bot execution completed.
+2024-10-17 09:29:34,440 INFO 
+    Your selected options:
+    Cryptocurrency: BTC
+    Symbol: BTC-USD
+    Full Name: BITCOIN
+    Scalping Target: 1.03
+    Trade Amount Per Transaction: 0.01
+    Stop-Loss Limit: 0.98
+    Daily Profit Target: 60.0
+    Enable Additional Checks: False
+    Short Moving Average Period: 5
+    Long Moving Average Period: 20
+    RSI Threshold: 50
+    Granularity: 300 seconds ()
+    Trailing Profit Threshold: 0.05
+    Max Trades Per Day: 100
+    

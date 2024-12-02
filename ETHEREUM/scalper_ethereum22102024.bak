@@ -1,0 +1,903 @@
+from datetime import datetime
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from cryptography.hazmat.primitives import serialization
+import http.client
+import json
+import time
+import logging
+import secrets
+import pandas as pd
+import numpy as np
+import jwt
+import requests
+import random
+import os
+import sys
+
+################################################################################################################################
+
+# Αρχικές μεταβλητές - πρέπει να οριστούν
+
+# Crypto asset to scalping - coinbase
+CRYPTO_SYMBOL = 'ETH-EUR'
+CRYPTO_NAME = 'ETH'
+CRYPTO_FULLNAME = 'ETHEREUM'
+
+# Ειδική περίπτωση URL απο Binance
+BINANCE_PAIR = "ETHEUR"
+BINANCE_INTERVAL = "5m"
+
+
+
+# Scalping variables
+SCALP_TARGET = 1.03  # 5% κέρδος
+TRADE_AMOUNT = 1  # Μονάδα κρυπτονομίσματος
+
+# Technical indicators
+short_ma_period = 5  # 5 περιόδων
+long_ma_period = 30  # 20 περιόδων
+RSI_THRESHOLD = 50  # Βελτιστοποιημένο RSI όριο
+GRANULARITY = 60
+GRANULARITY_TEXT = 'ONE_MINUTE'
+
+# Ορισμός της μεταβλητής ENABLE_ADDITIONAL_CHECKS
+ENABLE_ADDITIONAL_CHECKS = False  # Αλλαγή σε False αν θέλεις να απενεργοποιήσεις τους ελέγχους
+
+
+# Risk Management
+STOP_LOSS = 0.95  # 3% κάτω από την τιμή αγοράς
+
+ENABLE_TRAILING_PROFIT = True
+TRAILING_PROFIT_THRESHOLD = 0.01
+DAILY_PROFIT_TARGET = 200  # Μεγιστος ημερήσιος στοχος
+MAX_TRADES_PER_DAY = 50  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
+start_bot = True
+
+# Tracking variables
+daily_profit = 0
+current_trades = 0
+active_trade = None
+highest_price = 0
+trailing_profit_active = False
+
+
+################################################################################################################################
+
+
+# Configure logging to both file and console
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    handlers=[
+                        logging.FileHandler(f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/{CRYPTO_NAME}_bot.log"),  # Log to file
+                        logging.StreamHandler()  # Log to console
+                    ])
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Your Coinbase API details (you need to define these)
+key_name = "organizations/a935a9c0-1188-4df6-b289-3bc9c82328d8/apiKeys/cad2e31e-0159-4731-97d6-a43373845768"
+key_secret = "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIElQWMXqYUmD9J9ajFEUxYBqCxkDsLXfAgoKY87BynQaoAoGCCqGSM49\nAwEHoUQDQgAEe/nIxWZ27+bnVyIljVripEhfi5B59QgVcWNDqfiGn3PAvGGPqqK/\nGS95NnY0jDImKumL3AF4fcXOh+MaAebSaw==\n-----END EC PRIVATE KEY-----\n"
+
+
+
+# Διαδρομή για το state file
+state_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/state.json"
+
+
+# Διαδρομή για το pause flag
+pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
+
+
+# Έλεγχος για την ύπαρξη του flag
+if os.path.exists(pause_file):
+    print("Script paused due to reset process.")
+    sys.exit()
+
+
+
+
+
+
+
+# Συνάρτηση για την αποστολή email
+def sendgrid_email(quantity, transaction_type, price, daily_profit):
+    SENDGRID_API_KEY = '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'
+    
+    # Μήνυμα για αγορά ή πώληση
+    transaction = "Αγορά" if transaction_type == 'buy' else "Πώληση"
+    
+    # Τρέχουσα ημερομηνία και ώρα
+    current_time = datetime.now().strftime("%d/%m/%Y %H:%M")
+    
+    # Δημιουργία του περιεχομένου του email
+    message = Mail(
+        from_email='info@f2d.gr',
+        to_emails='info@f2d.gr',
+        subject=f'Scalping bot - {transaction} {CRYPTO_SYMBOL}',
+        html_content=f"""
+        Πραγματοποιήθηκε <strong>{transaction} {CRYPTO_SYMBOL}</strong>.<br>
+        Τεμάχια: {quantity}<br>
+        Αξία: {price} €<br>
+        Daily Profit: {daily_profit} €<br>
+        Ημερομηνία: {current_time}<br>
+        """
+    )
+
+    try:
+        # Αποστολή του email μέσω SendGrid API
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        sg.send(message)
+        logging.info("Email sent successfully!")
+    except Exception as e:
+        # Χρήση logging για αποτυχία αποστολής
+        logging.warning(f"Error sending email: {e}")
+
+
+
+def reset_bot_state():
+    global daily_profit, current_trades, active_trade, trade_amount, highest_price, trailing_profit_active
+
+    logging.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    logging.info("Resetting bot state...")
+
+    # Δημιουργία του pause flag
+    pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
+    open(pause_file, 'w').close()
+    logging.info("Pause flag created. Normal operation is paused.")
+
+    try:
+        load_state()
+
+        # If there is an active trade, attempt to sell only if the current price is greater than the active trade price
+        if active_trade:
+            logging.info(f"Attempting to sell active trade of {active_trade}")
+            current_price = get_crypto_price()
+            if current_price is None:
+                logging.error("Failed to fetch current price. Skipping trade execution.")
+                return
+
+            # Sell only if the current price is higher than the active trade price
+            if current_price > active_trade:
+                order_successful = place_order("sell", trade_amount, current_price)
+                
+                if order_successful:                    
+                    logging.info(f"Sold {trade_amount} of {CRYPTO_SYMBOL} at {current_price}")
+                    sendgrid_email(trade_amount, "sell", current_price, daily_profit)
+
+                    # Reset values in state.json only if the sale was executed
+                    daily_profit = 0
+                    current_trades = 0
+                    active_trade = None
+                    trade_amount = 0
+                    highest_price = None
+                    trailing_profit_active = False
+
+                    # Save the new state
+                    save_state()
+                    logging.info("Bot state reset completed.")
+                else:
+                    logging.info(f"Failed to execute sell order at {current_price}. No state reset performed.")
+            else:
+                logging.info(f"No sale executed. Current price ({current_price}) is not higher than the active trade price ({active_trade}).")
+                logging.info("No state reset performed as the active trade remains open.")
+    finally:
+        # Διαγραφή του pause flag στο τέλος της διαδικασίας
+        if os.path.exists(pause_file):
+            os.remove(pause_file)
+        logging.info("Pause flag removed. Resuming normal operation.")
+
+
+
+
+
+
+
+# Load the state from the file
+def load_state():
+    global daily_profit, current_trades, active_trade, trade_amount, highest_price, trailing_profit_active
+    try:
+        with open(state_file, "r") as f:
+            state = json.load(f)
+            daily_profit = state.get("daily_profit", 0)
+            current_trades = state.get("current_trades", 0)
+            active_trade = state.get("active_trade", None)
+            trade_amount = state.get("trade_amount", 0)
+            highest_price = state.get("highest_price", None)  # Φόρτωση του highest_price
+            trailing_profit_active = state.get('trailing_profit_active', False)
+            logging.info(
+                f"Loaded state: daily_profit={round(daily_profit, 2)}, current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}, highest_price={highest_price}"
+            )
+    except FileNotFoundError:
+        daily_profit = 0
+        current_trades = 0
+        active_trade = None
+        trade_amount = 0
+        highest_price = None  # Αρχικοποίηση του highest_price αν δεν υπάρχει
+        save_state()  # Αρχικοποίηση του αρχείου αν δεν υπάρχει
+        logging.info(
+            f"State file not found. Initialized new state: daily_profit={daily_profit}, current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}, highest_price={highest_price}, trailing_profit_active={trailing_profit_active}"
+        )
+
+
+
+# Save the state to the file
+def save_state():
+    state = {
+        "daily_profit": daily_profit,
+        "current_trades": current_trades,
+        "active_trade": active_trade,
+        "trade_amount": trade_amount,
+        "highest_price": highest_price,  # Αποθήκευση του highest_price
+        "trailing_profit_active": trailing_profit_active
+    }
+    with open(state_file, "w") as f:
+        json.dump(state, f)
+    logging.info(
+        f"Saved state: daily_profit={round(daily_profit, 2)}, current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}, highest_price={highest_price}, trailing={trailing_profit_active}"
+    )
+
+
+
+# Συνάρτηση για τη δημιουργία JWT token
+def build_jwt(uri):
+    # logging.debug(f"Building JWT token for URI: {uri}")
+    private_key_bytes = key_secret.encode("utf-8")
+    private_key = serialization.load_pem_private_key(private_key_bytes, password=None)
+
+    # JWT payload
+    jwt_payload = {
+        "sub": key_name,
+        "iss": "cdp",
+        "nbf": int(time.time()),
+        "exp": int(time.time()) + 120,  # Expire in 120 seconds
+        "uri": uri,
+    }
+
+    # Generate JWT token using ES256
+    jwt_token = jwt.encode(
+        jwt_payload,
+        private_key,
+        algorithm="ES256",
+        headers={"kid": key_name, "nonce": secrets.token_hex()},
+    )
+    # logging.debug(f"JWT token generated successfully: {jwt_token}")
+    return jwt_token
+
+
+# Τοποθέτηση εντολών αγοράς/πώλησης με επιπλέον logging
+def place_order(side, size, price):
+    logging.debug(f"Placing {side.upper()} order for {size} at price {price}")
+    request_host = "api.coinbase.com"
+    place_order_path = "/api/v3/brokerage/orders"
+
+    # Order data
+    order_data = {
+        "client_order_id": secrets.token_hex(10),
+        "product_id": CRYPTO_SYMBOL,
+        "side": "BUY" if side == "buy" else "SELL",
+        "order_configuration": {
+            "market_market_ioc": {
+                "base_size": str(size),
+            }
+        },
+    }
+
+    body = json.dumps(order_data)
+    logging.debug(f"Order data: {body}")
+
+    uri = f"POST {request_host}{place_order_path}"
+    jwt_token = build_jwt(uri)
+    # logging.debug(f"Generated JWT Token: {jwt_token}")
+
+    headers = {
+        "Authorization": f"Bearer {jwt_token}",
+        "Content-Type": "application/json",
+    }
+
+    conn = http.client.HTTPSConnection(request_host)
+    try:
+        conn.request("POST", place_order_path, body, headers)
+        res = conn.getresponse()
+        data = res.read().decode("utf-8")
+
+        logging.debug(f"Response Status Code: {res.status}")
+        logging.debug(f"Response Data: {data}")
+
+        response_data = json.loads(data)
+
+        # Έλεγχος αν το status είναι 200 και η απάντηση επιτυχημένη
+        if res.status == 200:
+            if response_data.get("success", False):
+                logging.info(f"Order placed successfully: {response_data}")
+                return True
+            else:
+                # Εξαγωγή των λεπτομερειών λάθους αν υπάρχει
+                error_message = response_data.get("error", "Unknown error")
+                error_details = response_data.get("message", response_data)
+
+                logging.error(
+                    f"Failed to place order. Status: {res.status}, Error: {error_message}, Details: {error_details}"
+                )
+                return False
+        else:
+                                                                                                                                        
+                                                                                                            
+                          
+            logging.error(f"HTTP error occurred. Status: {res.status}, Data: {data}")
+             
+            return False
+
+    except Exception as e:
+        logging.error(f"Error making request: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+
+
+# Technical indicators (MA, MACD, RSI)
+def calculate_ma(df, period, timeframe=None):
+    try:
+        # ---------------------------------------
+        # Έλεγχος αν το DataFrame έχει DatetimeIndex για να μπορεί να χρησιμοποιηθεί το resample
+        if timeframe is not None:
+            if not isinstance(
+                df.index, (pd.DatetimeIndex, pd.TimedeltaIndex, pd.PeriodIndex)
+            ):
+                df = df.copy()  # Δημιουργούμε αντίγραφο του DataFrame για να μην αλλάξουμε το πρωτότυπο
+                df.index = pd.to_datetime(df.index)  # Μετατροπή του index σε DatetimeIndex
+
+            df = df.resample(timeframe).last()  # Χρησιμοποιεί το τελευταίο διαθέσιμο κλείσιμο για το timeframe
+        # ---------------------------------------
+
+        # Μετατροπή των τιμών σε αριθμητικές (αν δεν είναι ήδη)
+        df['close'] = pd.to_numeric(df['close'], errors='coerce')
+
+        ma = df["close"].rolling(window=period).mean()
+
+        return ma
+    except Exception as e:
+        logging.error(f"Error calculating MA: {e}")
+        return None
+
+
+def calculate_macd(df, timeframe=None):
+    try:
+        # ---------------------------------------
+        # Έλεγχος αν το DataFrame έχει DatetimeIndex για να μπορεί να χρησιμοποιηθεί το resample
+        if timeframe is not None:
+            if not isinstance(
+                df.index, (pd.DatetimeIndex, pd.TimedeltaIndex, pd.PeriodIndex)
+            ):
+                logging.warning(f"Index type before conversion: {type(df.index)}")
+                df = df.copy()
+                df.index = pd.to_datetime(df.index)  # Μετατροπή του index σε DatetimeIndex
+                logging.info(f"Index type after conversion: {type(df.index)}")
+
+            df = df.resample(timeframe).last()  # Χρησιμοποιεί το τελευταίο διαθέσιμο κλείσιμο για το timeframe
+            logging.info(f"Resampled data: {df.index.min()} to {df.index.max()}")  # Έλεγχος resampling
+        # ---------------------------------------
+
+        # Μετατροπή των τιμών σε αριθμητικές (αν δεν είναι ήδη)
+        df['close'] = pd.to_numeric(df['close'], errors='coerce')
+
+        short_ema = df["close"].ewm(span=12, adjust=False).mean()
+        long_ema = df["close"].ewm(span=26, adjust=False).mean()
+        macd = short_ema - long_ema
+        signal = macd.ewm(span=9, adjust=False).mean()
+
+        return macd, signal
+    except Exception as e:
+        logging.error(f"Error calculating MACD: {e}")
+        return None, None
+
+
+def calculate_rsi(df, period=14, timeframe=None):
+    try:
+        # ---------------------------------------
+        # Έλεγχος αν το DataFrame έχει DatetimeIndex για να μπορεί να χρησιμοποιηθεί το resample
+        if timeframe is not None:
+            if not isinstance(
+                df.index, (pd.DatetimeIndex, pd.TimedeltaIndex, pd.PeriodIndex)
+            ):
+                logging.warning(f"Index type before conversion: {type(df.index)}")
+                df = df.copy()
+                df.index = pd.to_datetime(df.index)  # Μετατροπή του index σε DatetimeIndex
+                logging.info(f"Index type after conversion: {type(df.index)}")
+
+            df = df.resample(timeframe).last()  # Χρησιμοποιεί το τελευταίο διαθέσιμο κλείσιμο για το timeframe
+            logging.info(f"Resampled data: {df.index.min()} to {df.index.max()}")  # Έλεγχος resampling
+        # ---------------------------------------
+
+        # Μετατροπή των τιμών σε αριθμητικές (αν δεν είναι ήδη)
+        if df['close'].dtype != 'float64' and df['close'].dtype != 'int64':
+            df['close'] = pd.to_numeric(df['close'], errors='coerce')
+
+        delta = df["close"].diff(1)
+        gain = delta.where(delta > 0, 0)
+        loss = -delta.where(delta < 0, 0)
+        avg_gain = gain.rolling(window=period).mean()
+        avg_loss = loss.rolling(window=period).mean()
+        rs = avg_gain / avg_loss
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+    except Exception as e:
+        logging.error(f"Error calculating RSI: {e}")
+        return None
+
+
+
+def calculate_indicators(df, source_url, short_ma_period, long_ma_period):
+    # Έλεγχος αν υπάρχουν αρκετά δεδομένα για τον υπολογισμό των δεικτών
+    if len(df) < max(short_ma_period, long_ma_period, 26):  # Μακρύτερη περίοδος για MACD είναι 26
+        #logging.warning(f"Not enough data to calculate indicators from {source_url}. Data length: {len(df)}")
+        return False  # Επιστρέφει False για να δηλώσει ότι δεν υπάρχουν αρκετά δεδομένα
+    return True  # Επιστρέφει True αν υπάρχουν αρκετά δεδομένα
+
+
+
+
+
+# Fetch candlestick data from 3 different routes with try catch
+def fetch_data():
+    logging.debug(f"Fetching data for {CRYPTO_SYMBOL} with granularity: {GRANULARITY}")
+
+    
+    urls = [
+        f"https://api.coinbase.com/api/v3/brokerage/market/products/{CRYPTO_SYMBOL}/candles?granularity={GRANULARITY_TEXT}",
+        f"https://api.exchange.coinbase.com/products/{CRYPTO_SYMBOL}/candles?granularity={GRANULARITY}",
+        #f"https://api.coingecko.com/api/v3/coins/{CRYPTO_FULLNAME.lower()}/ohlc?days=1&vs_currency=eur",
+        f"https://api.binance.com/api/v3/klines?symbol={BINANCE_PAIR}&interval={BINANCE_INTERVAL}",
+    ]
+
+    
+    # Ανακάτεμα των URLs τυχαία                                             
+    random.shuffle(urls)
+
+    max_retries = 2
+    delay_between_retries = 10
+    
+    # Standard Mozilla User-Agent string
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0"
+
+    for url in urls:  # Δοκιμάζουμε διαφορετικά URLs
+        attempts = 0
+        conn = None
+
+        while attempts < max_retries:
+            try:
+                logging.debug(f"Attempt {attempts + 1} to fetch data from {url}")
+                conn = http.client.HTTPSConnection(url.split("/")[2])
+                path = "/" + "/".join(url.split("/")[3:])
+
+                headers = {
+                    "User-Agent": user_agent
+                }
+
+                conn.request("GET", path, headers=headers)
+                res = conn.getresponse()
+
+                if res.status != 200:
+                    # Καταγράφουμε το status, headers, και το response body για debugging
+                    logging.error(f"Failed to fetch data from {url}: HTTP {res.status}")
+                    logging.debug(f"Response headers: {res.getheaders()}")
+                    response_body = res.read().decode("utf-8")
+                    logging.debug(f"Response body: {response_body}")
+                    
+                    attempts += 1
+                    time.sleep(delay_between_retries)
+                    continue
+
+                data = res.read().decode("utf-8")
+                logging.debug(f"Raw response from {url}: {data}")
+
+                try:
+                    candles = json.loads(data)
+                except json.JSONDecodeError:
+                    logging.error(f"Failed to parse JSON from {url}. Response body: {data}")
+                    break
+
+                if not candles or len(candles) == 0:
+                    logging.warning(f"No valid data fetched from {url}. Trying next URL.")
+                    break  # Προχωράμε στο επόμενο URL
+
+                # Ειδική περίπτωση για το CoinGecko: η API επιστρέφει μόνο 5 στήλες (time, open, high, low, close)
+                if "coingecko" in url:
+                    df = pd.DataFrame(candles, columns=["time", "open", "high", "low", "close"])
+                    df["time"] = pd.to_datetime(df["time"], unit="ms")
+                
+                # Ειδική περίπτωση για το Binance, όπου μπορεί να επιστρέφει 12 στήλες αντί για 6
+                elif "binance" in url:
+                    # Εδώ χειριζόμαστε το σενάριο των 12 στηλών για το Binance
+                    # Σημείωση: Binance επιστρέφει επιπλέον δεδομένα (π.χ. quote asset volume, number of trades, κ.λπ.)
+                    if len(candles[0]) == 12:
+                        df = pd.DataFrame(candles, columns=[
+                            "time", "open", "high", "low", "close", "volume", 
+                            "close_time", "quote_asset_volume", "number_of_trades", 
+                            "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume", "ignore"
+                        ])
+                    else:
+                        df = pd.DataFrame(candles, columns=["time", "open", "high", "low", "close", "volume"])
+                    
+                    df["time"] = pd.to_datetime(df["time"], unit="ms")
+                
+                # Γενική περίπτωση για άλλες APIs, όπως Kraken
+                else:
+                    df = pd.DataFrame(candles, columns=["time", "low", "high", "open", "close", "volume"])
+                    df["time"] = pd.to_datetime(df["time"], unit="s")
+
+                # Υπολογισμός δεικτών
+                if calculate_indicators(df, url, short_ma_period, long_ma_period):
+                    return df, url
+
+                logging.warning(f"Not enough data from {url}. Data length: {len(df)}. Trying next URL...")
+                break
+
+            except Exception as e:
+                logging.error(f"Error fetching data from {url} (Attempt {attempts + 1}): {e}")
+                attempts += 1
+                time.sleep(delay_between_retries)
+
+            finally:
+                if conn:
+                    conn.close()
+
+    logging.error("Failed to fetch sufficient data from all sources")
+    return None, None
+
+
+
+
+
+
+# # MOCK UP API - ΓΙΑ ΔΟΚΙΜΕΣ - Απλή έκδοση χωρίς ελέγχους ή retries
+# def get_crypto_price():
+    # public_base_url = "http://localhost:5015"  # Δικό σου API URL
+    # response = requests.get(f"{public_base_url}/price")
+    # return float(response.json().get('price'))  # Επιστροφή της τιμής ως float
+
+
+
+
+
+
+
+
+
+
+# Νέα έκδοση της συνάρτησης get_crypto_price για χρήση με public endpoint (χωρίς authentication)
+def get_crypto_price(retries=3, delay=5):
+    method = "GET"
+    # Δημόσιο endpoint για crypto
+    request_path = f"/products/{CRYPTO_SYMBOL}/ticker"
+    public_base_url = "https://api.exchange.coinbase.com"
+
+    for attempt in range(retries):
+        try:
+            # Δημιουργία του πλήρους URL (χωρίς authentication)
+            # logging.debug(f"Making request to {public_base_url}{request_path}")
+            response = requests.get(f"{public_base_url}{request_path}")
+            # logging.debug(f"Response Status Code: {response.status_code}")
+            # logging.debug(f"Response Headers: {response.headers}")
+            # logging.debug(f"Response Text: {response.text}")
+
+            # Έλεγχος status code
+            if response.status_code != 200:
+                logging.error(
+                    f"Failed to fetch {CRYPTO_NAME} price. Status code: {response.status_code}. Attempt {attempt + 1} of {retries}"
+                )
+                time.sleep(delay)  # Καθυστέρηση πριν την επόμενη προσπάθεια
+                continue
+
+            # Ανάλυση του JSON
+            data = response.json()
+            if "price" not in data:
+                logging.error(
+                    f"'price' key missing in API response: {data}. Attempt {attempt + 1} of {retries}"
+                )
+                time.sleep(delay)  # Καθυστέρηση πριν την επόμενη προσπάθεια
+                continue
+
+            # Απόκτηση της τιμής
+            price = float(data["price"])
+            logging.info(f"Fetched {CRYPTO_NAME} price: {price}")
+            return price
+
+        except requests.exceptions.RequestException as e:
+            logging.error(
+                f"Error fetching {CRYPTO_NAME} price: {e}. Attempt {attempt + 1} of {retries}"
+            )
+            time.sleep(delay)  # Καθυστέρηση πριν την επόμενη προσπάθεια
+
+    # Αν αποτύχουν όλες οι προσπάθειες
+    logging.error(f"Failed to fetch {CRYPTO_NAME} price after {retries} attempts.")
+    return None
+
+
+# Main trading logic (updated)
+def execute_scalping_trade(CRYPTO_SYMBOL):
+    global daily_profit, current_trades, highest_price, active_trade, trade_amount, start_bot, trailing_profit_active
+
+    logging.info(f"Executing trade logic for {CRYPTO_SYMBOL}")
+
+    if not start_bot:
+        logging.info("Bot is stopped.")
+        return
+
+    try:
+        # Λήψη της τρέχουσας τιμής του κρυπτονομίσματος
+        current_price = get_crypto_price()
+
+        if current_price is None:
+            logging.error("Failed to fetch current price. Skipping trade execution.")
+            return
+
+        logging.debug(f"Current price for {CRYPTO_SYMBOL}: {current_price}")
+        logging.debug(f"Current Price: {current_price}, Highest Price: {highest_price}")
+
+        # Αν υπάρχει ανοιχτή θέση, έλεγχος για πώληση
+        if active_trade:
+            logging.info(f"Active trade exists at {active_trade}. Checking for sell opportunity.")
+
+            # Αρχικοποίηση του highest_price αν είναι None
+            if highest_price is None:
+                highest_price = active_trade
+                logging.info(f"Initialized highest_price to {highest_price}")
+
+            # Ενημέρωση του highest_price μόνο αν η τρέχουσα τιμή είναι μεγαλύτερη
+            if current_price > highest_price:
+                highest_price = current_price
+                logging.info(f"Updated highest_price to {highest_price}")
+                save_state()  # Αποθήκευση του ενημερωμένου highest_price
+
+            logging.info(f"Current Price: {current_price}, Highest Price: {highest_price}")
+
+            # Έλεγχος stop-loss πρώτα
+            stop_loss_price = active_trade * STOP_LOSS
+            if current_price <= stop_loss_price:
+                logging.info(f"Stop-loss triggered. Selling at {current_price}")
+                order_successful = place_order("sell", trade_amount, current_price)
+
+                if order_successful:
+                    daily_profit -= (active_trade - current_price) * trade_amount
+                    sendgrid_email(trade_amount, "sell", current_price, daily_profit)
+                    active_trade = None
+                    trade_amount = 0
+                    highest_price = None
+                    current_trades += 1
+                    save_state()
+                    return  # Σταματάει η εκτέλεση εδώ αν γίνει πώληση λόγω stop-loss
+                else:
+                    logging.info(f"Failed to execute sell order for stop-loss at {current_price}")
+
+            # Υπολογισμός του scalp target price
+            scalp_target_price = active_trade * SCALP_TARGET
+
+            if ENABLE_TRAILING_PROFIT:
+                # Έλεγχος αν το trailing profit είναι ενεργό ή αν πρέπει να ενεργοποιηθεί
+                if not trailing_profit_active and current_price >= scalp_target_price:
+                    logging.info(f"Scalp target reached. Trailing profit activated.")
+                    trailing_profit_active = True
+                    save_state()
+                                                                                                                    
+                if trailing_profit_active:
+                    # Ενημέρωση του trailing sell price
+                    trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
+                    logging.info(f"Trailing sell price is {round(trailing_sell_price, 2)}")
+
+                    # Έλεγχος αν πρέπει να πουλήσουμε λόγω trailing profit
+                    if current_price <= trailing_sell_price:
+                        logging.info(f"Trailing profit triggered. Selling at {current_price}")
+                        order_successful = place_order("sell", trade_amount, current_price)
+
+                        if order_successful:
+                            daily_profit += (current_price - active_trade) * trade_amount
+                            sendgrid_email(trade_amount, "sell", current_price, daily_profit)
+                            active_trade = None
+                            trade_amount = 0
+                            highest_price = None
+                            trailing_profit_active = False
+                            current_trades += 1
+                            save_state()
+                            return  # Σταματάμε εδώ αν έγινε πώληση λόγω trailing profit
+                        else:
+                            logging.info(f"Failed to execute sell order for trailing profit at {current_price}")
+                    else:
+                        logging.info(f"Trailing profit active. Current price {current_price} has not dropped below trailing sell price {round(trailing_sell_price, 2)}.")
+
+                else:
+                    # Αν το trailing profit δεν είναι ενεργό και η τιμή δεν έχει φτάσει το scalp target
+                    logging.info(f"Waiting for price to reach scalp target at {round(scalp_target_price, 2)}")
+
+
+            else:
+                # Αν το trailing profit δεν είναι ενεργοποιημένο, πουλάμε στο scalp target
+                if current_price >= scalp_target_price:
+                    logging.info(f"Selling at {current_price} for profit (scalp target)")
+                    order_successful = place_order("sell", trade_amount, current_price)
+
+                    if order_successful:
+                        daily_profit += (current_price - active_trade) * trade_amount
+                        sendgrid_email(trade_amount, "sell", current_price, daily_profit)
+                        active_trade = None
+                        trade_amount = 0
+                        highest_price = None
+                        current_trades += 1
+                        save_state()
+                        return  # Σταματάει η εκτέλεση εδώ αν γίνει πώληση λόγω scalp target
+                    else:
+                        logging.info(f"Failed to execute sell order for scalp target at {current_price}")
+
+                # Δεν πουλάμε ακόμη, συνεχίζουμε να παρακολουθούμε
+                logging.info(f"Current price {current_price} has not reached scalp target price {scalp_target_price}.")
+
+            # Καμία πώληση δεν έγινε
+            logging.info(f"No sell action taken. Current price {current_price} did not meet any sell criteria.")
+
+            return  # Δεν κάνουμε νέα αγορά αν υπάρχει ανοιχτή θέση
+
+
+
+
+
+        
+        
+        
+        
+        ##########################################################################################################################################
+        ################### ΓΙΑ ΑΓΟΡΑ####################################################
+
+        # Μεταφέραμε την κλήση fetch_data() εδώ, πριν τον έλεγχο για την αγορά  (ήταν στην αρχή της συνάρτησης αμέσως μετα το try)
+        df, source_url = fetch_data()
+        if df is None:
+            logging.error(f"Failed to fetch data from {source_url}")
+            return
+
+
+        # # Έλεγχος αν υπάρχουν αρκετά δεδομένα για τον υπολογισμό των δεικτών
+        # if len(df) < max(short_ma_period, long_ma_period, 26):  # Μακρύτερη περίοδος για MACD είναι 26
+            # logging.warning(f"Not enough data to calculate indicators. Data length: {len(df)}")
+            # return
+
+        # Calculate indicators (για αγορά)
+        ma_short = calculate_ma(df, short_ma_period).iloc[-1]
+        ma_long = calculate_ma(df, long_ma_period).iloc[-1]
+        macd, signal = calculate_macd(df)
+        rsi = calculate_rsi(df).iloc[-1]
+
+        logging.info(
+            f"Indicators: MA_Short={round(ma_short,3)}, MA_Long={round(ma_long,3)}, MACD={round(macd.iloc[-1],3)}, Signal={round(signal.iloc[-1],3)}, RSI={round(rsi,3)}, Current Price={current_price}"
+        )
+        # Εμφάνιση του εύρους δεδομένων πριν το resample
+        # logging.info(f"Data available for SOL-EUR: {df.index.min()} to {df.index.max()}")
+
+        # ---------------------------------------
+        # Μετατροπή της στήλης 'time' σε DatetimeIndex, αν υπάρχει
+        if "time" in df.columns:
+            df["time"] = pd.to_datetime(
+                df["time"]
+            )  # Μετατροπή της στήλης 'time' σε datetime format
+            df.set_index(
+                "time", inplace=True
+            )  # Ορισμός της στήλης 'time' ως DatetimeIndex
+            # logging.info(f"Index converted to DatetimeIndex: {df.index}")
+        else:
+            # Αν δεν υπάρχει στήλη 'time', δημιουργούμε DatetimeIndex από RangeIndex
+            if isinstance(df.index, pd.RangeIndex):
+                logging.warning("No valid datetime index. Creating a DatetimeIndex.")
+                df.index = pd.date_range(
+                    start="2024-10-01", periods=len(df), freq="T"
+                )  # Προσαρμόστε το freq ανάλογα
+                logging.info(f"New index created: {df.index}")
+            else:
+                logging.error("No 'time' column or valid index for resampling.")
+                return  # Σταματάμε την εκτέλεση, αν δεν υπάρχουν χρονικές πληροφορίες
+        # ---------------------------------------
+
+        # ---------------------------------------
+        # Συμπληρωματικός Έλεγχος για επιβεβαίωση δεικτών (προαιρετικός)
+        if ENABLE_ADDITIONAL_CHECKS:
+            # Resampling data σε ωριαίο χρονικό διάστημα
+            df_resampled = df.resample(
+                "1H"
+            ).last()  # Χρησιμοποιεί το τελευταίο διαθέσιμο κλείσιμο κάθε ώρας
+            # logging.info(f"Resampled data: {df_resampled.index.min()} to {df_resampled.index.max()}, length: {len(df_resampled)}")
+
+            # Ελέγχουμε αν υπάρχουν αρκετά δεδομένα για υπολογισμό των δεικτών
+            if len(df_resampled) < max(
+                short_ma_period, long_ma_period, 14
+            ):  # Ανάλογα με τις περιόδους που χρησιμοποιείς
+                logging.warning(
+                    f"Not enough resampled data for calculating indicators. Data length: {len(df_resampled)}"
+                )
+                return
+
+            # Υπολογισμός τεχνικών δεικτών
+            ma_short_long_period = calculate_ma(df_resampled, short_ma_period).iloc[-1]
+            ma_long_long_period = calculate_ma(df_resampled, long_ma_period).iloc[-1]
+            macd_long, signal_long = calculate_macd(df_resampled)
+            rsi_long = calculate_rsi(df_resampled).iloc[-1]
+
+            # Επιβεβαίωση ότι οι δείκτες συμφωνούν και σε ωριαία χρονικά διαστήματα
+            if (
+                pd.isna(ma_short_long_period)
+                or pd.isna(ma_long_long_period)
+                or pd.isna(rsi_long)
+            ):
+                logging.warning(
+                    f"Additional check failed: MA_Short_Long={ma_short_long_period}, MA_Long_Long={ma_long_long_period}, MACD_Long={macd_long.iloc[-1]}, Signal_Long={signal_long.iloc[-1]}, RSI_Long={rsi_long}"
+                )
+                logging.info(
+                    f"Indicators are not consistent across multiple timeframes. No buy action will be taken."
+                )
+                return
+            else:
+                logging.info(
+                    f"Additional check passed: MA_Short_Long={round(ma_short_long_period, 3)}, MA_Long_Long={round(ma_long_long_period, 3)}, MACD_Long={round(macd_long.iloc[-1], 3)}, Signal_Long={round(signal_long.iloc[-1], 3)}, RSI_Long={round(rsi_long, 3)}"
+                )
+        # ---------------------------------------
+
+        # Αγοραστικό σήμα
+        if (ma_short > ma_long and macd.iloc[-1] > signal.iloc[-1] and rsi < RSI_THRESHOLD):
+        #if (ma_short > ma_long or rsi < RSI_THRESHOLD):
+            logging.info(f"All technical indicators are positive. Initiating a buy at {current_price}.")
+            order_successful = place_order("buy", TRADE_AMOUNT, current_price)      
+            
+            if order_successful:
+                active_trade = current_price  # Ενημέρωση της ανοιχτής θέσης
+                trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
+                
+                # Κλήση της sendgrid_email πριν μηδενιστούν οι τιμές
+                sendgrid_email(trade_amount, "buy", current_price, daily_profit=0) 
+                
+                highest_price = current_price
+                current_trades += 1
+                save_state()  # Αποθήκευση της κατάστασης μετά την αγορά
+            else:
+                # logging.info(f"Indicators: MA_Short={round(ma_short,3)}, MA_Long={round(ma_long,3)}, MACD={round(macd.iloc[-1],3)}, Signal={round(signal.iloc[-1],3)}, RSI={round(rsi,3)}, Current Price={current_price}")
+                logging.info(
+                    f"Not all technical indicators are favorable. No buy action will be taken at this time."
+                )
+
+        # Έλεγχος αν επιτεύχθηκε το καθημερινό κέρδος ή το όριο συναλλαγών
+        if daily_profit >= DAILY_PROFIT_TARGET or current_trades >= MAX_TRADES_PER_DAY:
+            logging.info(
+                f"Daily profit target reached: {round(daily_profit, 2)} or maximum trades executed."
+            )
+            start_bot = False
+            #save_state()  # Αποθήκευση κατάστασης όταν σταματάει το bot
+
+    except Exception as e:
+        logging.error(f"Exception occurred in execute_scalping_trade: {e}")
+        return
+
+
+# Main loop (updated to load state)
+def run_bot():
+    logging.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    logging.info("Starting bot...")
+    load_state()  # Load the previous state
+    execute_scalping_trade(CRYPTO_SYMBOL)
+    # save_state()  # Save the state after each execution
+    logging.info("Bot execution completed.")
+
+
+
+if __name__ == "__main__":
+    if "--reset" in sys.argv:
+        reset_bot_state()  # Εκτέλεση της συνάρτησης reset
+    else:
+        run_bot()

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Πληροφορίες Κρυπτονομισμάτων</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        .bot-status { font-weight: bold; }
+        .bot-running { color: green; }
+        .bot-stopped { color: red; }
+        .positive-diff { color: green; }
+        .negative-diff { color: red; }
+        .section-break { margin-top: 10px; margin-bottom: 10px; border-top: 1px solid #e0e0e0; }
+        .hidden-card { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-3">
+    <h3 class="text-center">Πορτοφόλι Κρυπτονομισμάτων</h3>
+    <div class="text-center mb-3">
+        <button id="restore-cards" class="btn btn-secondary">Restore Deleted Cards</button>
+    </div>
+    <div id="crypto-cards" class="row"></div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Ενεργοποίηση της drag-and-drop λειτουργίας
+        $("#crypto-cards").sortable();
+        $("#crypto-cards").disableSelection();
+        
+        // Κλήση για δεδομένα και εμφάνιση καρτών
+        fetchCryptoData();
+
+        // Λειτουργία επαναφοράς για κρυμμένες κάρτες
+        $("#restore-cards").click(function() {
+            $(".hidden-card").removeClass("hidden-card");
+        });
+    });
+
+    function fetchCryptoData() {
+        $.ajax({
+            url: 'http://192.168.2.251:5015/api/crypto-info',
+            method: 'GET',
+            success: function(data) {
+                $('#crypto-cards').empty();
+
+                data.forEach((item, index) => {
+                    const botStatusClass = item.start_bot ? 'bot-running' : 'bot-stopped';
+                    const botStatusText = item.start_bot ? 'Running' : 'Stopped';
+
+                    // Δημιουργία της κάρτας με δυνατότητα διαγραφής και collapse
+                    let card = `
+                        <div class="col-sm-6 col-md-4 col-lg-3 mb-3 card-container" data-id="${item.name}" id="crypto-card-${item.name}">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <a href="#" class="text-dark" data-toggle="collapse" data-target="#collapse-${item.name}">
+                                            ${item.name}
+                                        </a>
+                                        <button class="btn btn-danger btn-sm float-right delete-card" onclick="deleteCard('${item.name}')">Delete</button>
+                                    </h5>
+                                </div>
+                                <div id="collapse-${item.name}" class="collapse show">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2 text-muted">${item.euro_pair}</h6>
+                                        <p class="card-text">Active Trade: €${item.active_trade.toFixed(2)}</p>
+                                        <p class="card-text">Trade Amount: ${item.trade_amount}</p>
+                                        
+                                        <div class="section-break"></div>
+                                        
+                                        <p class="card-text current-price" id="price-${item.euro_pair}">Current Price: Loading...</p>
+                                        <p class="card-text" id="scalp-target-${item.name}">Scalp Target: Loading...</p>`;
+
+                    if (item.active_trade > 0) {
+                        card += `
+                            <p class="card-text goal" id="goal-${item.name}">GOAL: Loading...</p>
+                            <div class="section-break"></div>
+                            <p class="card-text value-diff" id="value-diff-${item.euro_pair}">Value Difference: N/A</p>
+                            <p class="card-text percent-diff" id="percent-diff-${item.euro_pair}">Percentage Difference: N/A</p>`;
+                    }
+
+                    card += `
+                                        <p class="card-text bot-status ${botStatusClass}">Bot Status: ${botStatusText}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    $('#crypto-cards').append(card);
+
+                    setTimeout(() => fetchCurrentPrice(item.euro_pair, item.active_trade, item.name), index * 500);
+                    fetchScalpTarget(item.name, item.active_trade);
+                });
+            },
+            error: function() {
+                console.error("Σφάλμα κατά την ανάκτηση δεδομένων από το API.");
+            }
+        });
+    }
+
+    function deleteCard(cardId) {
+        $(`#crypto-card-${cardId}`).addClass("hidden-card");
+    }
+
+
+
+    function fetchCurrentPrice(pair, activeTrade, botName) {
+        // Κλήση στο API της Coinbase για την τρέχουσα τιμή
+        $.ajax({
+            url: `https://api.exchange.coinbase.com/products/${pair}/ticker`,
+            method: 'GET',
+            success: function(data) {
+                const currentPrice = parseFloat(data.price);
+                
+                // Ενημέρωση της τρέχουσας τιμής
+                const priceElement = $(`#price-${pair}`);
+                priceElement.text(`Current Price: €${currentPrice.toFixed(2)}`);
+                
+                // Ανάκτηση του Goal για τον υπολογισμό των διαφορών
+                const goal = parseFloat($(`#goal-${botName}`).text().replace("Goal: €", ""));
+                
+                if (!isNaN(goal)) {
+                    // Υπολογισμός αξιακής και ποσοστιαίας διαφοράς σε σχέση με το Goal
+                    const valueDifference = currentPrice - goal;
+                    const percentDifference = (valueDifference / goal) * 100;
+
+                    // Εφαρμογή χρώματος για τις διαφορές
+                    const valueDiffElement = $(`#value-diff-${pair}`);
+                    valueDiffElement.text(`Value Difference: €${valueDifference.toFixed(2)}`);
+                    valueDiffElement.removeClass("positive-diff negative-diff")
+                                   .addClass(valueDifference >= 0 ? "positive-diff" : "negative-diff");
+
+                    const percentDiffElement = $(`#percent-diff-${pair}`);
+                    percentDiffElement.text(`Percentage Difference: ${percentDifference.toFixed(2)}%`);
+                    percentDiffElement.removeClass("positive-diff negative-diff")
+                                      .addClass(percentDifference >= 0 ? "positive-diff" : "negative-diff");
+                }
+            },
+            error: function() {
+                console.error(`Σφάλμα κατά την ανάκτηση της τιμής για το ζεύγος ${pair}`);
+            }
+        });
+    }
+
+    function fetchScalpTarget(botName, activeTrade) {
+        // Κλήση στο endpoint για τη στατική μεταβλητή SCALP_TARGET
+        $.ajax({
+            url: `http://192.168.2.251:5015/api/get_static_variables?name=${botName}`,
+            method: 'GET',
+            success: function(data) {
+                const scalpTarget = data.SCALP_TARGET !== undefined ? data.SCALP_TARGET : "N/A";
+                
+                // Ενημέρωση του SCALP_TARGET
+                const scalpTargetElement = $(`#scalp-target-${botName}`);
+                scalpTargetElement.text(`Scalp Target: ${scalpTarget}`);
+
+                // Υπολογισμός του GOAL αν υπάρχουν και τα δύο δεδομένα
+                if (scalpTarget !== "N/A" && activeTrade !== null) {
+                    const goal = activeTrade * scalpTarget;
+                    const goalElement = $(`#goal-${botName}`);
+                    goalElement.text(`Goal: €${goal.toFixed(2)}`);
+                }
+            },
+            error: function() {
+                console.error(`Σφάλμα κατά την ανάκτηση της SCALP_TARGET για το bot ${botName}`);
+                $(`#scalp-target-${botName}`).text("Scalp Target: N/A");
+                $(`#goal-${botName}`).text("GOAL: N/A");
+            }
+        });
+    }
+
+    // Φόρτωση δεδομένων μόνο κατά την αρχική κλήση της σελίδας
+    fetchCryptoData();
+</script>
+
+
+</body>
+</html>

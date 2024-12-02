@@ -1,0 +1,107 @@
+
+<html>
+<body>
+    <h2>Ημερήσια Αναφορά 19-11-2024</h2>
+    <p><strong>Συνολικό Κέρδος Ημέρας:</strong> 105.80 EUR</p>
+    <p><strong>Συνολικό Κέρδος Όλων των Εποχών:</strong> 519.59 EUR</p>
+    <p><strong>Συνολικός Αριθμός Συναλλαγών:</strong> 4</p>
+    <p><strong>Συνολικές Ενεργές Συναλλαγές:</strong> 8502.08 EUR</p>
+    <h3>Λεπτομέρειες ανά bot:</h3>
+     <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 50%; border: 1px solid #eeeeee;">
+        <thead>
+            <tr style="background-color: #d3d3d3; color: #000;">
+                <th>Bot Name</th>
+                <th>Συναλλαγές</th>
+                <th>Τεμάχια</th>
+                <th>Ανοικτή Θέση</th>
+                <th>Κέρδος Ημέρας</th>
+                <th>Συνολικό Κέρδος</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+    <tr>
+        <td>SOLANA</td>
+        <td>1</td>
+        <td>15.00</td>
+        <td>3435.75 EUR</td>
+        <td>-6.87 EUR</td>
+        <td>237.38 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>ETHEREUM</td>
+        <td>1</td>
+        <td>1.00</td>
+        <td>2935.93 EUR</td>
+        <td>-5.87 EUR</td>
+        <td>399.55 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>LITECOIN</td>
+        <td>0</td>
+        <td>20.00</td>
+        <td>1760.40 EUR</td>
+        <td>0.00 EUR</td>
+        <td>-152.13 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>DOGECOIN</td>
+        <td>1</td>
+        <td>1000.00</td>
+        <td>370.00 EUR</td>
+        <td>-0.74 EUR</td>
+        <td>22.84 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>AVAX</td>
+        <td>0</td>
+        <td>0.00</td>
+        <td>0.00 EUR</td>
+        <td>0.00 EUR</td>
+        <td>-0.54 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>XRP</td>
+        <td>0</td>
+        <td>0.00</td>
+        <td>0.00 EUR</td>
+        <td>0.00 EUR</td>
+        <td>25.17 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>CARDANO</td>
+        <td>0</td>
+        <td>0.00</td>
+        <td>0.00 EUR</td>
+        <td>0.00 EUR</td>
+        <td>12.81 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>POLKADOT</td>
+        <td>1</td>
+        <td>0.00</td>
+        <td>0.00 EUR</td>
+        <td>119.28 EUR</td>
+        <td>-62.47 EUR</td>
+    </tr>
+    
+    <tr>
+        <td>POLYGON</td>
+        <td>0</td>
+        <td>0.00</td>
+        <td>0.00 EUR</td>
+        <td>0.00 EUR</td>
+        <td>36.98 EUR</td>
+    </tr>
+    
+        </tbody>
+    </table>
+</body>
+</html>
