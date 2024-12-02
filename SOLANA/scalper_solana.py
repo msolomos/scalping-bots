@@ -148,6 +148,9 @@ pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
 weights_file = f"/opt/python/scalping-bot/indicator_weights.json"
 
 
+# Διαδρομή για το αρχείο excel
+file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.xlsx"
+
 
 
 # Συνάρτηση για να φορτώσει τα κλειδιά από το αρχείο JSON
@@ -483,6 +486,77 @@ def check_cooldown():
     current_time = time.time()
     remaining_time = COOLDOWN_DURATION - (current_time - last_reset_time)
     return remaining_time <= 0, max(0, int(remaining_time))
+
+
+
+
+
+
+
+def save_to_excel(file_path, CRYPTO_NAME, current_price, score, scores):
+    """
+    Αποθηκεύει δεδομένα σε αρχείο Excel, προσθέτοντας μια νέα γραμμή κάθε φορά.
+
+    Args:
+        file_path (str): Το όνομα ή η διαδρομή του αρχείου Excel.
+        CRYPTO_NAME (str): Το όνομα του crypto/bot.
+        current_price (float): Η τρέχουσα τιμή.
+        score (float): Η συνολική βαθμολογία.
+        scores (dict): Οι βαθμολογίες των τεχνικών δεικτών.
+
+    Returns:
+        None
+    """
+    # Δημιουργία της νέας εγγραφής
+    new_entry = {
+        "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "bot_name": CRYPTO_NAME,
+        "macd_score": scores.get("macd", 0),
+        "rsi_score": scores.get("rsi", 0),
+        "bollinger_score": scores.get("bollinger", 0),
+        "vwap_score": scores.get("vwap", 0),
+        "current_price": current_price,
+        "score": score
+    }
+
+    # Δημιουργία DataFrame με τις στήλες
+    columns = [
+        "timestamp",
+        "bot_name",
+        "macd_score",
+        "rsi_score",
+        "bollinger_score",
+        "vwap_score",
+        "current_price",
+        "score"
+    ]
+
+    # Αν το αρχείο Excel δεν υπάρχει, το δημιουργούμε
+    if not os.path.exists(file_path):
+        logging.info(f"File {file_path} does not exist. Creating a new one.")
+        # Δημιουργία DataFrame με τις στήλες και την πρώτη εγγραφή
+        df = pd.DataFrame([new_entry], columns=columns)
+        df.to_excel(file_path, index=False)
+        logging.info(f"New Excel file {file_path} created with headers and data.")
+    else:
+        # Αν υπάρχει το αρχείο, διαβάζουμε τα δεδομένα και προσθέτουμε τη νέα εγγραφή
+        logging.info(f"File {file_path} found. Appending new data.")
+        existing_data = pd.read_excel(file_path, engine="openpyxl")
+        new_data = pd.DataFrame([new_entry], columns=columns)
+        updated_data = pd.concat([existing_data, new_data], ignore_index=True)
+        updated_data.to_excel(file_path, index=False)
+        logging.info("New data appended to the Excel file.")
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2238,6 +2312,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             # Συγκεντρωτικό logging
             logging.info(f"Score Analysis: {scores}, Total Score: {score:.2f}")
             logging.debug(f"Score history before append: {[round(score, 2) for score in score_history]}")
+
+
+            # Αποθήκευση τιμών και σκορ σε excel
+            save_to_excel(file_path, CRYPTO_NAME, current_price, score, scores)
+
+
+
 
             #Αναλυτικό μήνυμα για το συνολικό score και το score history.
             if ENABLE_SCORE_HISTORY:
