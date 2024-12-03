@@ -643,12 +643,13 @@ def reset_bot_state():
                 logging.info("Bot state reset completed.")
 
         else:
-            logging.info(f"No active trade found. Updating total profit and resetting daily profit and current trades.")
+            logging.info(f"No active trade found. Resetting daily profit and current trades, updating total profit.")
             
             # Ανανεώνουμε το συνολικό κέρδος με το τρέχον ημερήσιο κέρδος πριν το reset
             total_profit += daily_profit
             daily_profit = 0
             current_trades = 0
+            start_bot = True
             score_history = []  # Reset του score_history
             
             # Αποθήκευση της νέας κατάστασης
@@ -2489,10 +2490,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 f"Daily profit target reached: {daily_profit:.2f} or maximum trades executed."
             )
             
-            # Αποστολή Push Notification #####################################
-            send_push_notification(f"Alert! Daily profit target reached or maximum trades executed for {CRYPTO_NAME} bot.")
-            logging.info(f"Push notification was sent. Bot is stopped.")
+            logging.info(f"The bot has been stopped. Push notification has been sent.")
             
+            # Αποστολή Push Notification #####################################
+            send_push_notification(f"Alert: The bot has been stopped. The daily profit target has been reached for the {CRYPTO_NAME} bot.")
+                       
             start_bot = False
             save_state(log_info=False)  # Αποθήκευση κατάστασης όταν σταματάει το bot
 
