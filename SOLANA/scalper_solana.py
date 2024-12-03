@@ -16,6 +16,7 @@ import random
 import os
 import sys
 import pushover
+import csv
 
 ###################################################################################################################################################################################################################################
 # Αρχικές μεταβλητές - πρέπει να οριστούν
@@ -148,8 +149,8 @@ pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
 weights_file = f"/opt/python/scalping-bot/indicator_weights.json"
 
 
-# Διαδρομή για το αρχείο excel
-file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.xlsx"
+# Διαδρομή για το αρχείο .csv
+file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.csv"
 
 
 
@@ -493,12 +494,12 @@ def check_cooldown():
 
 
 
-def save_to_excel(file_path, CRYPTO_NAME, current_price, score, scores):
+def save_to_csv(file_path, CRYPTO_NAME, current_price, score, scores):
     """
-    Αποθηκεύει δεδομένα σε αρχείο Excel, προσθέτοντας μια νέα γραμμή κάθε φορά.
+    Αποθηκεύει δεδομένα σε αρχείο CSV, προσθέτοντας μια νέα γραμμή κάθε φορά.
 
     Args:
-        file_path (str): Το όνομα ή η διαδρομή του αρχείου Excel.
+        file_path (str): Το όνομα ή η διαδρομή του αρχείου CSV.
         CRYPTO_NAME (str): Το όνομα του crypto/bot.
         current_price (float): Η τρέχουσα τιμή.
         score (float): Η συνολική βαθμολογία.
@@ -507,6 +508,11 @@ def save_to_excel(file_path, CRYPTO_NAME, current_price, score, scores):
     Returns:
         None
     """
+    
+    # Στρογγυλοποίηση του score στα 2 δεκαδικά ψηφία
+    score = round(score, 2)    
+    
+    
     # Δημιουργία της νέας εγγραφής
     new_entry = {
         "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
@@ -519,34 +525,22 @@ def save_to_excel(file_path, CRYPTO_NAME, current_price, score, scores):
         "score": score
     }
 
-    # Δημιουργία DataFrame με τις στήλες
-    columns = [
-        "timestamp",
-        "bot_name",
-        "macd_score",
-        "rsi_score",
-        "bollinger_score",
-        "vwap_score",
-        "current_price",
-        "score"
-    ]
+    # Έλεγχος αν υπάρχει το αρχείο
+    file_exists = os.path.exists(file_path)
 
-    # Αν το αρχείο Excel δεν υπάρχει, το δημιουργούμε
-    if not os.path.exists(file_path):
-        logging.info(f"File {file_path} does not exist. Creating a new one.")
-        # Δημιουργία DataFrame με τις στήλες και την πρώτη εγγραφή
-        df = pd.DataFrame([new_entry], columns=columns)
-        df.to_excel(file_path, index=False)
-        logging.info(f"New Excel file {file_path} created with headers and data.")
-    else:
-        # Αν υπάρχει το αρχείο, διαβάζουμε τα δεδομένα και προσθέτουμε τη νέα εγγραφή
-        logging.info(f"File {file_path} found. Appending new data.")
-        existing_data = pd.read_excel(file_path, engine="openpyxl")
-        new_data = pd.DataFrame([new_entry], columns=columns)
-        updated_data = pd.concat([existing_data, new_data], ignore_index=True)
-        updated_data.to_excel(file_path, index=False)
-        logging.info("New data appended to the Excel file.")
+    # Γράψιμο της εγγραφής
+    with open(file_path, mode="a", newline='', encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=new_entry.keys())
+        
+        # Αν το αρχείο δεν υπάρχει, γράφουμε κεφαλίδες
+        if not file_exists:
+            writer.writeheader()
+        
+        # Προσθήκη της νέας γραμμής
+        writer.writerow(new_entry)
 
+    # Καταγραφή της επιτυχούς αποθήκευσης
+    logging.info(f"File {file_path} found. Appending new data.")
 
 
 
@@ -2315,7 +2309,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
             # Αποθήκευση τιμών και σκορ σε excel
-            save_to_excel(file_path, CRYPTO_NAME, current_price, score, scores)
+            save_to_csv(file_path, CRYPTO_NAME, current_price, score, scores)
 
 
 
