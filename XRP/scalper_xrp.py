@@ -1517,10 +1517,12 @@ def execute_buy_action(
 
     if "error" not in portfolio_summary:
         available_cash = portfolio_summary['total_cash_equivalent_balance']
-        logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR")
+
+        amount_needed_to_buy = TRADE_AMOUNT * current_price
+        logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR, Amount needed: {amount_needed_to_buy:.2f} EUR ")
 
         # Έλεγχος αν το ποσό της αγοράς επαρκεί
-        if TRADE_AMOUNT <= available_cash:
+        if amount_needed_to_buy <= available_cash:
             logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
             order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
 
@@ -2335,10 +2337,12 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 portfolio_summary = get_portfolio_balance(portfolio_uuid)  # Υποθέτουμε ότι έχεις το portfolio_uuid
                 if "error" not in portfolio_summary:
                     available_cash = portfolio_summary['total_cash_equivalent_balance']
-                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR")
+
+                    amount_needed_to_buy = TRADE_AMOUNT * current_price
+                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR, Amount needed: {amount_needed_to_buy:.2f} EUR ")
 
                     # Έλεγχος αν το ποσό της αγοράς επαρκεί
-                    if TRADE_AMOUNT <= available_cash:
+                    if amount_needed_to_buy <= available_cash:
                         logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
                         order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
 
@@ -2433,11 +2437,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 # Εξαγωγή του υπολοίπου του χαρτοφυλακίου
                 portfolio_summary = get_portfolio_balance(portfolio_uuid)  # Υποθέτουμε ότι έχεις το portfolio_uuid
                 if "error" not in portfolio_summary:
-                    available_cash = portfolio_summary['total_cash_equivalent_balance']
-                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR")
+                    available_cash = portfolio_summary['total_cash_equivalent_balance']                    
+                    
+                    amount_needed_to_buy = TRADE_AMOUNT * current_price
+                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR, Amount needed: {amount_needed_to_buy:.2f} EUR ")
 
                     # Έλεγχος αν το ποσό της αγοράς επαρκεί
-                    if TRADE_AMOUNT <= available_cash:
+                    if amount_needed_to_buy <= available_cash:
                         logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
                         order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
 
