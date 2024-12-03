@@ -1,7 +1,0 @@
-{
-   "key_name": "organizations/a935a9c0-1188-4df6-b289-3bc9c82328d8/apiKeys/cad2e31e-0159-4731-97d6-a43373845768",
-   "key_secret": "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIElQWMXqYUmD9J9ajFEUxYBqCxkDsLXfAgoKY87BynQaoAoGCCqGSM49\nAwEHoUQDQgAEe/nIxWZ27+bnVyIljVripEhfi5B59QgVcWNDqfiGn3PAvGGPqqK/\nGS95NnY0jDImKumL3AF4fcXOh+MaAebSaw==\n-----END EC PRIVATE KEY-----\n",
-   "SENDGRID_API_KEY": "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",
-   "PUSHOVER_TOKEN": "a5bfy5e3usz1175apu5mpz1m9eg6ra",
-   "PUSHOVER_USER": "ucq5bqpnwyuon9qgsun28ygf8vfbqg"
-}
