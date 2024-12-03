@@ -34,6 +34,8 @@ BINANCE_INTERVAL = "5m"
 # 3. Scalping variables
 SCALP_TARGET = 1.02
 TRADE_AMOUNT = 500  # Μονάδα κρυπτονομίσματος
+DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός επένδυσης σύμφωνα με το ημερήσιο κέρδος / ζημιά
+
 
 # 4. Τεχνικοί Δείκτες
 short_ma_period = 5  # 5 περιόδων
@@ -1586,6 +1588,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
     if not start_bot:
         logging.info("Bot is stopped.")
         return
+        
+
+
+        
 
     try:
         # Λήψη της τρέχουσας τιμής του κρυπτονομίσματος
@@ -1598,6 +1604,23 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         logging.debug(f"Current price for {CRYPTO_SYMBOL}: {current_price}")
         logging.debug(f"Current Price: {current_price}, Highest_price: {highest_price}")
 
+
+
+        #------------------------------------------------------------------------------------------------------------------ 
+        
+        # ΔΥΝΑΜΙΚΟ TRADE_AMOUNT - Υπολογισμός προσαρμοσμένου TRADE_AMOUNT
+        if DYNAMIC_TRADE_ENABLED:
+            
+            if trade_amount == 0:
+                trade_amount = 500  # Εξασφάλιση ότι χρησιμοποιείται η αρχική τιμή            
+            
+                #logging.info(f"Initial trade amount: {trade_amount}")    
+                PROFIT_OR_LOSS_CRYPTO = daily_profit / current_price  # Μετατροπή κέρδους/ζημίας σε αριθμό κρυπτονομισμάτων
+                trade_amount = trade_amount + PROFIT_OR_LOSS_CRYPTO
+                    
+                logging.info(f"Dynamic trade Enabled. New Trade Amount: {trade_amount:.{current_decimals}f} {CRYPTO_SYMBOL}")        
+         
+        #------------------------------------------------------------------------------------------------------------------
 
 
         # Αν υπάρχει ανοιχτή θέση, έλεγχος για πώληση
@@ -2488,7 +2511,8 @@ def run_bot():
     
     # Check if the bot is allowed to run
     load_state()  # Load the state to check start_bot status
-    
+ 
+ 
     #------------------------------------------------------------------------------------------------------------------
     
     if ENABLE_FAILOVER_BOT:
