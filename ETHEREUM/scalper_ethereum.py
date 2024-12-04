@@ -283,19 +283,30 @@ def check_sell_signal():
 
 
 # Ειδοποίηση μέσω Pushover
-def send_push_notification(message):
+def send_push_notification(message, Logfile=True):
+    """
+    Στέλνει push notification μέσω Pushover.
+    
+    Args:
+        message (str): Το μήνυμα που θα σταλεί.
+        Logfile (bool): Αν είναι True, εμφανίζει τα logs. Αν είναι False, δεν εμφανίζει τίποτα.
+    """
     # Έλεγχος αν η αποστολή push notifications είναι ενεργοποιημένη
     if not ENABLE_PUSH_NOTIFICATIONS:
-        logging.info("Push notifications are paused. Notification was not sent.")
+        if Logfile:
+            logging.info("Push notifications are paused. Notification was not sent.")
         return  # Επιστροφή χωρίς να σταλεί push notification
     
     try:
         # Αποστολή push notification μέσω Pushover
         po = pushover.Client(user_key=PUSHOVER_USER, api_token=PUSHOVER_TOKEN)
         po.send_message(message, title="Scalping Alert")
-        logging.info("Push notification sent successfully!")
+        
+        if Logfile:
+            logging.info("Push notification sent successfully!")
     except Exception as e:
-        logging.error(f"Error sending Push notification: {e}")
+        if Logfile:
+            logging.error(f"Error sending Push notification: {e}")
 
 
 

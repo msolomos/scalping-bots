@@ -291,7 +291,7 @@ def send_push_notification(message, Logfile=True):
     
     try:
         # Αποστολή push notification μέσω Pushover
-        po = Client(user_key=PUSHOVER_USER, api_token=PUSHOVER_TOKEN)
+        po = pushover.Client(user_key=PUSHOVER_USER, api_token=PUSHOVER_TOKEN)
         po.send_message(message, title="Scalping Alert")
         
         if Logfile:
