@@ -70,7 +70,7 @@ ENABLE_DYNAMIC_TRAILING_PROFIT = True   # True για δυναμικό trailing 
 STATIC_TRAILING_PROFIT_THRESHOLD = 0.01 # 1% στατικό trailing profit
 ENABLE_ADDITIONAL_CHECKS = False  # Αλλαγή σε False αν θέλεις να απενεργοποιήσεις τους πρόσθετους ελέγχους
 
-DAILY_PROFIT_TARGET = 100
+DAILY_PROFIT_TARGET = 500
 MAX_TRADES_PER_DAY = 100  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
 
 # 7. Μεταβλητές βραδυνού reset
@@ -939,7 +939,7 @@ def place_order(side, size, price):
                     total_fees = order_details.get("total_fees")
 
                     if average_filled_price:
-                        logging.info(f"Order executed at price: {average_filled_price:.{current_decimals}f}, fees: {total_fees:.{current_decimals}f}")
+                        logging.info(f"Order executed at price: {average_filled_price:.{current_decimals}f} {CRYPTO_CURRENCY}, fees: {total_fees:.{current_decimals}f} {CRYPTO_CURRENCY}")
                         return True, average_filled_price, total_fees  # Επιστρέφουμε και τα fees
                     else:
                         logging.warning("Order placed but no execution price found.")
@@ -1235,15 +1235,15 @@ def fallback_conditions(df, atr_threshold=1.5, stochastic_threshold=20):
     stochastic_condition = current_k < stochastic_threshold
     
     # Logging για ATR και Stochastic
-    logging.info(f"ATR Check: Current ATR = {current_atr:.2f}, Mean ATR = {mean_atr:.2f}, Condition = {atr_condition}")
-    logging.info(f"Stochastic Check: Current %K = {current_k:.2f}, Condition = {stochastic_condition}")
+    logging.debug(f"ATR Check: Current ATR = {current_atr:.2f}, Mean ATR = {mean_atr:.2f}, Condition = {atr_condition}")
+    logging.debug(f"Stochastic Check: Current %K = {current_k:.2f}, Condition = {stochastic_condition}")
     
     # Επιστροφή απόφασης
     if atr_condition or stochastic_condition:
-        logging.info("Fallback conditions met. Proceeding with buy action despite failed volume confirmation.")
+        logging.debug("Fallback conditions met. Proceeding with buy action despite failed volume confirmation.")
         return True
     else:
-        logging.info("Fallback conditions not met. Buy action skipped.")
+        logging.debug("Fallback conditions not met. Buy action skipped.")
         return False
 
 
@@ -1546,7 +1546,7 @@ def execute_buy_action(
                 daily_profit -= fees
                 current_trades += 1
 
-                logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees}")
+                logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees:.{current_decimals}f}")
 
                 # Δημιουργία reasoning και final_score για email
                 reasoning = (
@@ -2361,7 +2361,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         if order_successful and execution_price:
                             active_trade = execution_price  # Ενημέρωση της ανοιχτής θέσης με την τιμή εκτέλεσης
                             trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
-                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees}")
+                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees:.{current_decimals}f}")
                             
                             # Προσθήκη των fees στο daily_profit                
                             daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους
@@ -2401,8 +2401,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"Trade signal score is positive: {score:.2f}. Proceeding to volume confirmation check before initiating a buy at {current_price}.")
                 logging.info(f"Checking Volume Confirmation...")
                 
-                # Ενημέρωση για θετική τιμή
-                send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.")
+                # Ενημέρωση για θετική τιμή σε silent mode
+                send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
 
                 # Έλεγχος επιβεβαίωσης όγκου πριν την αγορά
                 volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30)
@@ -2441,7 +2441,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         return  # Τερματίζει την εκτέλεση του τρέχοντος block αν η επιβεβαίωση όγκου είναι false             
                     
 
-                logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
+                logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}", Logfile=False)
                 
                 # Ενημέρωση για θετική τιμή
                 send_push_notification(f"Volume confirmation passed for {CRYPTO_NAME} bot.")
@@ -2456,13 +2456,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                     # Έλεγχος αν το ποσό της αγοράς επαρκεί
                     if amount_needed_to_buy <= available_cash:
-                        logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
+                        logging.info(f"Sufficient funds available. Executing Buy Order.")
                         order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
 
                         if order_successful and execution_price:
                             active_trade = execution_price  # Ενημέρωση της ανοιχτής θέσης με την τιμή εκτέλεσης
                             trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
-                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees}")
+                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees:.{current_decimals}f}")
 
                             # Προσθήκη των fees στο daily_profit                
                             daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους
@@ -2504,7 +2504,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             logging.info(f"The bot has been stopped. Push notification has been sent.")
             
             # Αποστολή Push Notification #####################################
-            send_push_notification(f"Alert: The bot has been stopped. The daily profit target has been reached for the {CRYPTO_NAME} bot.")
+            send_push_notification(f"Alert: The bot has been stopped. Daily profit target reached ({DAILY_PROFIT_TARGET} {CRYPTO_CURRENCY}) for {CRYPTO_NAME} bot.")
                        
             start_bot = False
             save_state(log_info=False)  # Αποθήκευση κατάστασης όταν σταματάει το bot

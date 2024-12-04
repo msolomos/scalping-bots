@@ -76,7 +76,7 @@ ENABLE_DYNAMIC_TRAILING_PROFIT = True   # True για δυναμικό trailing 
 STATIC_TRAILING_PROFIT_THRESHOLD = 0.01 # 1% στατικό trailing profit
 ENABLE_ADDITIONAL_CHECKS = False  # Αλλαγή σε False αν θέλεις να απενεργοποιήσεις τους πρόσθετους ελέγχους
 
-DAILY_PROFIT_TARGET = 100
+DAILY_PROFIT_TARGET = 500
 MAX_TRADES_PER_DAY = 100  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
 
 # 7. Μεταβλητές βραδυνού reset
@@ -2241,7 +2241,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             )
             
             # Αποστολή Push Notification #####################################
-            send_push_notification(f"Alert! Daily profit target reached or maximum trades executed for {CRYPTO_NAME} bot.")
+            send_push_notification(f"Alert! Daily profit target reached ({DAILY_PROFIT_TARGET} {CRYPTO_CURRENCY}) for {CRYPTO_NAME} bot.")
             logging.info(f"Push notification was sent. Bot is stopped.")
             
             start_bot = False
