@@ -29,7 +29,7 @@ portfolio_uuid = "0054c157-a5c9-4e91-a3c4-bb1f5d638c5c"
 
 # 2. Ειδική περίπτωση URL απο Binance
 BINANCE_PAIR = "BTCEUR"
-BINANCE_INTERVAL = "1m"
+BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
 SCALP_TARGET = 1.01
@@ -79,7 +79,7 @@ SELL_ON_TRAILING = False  # ή False ανάλογα με την επιθυμητ
 # 8. Παράμετροι Αποστολής Ειδοποιήσεων
 EMAIL_SENDER= 'info@f2d.gr'
 EMAIL_RECIPIENT= 'info@f2d.gr'
-ENABLE_EMAIL_NOTIFICATIONS = False
+ENABLE_EMAIL_NOTIFICATIONS = True
 ENABLE_PUSH_NOTIFICATIONS = True                                 
 
 # 9. MOCK DATA - Στατική μεταβλητή για ενεργοποίηση του demo mode
@@ -1755,7 +1755,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             Amount: {trade_amount}
                             Type: Sell
                             Execution Price: {execution_price}
-                            Net Profit: {net_profit}
+                            Net Profit: {profit_trailing}
                             Reason: Trailing Profit
                             """
 
