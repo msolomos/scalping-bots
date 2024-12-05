@@ -58,7 +58,7 @@ POSITIVE_THRESHOLD = 2                  # Πλήθος των θετικών τ�
 ENABLE_STOP_LOSS = False
 STOP_LOSS = 0.95
 ENABLE_DYNAMIC_STOP_LOSS = False   # Ενεργοποίηση δυναμικού stop-loss
-ATR_MULTIPLIER = 2.5
+ATR_MULTIPLIER = 2.0
 
 # Συντηρητικοί traders τείνουν να επιλέγουν έναν χαμηλότερο συντελεστή, γύρω στο 1.5 έως 2, ώστε να κλείνουν τις θέσεις τους πιο κοντά στην τρέχουσα τιμή για να μειώνουν τις απώλειες.
 # Πιο επιθετικοί traders προτιμούν υψηλότερο atr_multiplier, όπως 2.5 ή 3, δίνοντας μεγαλύτερο χώρο στο περιθώριο τιμών και στο bot να αποφεύγει την απότομη πώληση σε βραχυπρόθεσμες διακυμάνσεις.
@@ -2047,7 +2047,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     
                     # Ενημέρωση του trailing sell price
                     trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
-                    logging.info(f"Trailing sell price is {trailing_sell_price:.{current_decimals}f}")
+                    trailing_sell_price = max(trailing_sell_price, active_trade)  # Ensure sell price is above active trade             <<<----------------------------- new additional to correct negative trailing price
+                    logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f}")         # <<<---------------------------------------------------------------------------------------------
 
                     # Έλεγχος αν πρέπει να πουλήσουμε λόγω trailing profit
                     if current_price <= trailing_sell_price:
