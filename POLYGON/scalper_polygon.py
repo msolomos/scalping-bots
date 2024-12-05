@@ -2441,7 +2441,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         return  # Τερματίζει την εκτέλεση του τρέχοντος block αν η επιβεβαίωση όγκου είναι false             
                     
 
-                logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}", Logfile=False)
+                logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
                 
                 # Ενημέρωση για θετική τιμή
                 send_push_notification(f"Volume confirmation passed for {CRYPTO_NAME} bot.")
