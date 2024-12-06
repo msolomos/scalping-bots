@@ -253,18 +253,22 @@ def pause_bot():
 def read_static_variables(script_path):
     variables = {}
     try:
-        with open(script_path, 'r') as f:
-            # Διαβάζουμε μόνο τις πρώτες 100 γραμμές
+        with open(script_path, 'r', encoding='utf-8') as f:
             script_content = ''.join([next(f) for _ in range(100)])
             for var in static_vars:
                 match = re.search(rf'^{var}\s*=\s*(.+)', script_content, re.MULTILINE)
                 if match:
-                    variables[var] = eval(match.group(1))
+                    try:
+                        variables[var] = eval(match.group(1))
+                    except Exception as e:
+                        variables[var] = None  # Αν δεν μπορεί να αξιολογήσει τη μεταβλητή
+                        print(f"Error parsing variable {var} in {script_path}: {str(e)}")
                 else:
-                    variables[var] = None  # Variable not found
+                    variables[var] = None
     except Exception as e:
         print(f"Error reading {script_path}: {str(e)}")
     return variables
+
 
 
 
