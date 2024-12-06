@@ -1004,11 +1004,25 @@ def place_order(side, size, price):
                     total_fees = order_details.get("total_fees")
 
                     if average_filled_price:
-                        logging.info(f"Order executed at price: {average_filled_price:.{current_decimals}f}, fees: {total_fees:.{current_decimals}f}")
+                        logging.info(f"Order executed at price: {average_filled_price:.{current_decimals}f} {CRYPTO_CURRENCY}, fees: {total_fees:.{current_decimals}f} {CRYPTO_CURRENCY}")
                         return True, average_filled_price, total_fees  # Επιστρέφουμε και τα fees
                     else:
+                        # Fallback logic when no execution price is found
                         logging.warning("Order placed but no execution price found.")
-                        return True, None, None
+                        
+                        # Fallback: Treat the sale as successful using the provided price
+                        logging.warning(f"Using fallback for order execution at price: {price}")
+                        total_fees = price * size * FEES_PERCENTAGE
+                                                
+                        # Εξαγωγή των λεπτομερειών λάθους αν υπάρχει
+                        error_details = response_data.get("message", response_data)
+                        
+                        # Αποστολή Push notification
+                        send_push_notification(f"ALERT: Usign fallback for order execution  for {CRYPTO_NAME} bot. Details: {error_details}")
+                        
+                        return True, price, total_fees
+
+
                 else:
                     logging.warning("Order placed but no order_id returned.")
                     return True, None, None
