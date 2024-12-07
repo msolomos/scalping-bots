@@ -16,37 +16,37 @@ import random
 import os
 import sys
 import pushover
-
+               
 ###################################################################################################################################################################################################################################
 # Αρχικές μεταβλητές - πρέπει να οριστούν
 
 # 1. Crypto asset to scalping - coinbase
-CRYPTO_SYMBOL = "LTC-EUR"
-CRYPTO_NAME = "LTC"
-CRYPTO_FULLNAME = "LITECOIN"
+CRYPTO_SYMBOL = "ETH-EUR"
+CRYPTO_NAME = "ETH"
+CRYPTO_FULLNAME = "ETHEREUM_VERSION2"
 CRYPTO_CURRENCY = "EUR"
-portfolio_uuid = "0054c157-a5c9-4e91-a3c4-bb1f5d638c5c"                                                       
+portfolio_uuid = "0054c157-a5c9-4e91-a3c4-bb1f5d638c5c"
 
 # 2. Ειδική περίπτωση URL απο Binance
-BINANCE_PAIR = "LTCEUR"
+BINANCE_PAIR = "ETHEUR"
 BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
-SCALP_TARGET = 1.01
-TRADE_AMOUNT = 20  # Μονάδα κρυπτονομίσματος
+SCALP_TARGET = 1.02
+TRADE_AMOUNT = 1  # Μονάδα κρυπτονομίσματος
 DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός επένδυσης σύμφωνα με το ημερήσιο κέρδος / ζημιά
 
 
 # 4. Τεχνικοί Δείκτες
 short_ma_period = 5  # 5 περιόδων
-long_ma_period = 20  # 20 περιόδων
-RSI_THRESHOLD = 30
+long_ma_period = 50  # 20 περιόδων
+RSI_THRESHOLD = 40
 ADX_THRESHOLD = 25
 STOCHASTIC_OVERSOLD_THRESHOLD = 40
-BUY_THRESHOLD = 0.5     # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά
+BUY_THRESHOLD = 0.45     # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά
 GRANULARITY = 300
 GRANULARITY_TEXT = "FIVE_MINUTE"
-ENABLE_TABULATE_INDICATORS = False      # αποτελέσματα δεικτών σε γραμμογραφημένη μορφή   
+ENABLE_TABULATE_INDICATORS = False      # αποτελέσματα δεικτών σε γραμμογραφημένη μορφή
 ENABLE_GEORGE_SAYS = False              # Εμφάνιση τεχνικών δεικτών μετά το buy  
 ENABLE_FAILOVER_BOT = False             # Ενεργοποιεί απόφαση απο εξωτερικό bot.                                                                                                                                                                                                                                         
 
@@ -74,7 +74,7 @@ DAILY_PROFIT_TARGET = 500
 MAX_TRADES_PER_DAY = 100  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
 
 # 7. Μεταβλητές βραδυνού reset
-MINIMUM_PROFIT_THRESHOLD = 15
+MINIMUM_PROFIT_THRESHOLD = 40
 FEES_PERCENTAGE = 0.0025  # Εκτιμώμενο ποσοστό fees (0.25%)
 COOLDOWN_DURATION = 3600  # Χρόνος σε δευτερόλεπτα πριν το re-buy
 
@@ -107,6 +107,13 @@ current_trades = 0
 active_trade = None
 highest_price = 0
 trailing_profit_active = False
+
+
+
+                             
+                                                                  
+                                                                                             
+                          
 
 
 # Load decimal configuration from external JSON file
@@ -743,6 +750,10 @@ def get_order_details(order_id, jwt_token):
 
                 # Logging για το πλήρες αντικείμενο της παραγγελίας
                 logging.debug(f"Full order details: {order_details}")
+                                                                    
+                                                                                      
+                                                                  
+                                                           
 
                 # Εξαγωγή των σημαντικών τιμών
                 executed_value = float(order_details.get("filled_value", 0))
@@ -752,7 +763,19 @@ def get_order_details(order_id, jwt_token):
                 status = order_details.get("status", "unknown")
 
                 # Logging της κατάστασης της παραγγελίας
+                                     
+                                                 
+                                           
+                                                             
+                                         
+                                
+             
+             
                 logging.debug(f"Order status: {status}")
+                    
+                                              
+                                        
+             
 
                 return {
                     "order_id": order_id,
@@ -1153,6 +1176,7 @@ def calculate_volume_confirmation(df, window=20):
 
     :param df: DataFrame containing the data with a 'volume' column
     :param window: The number of periods for the moving average
+                                                                             
     :return: True if the current volume is above the average, otherwise False
     """
     if 'volume' not in df.columns:
@@ -1165,6 +1189,11 @@ def calculate_volume_confirmation(df, window=20):
     # Remove rows with invalid values (NaN)
     df = df.dropna(subset=['volume'])
 
+                                                               
+                        
+                                                                               
+                                
+
     # Calculate the moving average of the volume
     df['volume_avg'] = df['volume'].rolling(window=window).mean()
 
@@ -1174,6 +1203,7 @@ def calculate_volume_confirmation(df, window=20):
         
         avg_volume = df['volume_avg'].iloc[-1]
         
+                                                      
         volume_confirmation = current_volume > avg_volume
 
         logging.info(f"Latest volume: {current_volume}, MAV ({window} periods): {avg_volume:.{current_decimals}f}")
@@ -1184,6 +1214,7 @@ def calculate_volume_confirmation(df, window=20):
     else:
         logging.info("There is not enough data to calculate the moving average volume.")
         return False, None, None
+
 
 
 
@@ -2018,7 +2049,6 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     
                     
                     # Ενημέρωση του trailing sell price
-                    trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
                     trailing_sell_price = max(trailing_sell_price, active_trade)  # Ensure sell price is above active trade             <<<----------------------------- new additional to correct negative trailing price
                     logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f}")         # <<<---------------------------------------------------------------------------------------------
 
@@ -2262,32 +2292,140 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             score = 0
             scores = {}
 
+                                                                                                                    
             # Υπολογισμός MACD
             scores['macd'] = weights['macd'] * (1 if macd_last > signal_last else -1)
+                                 
+                                                                                                          
+                                                                                                                    
+                     
+                                                                                                          
+                                                                                                 
+                 
+                                                 
+                                                                                                                 
+
+                                                                               
+                                                        
+
+                                                               
             score += scores['macd']
+
             #logging.info(f"MACD Score: {scores['macd']}")
+                                                                                                                    
+
+            
+                                        
+                             
+                                                                                                                          
+                                     
+                                                              
+                                     
+                                                                  
+                                      
+                                 
+                                                                
+                     
+                                                                 
+                                     
+                                                                   
+                                     
+                                                                   
+                                  
+                                                                                                                             
+
+                                                               
+                                                      
 
             # Υπολογισμός RSI            
             scores['rsi'] = weights['rsi'] * (1 if rsi_last < RSI_THRESHOLD else -1)
             score += scores['rsi']
+
+                                            
             #logging.info(f"RSI Score: {scores['rsi']}")
 
+
+            
+                                                                                                                    
+
+
             # Υπολογισμός Bollinger Bands
+                                                                        
+                                                                    
+
             if current_price <= bollinger_lower_last:
                 scores['bollinger'] = weights['bollinger'] * 1
+                                                                                                                   
+                     
+                                                                                 
             elif current_price >= bollinger_upper_last:
                 scores['bollinger'] = weights['bollinger'] * -1
+                                                                                                                  
+                     
+                                                                                                                    
+                                                                   
+                                                                                                        
+                                          
+                                                                                                     
             else:
+                                                                                                    
+
+                                                                           
                 scores['bollinger'] = 0
+
+                                                               
             score += scores['bollinger']
+
             #logging.info(f"Bollinger Score: {scores['bollinger']}")
+
+
+                                                                                                                    
+
+
+                                                                                               
+                                                                    
+
+                                         
+                                                                              
+                                                                                                                              
+                                                                                 
+                                                                      
+                                                               
+                                                                  
+                                           
+                                                                              
+                                                                            
+                                                                                 
+                                                                       
+                                                               
+                                                                   
+                 
+                                                                                           
+
+
+                                                                
+                                                        
 
             # Υπολογισμός VWAP
             scores['vwap'] = weights['vwap'] * (1 if current_price > vwap_last else -1)
             score += scores['vwap']
+
+                                   
+            
+            
+                                                                                                                                      
+
+
+            
+                                                                                                                                
+                   
+
             
             
             # Συγκεντρωτικό logging
+                                                                                    
+            
+                                                                                            
             logging.info(f"Score Analysis: {scores}, Total Score: {score:.2f}")
             logging.debug(f"Score history before append: {[round(score, 2) for score in score_history]}")
 
@@ -2302,6 +2440,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             score_history.append(score)
 
             
+                                                             
+                                      
+                                                                                                      
 
             
             # Διατήρηση μόνο των τελευταίων MAX_SCORE_HISTORY τιμών
@@ -2455,6 +2596,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         logging.info("Buy action skipped due to failure of fallback conditions.")
                         return  # Τερματίζει την εκτέλεση του τρέχοντος block αν η επιβεβαίωση όγκου είναι false             
                     
+                                                                                                                                                                     
 
                 logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
                 
@@ -2502,11 +2644,15 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
                         logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.{current_decimals}f} EUR")
+                                                                                                                                                                                                  
                 else:
                     logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
                     logging.error(f"Error details: {portfolio_summary['message']}")
+                                                                                                                               
             else:
                 logging.info(f"Trade signal score ({score:.2f}) was below the buy threshold ({BUY_THRESHOLD}). No action taken.")
+                                                                                   
+
 
 
 
@@ -2516,6 +2662,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 f"Daily profit target reached: {daily_profit:.2f} or maximum trades executed."
             )
             
+                                                                                      
+                                                                                                                                          
             logging.info(f"The bot has been stopped. Push notification has been sent.")
             
             # Αποστολή Push Notification #####################################
@@ -2530,6 +2678,218 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         
         
         # ---------------------------------------
+
+
+
+                    
+                                     
+                                               
+                                     
+  
+       
+                                                                                                                     
+       
+
+                                                                                                    
+             
+               
+
+                                                                                                             
+                                 
+                               
+                                                                                                  
+         
+                                          
+
+                                                
+                           
+
+                                                                                                             
+                                
+                     
+                                                        
+                             
+                                             
+                             
+                                                 
+                              
+                                                                                       
+                             
+                                                  
+                             
+                                                  
+                          
+                                                         
+
+                                              
+                          
+
+                                                                                                             
+                                            
+                                                                
+                                                            
+
+                                             
+                                                                                                                                                           
+                                               
+                                                                                                                                                             
+                                                           
+                                                  
+                                  
+                                                                    
+         
+                                                                   
+
+                                                          
+                                
+
+                                                                                                             
+                                 
+                                                          
+
+                                 
+                            
+                                                                   
+                              
+                                                     
+             
+                                                 
+                                   
+                            
+                                                                    
+                              
+                                                      
+             
+                                                  
+         
+                                                  
+
+                                                
+                           
+
+                        
+
+
+
+
+
+                                                                  
+       
+                                                                                                     
+       
+
+                                                                                               
+                                       
+                   
+                                                                                         
+                 
+
+                                                           
+
+                                     
+                                    
+
+               
+                      
+
+                          
+                              
+                             
+                                            
+                                  
+             
+                                      
+                     
+                                    
+
+                                               
+                      
+
+                                            
+                                                     
+                                                                
+                                                                    
+                                                                                                                                                                                                     
+
+                                                                                  
+                                                          
+         
+                                
+                                             
+                                                             
+                                                      
+                                                                              
+                                                   
+                                                                
+                                                 
+                                                   
+                                                
+                                                            
+                                                            
+                                                 
+
+                                      
+                                                                                                          
+                                     
+                                   
+                                                  
+                                                                     
+             
+                      
+                                      
+                                   
+                                 
+                                   
+                                   
+                                 
+                                     
+                               
+                                                       
+                                                       
+                                 
+                  
+
+                                                                                               
+                                    
+              
+                                                                                                                                                
+                                                                                                      
+                                                                                                                                         
+         
+
+                        
+
+
+
+
+
+
+
+
+             
+                                      
+                                                
+                                                          
+  
+       
+                                                                                                       
+       
+                                                                                                     
+                               
+                                          
+                                                    
+                                         
+     
+                                          
+
+
+
+
+
+
+
+
+
 
 
 # Main loop (updated to load state)
@@ -2582,6 +2942,24 @@ def run_bot():
 
 # Τροποποίηση της κύριας συνάρτησης για να ελέγχει το cooldown και να εμφανίζει το χρόνο που απομένει
 if __name__ == "__main__":    
+                        
+                                                                                              
+
+                                                                          
+                                                     
+                                                    
+                                                                                 
+
+                                                     
+                                                     
+                                                                                  
+
+                                                     
+                                                     
+                                                                                  
+        
+                                                           
+
     if "--reset" in sys.argv:
         reset_bot_state()  # Εκτέλεση της συνάρτησης reset
     else:

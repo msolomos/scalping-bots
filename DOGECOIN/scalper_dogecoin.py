@@ -2018,6 +2018,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     
                     
                     # Ενημέρωση του trailing sell price
+                    trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
                     trailing_sell_price = max(trailing_sell_price, active_trade)  # Ensure sell price is above active trade             <<<----------------------------- new additional to correct negative trailing price
                     logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f}")         # <<<---------------------------------------------------------------------------------------------
 
