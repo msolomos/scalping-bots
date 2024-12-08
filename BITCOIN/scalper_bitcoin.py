@@ -40,7 +40,7 @@ DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός ε�
 # 4. Τεχνικοί Δείκτες
 short_ma_period = 10  # 5 περιόδων
 long_ma_period = 50  # 20 περιόδων
-RSI_THRESHOLD = 50
+RSI_THRESHOLD = 30
 ADX_THRESHOLD = 25
 STOCHASTIC_OVERSOLD_THRESHOLD = 40
 BUY_THRESHOLD = 0.5 # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά
@@ -74,7 +74,7 @@ DAILY_PROFIT_TARGET = 500
 MAX_TRADES_PER_DAY = 100  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
 
 # 7. Μεταβλητές βραδυνού reset
-MINIMUM_PROFIT_THRESHOLD = 15
+MINIMUM_PROFIT_THRESHOLD = 40
 FEES_PERCENTAGE = 0.0025  # Εκτιμώμενο ποσοστό fees (0.25%)
 COOLDOWN_DURATION = 3600  # Χρόνος σε δευτερόλεπτα πριν το re-buy
 
