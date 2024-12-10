@@ -1645,7 +1645,10 @@ def execute_buy_action(
             else:
                 logging.info(f"Order placement failed. No buy action taken.")
         else:
-            logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.{current_decimals}f} EUR")
+            logging.warning(f"Insufficient funds. 4)  EUR, Available: {available_cash:.2f} EUR")
+            send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)            
+            return
+            
     else:
         logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
         logging.error(f"Error details: {portfolio_summary['message']}")
@@ -2513,8 +2516,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         else:
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
-                        logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.2f} EUR")
-                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.")
+                        logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
+                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)                        
+                        return
+                        
                 else:
                     logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
                     logging.error(f"Error details: {portfolio_summary['message']}")
@@ -2614,7 +2619,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         else:
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
-                        logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.{current_decimals}f} EUR")
+                        logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
+                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)                        
+                        return
+                        
                 else:
                     logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
                     logging.error(f"Error details: {portfolio_summary['message']}")
