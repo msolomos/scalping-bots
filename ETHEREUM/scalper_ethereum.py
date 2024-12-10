@@ -16,8 +16,7 @@ import random
 import os
 import sys
 import pushover
-import argparse
-import re
+import csv
 
 ###################################################################################################################################################################################################################################
 # Αρχικές μεταβλητές - πρέπει να οριστούν
@@ -31,22 +30,18 @@ portfolio_uuid = "0054c157-a5c9-4e91-a3c4-bb1f5d638c5c"
 
 # 2. Ειδική περίπτωση URL απο Binance
 BINANCE_PAIR = "ETHEUR"
-BINANCE_INTERVAL = "1m"
-
+BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
 SCALP_TARGET = 1.02
 TRADE_AMOUNT = 1  # Μονάδα κρυπτονομίσματος
+DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός επένδυσης σύμφωνα με το ημερήσιο κέρδος / ζημιά                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+
 
 # 4. Τεχνικοί Δείκτες
 short_ma_period = 5  # 5 περιόδων
 long_ma_period = 50  # 20 περιόδων
 RSI_THRESHOLD = 40
-
-# Συνδυασμοί ADX και Stochastic για Διαφορετικές Στρατηγικές
-# Αναγνώριση Ισχυρής Τάσης: ADX πάνω από 25 και Stochastic Oversold κάτω από 20 είναι μια συνηθισμένη ρύθμιση για είσοδο σε δυνατές τάσεις.
-#Συνθήκες Εύρους: ADX κάτω από 20 και Stochastic κοντά στο 20-30 είναι κατάλληλες ρυθμίσεις για την ανίχνευση περιοχών αντιστροφής όταν δεν υπάρχει έντονη τάση.
-
 ADX_THRESHOLD = 25
 STOCHASTIC_OVERSOLD_THRESHOLD = 40
 BUY_THRESHOLD = 0.45     # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά                                                                          
@@ -98,6 +93,19 @@ ENABLE_PUSH_NOTIFICATIONS = True
 ENABLE_DEMO_MODE = False  # Ορισμός σε True για demo mode, False για live mode
 
 
+# 10. DOLLAR COST AVERAGE STRATEGY
+MAX_DROP_PERCENTAGE = 0.05       # 5% price drop
+ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE = True   ## Δυναμικό κατώφλι buy back αγοράς σε πτώση
+ATR_FACTOR = 1  # Ευαισθησία στη μεταβλητότητα (ATR)
+ADX_THRESHOLD = 20  # Όριο ADX για ισχυρή τάση                                         
+
+TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το αν χρειάζεται)
+
+# 11. Λειτουργία Γραφήματος και back testing
+ENABLE_SAVE_TO_CSV = False
+
+
+
 ###################################################################################################################################################################################################################################
 
 # Αρχικοποίηση μεταβλητών
@@ -108,13 +116,6 @@ current_trades = 0
 active_trade = None
 highest_price = 0
 trailing_profit_active = False
-
-
-
-# Δημιουργία parser
-parser = argparse.ArgumentParser(description="Trading bot script")
-parser.add_argument("--backtesting", action="store_true", help="Run backtesting on log file")
-args = parser.parse_args()
 
 
 # Load decimal configuration from external JSON file
@@ -158,6 +159,8 @@ pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
 weights_file = f"/opt/python/scalping-bot/indicator_weights.json"
 
 
+# Διαδρομή για το αρχείο .csv
+csv_file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.csv"
 
 
 # Συνάρτηση για να φορτώσει τα κλειδιά από το αρχείο JSON
@@ -370,6 +373,9 @@ def sendgrid_email(quantity, transaction_type, price, net_profit, final_score, r
 # Load the state from the file
 def load_state():
     global daily_profit, total_profit, current_trades, active_trade, trade_amount, highest_price, trailing_profit_active, start_bot, score_history
+    global second_trade_price, second_trade_amount, average_trade_price  # Νέες μεταβλητές
+    global highest_price_second_position, trailing_profit_second_position_active  # Νέες μεταβλητές για τη δεύτερη θέση
+
     try:
         with open(state_file, "r") as f:
             state = json.load(f)
@@ -382,15 +388,27 @@ def load_state():
             trailing_profit_active = state.get("trailing_profit_active", False)
             start_bot = state.get("start_bot", True)  # Load the start_bot status
             score_history = state.get("score_history", [])  # Load the score history
+            
+            # Φόρτωση μεταβλητών για τη δεύτερη θέση
+            second_trade_price = state.get("second_trade_price", None)
+            second_trade_amount = state.get("second_trade_amount", 0)
+            average_trade_price = state.get("average_trade_price", None)
+            highest_price_second_position = state.get("highest_price_second_position", None)
+            trailing_profit_second_position_active = state.get("trailing_profit_second_position_active", False)
+
             logging.info(
-                f"Loaded state 1/2: daily_profit={daily_profit:.2f}, total_profit={total_profit:.2f}, "
+                f"Loaded state 1/3: daily_profit={daily_profit:.2f}, total_profit={total_profit:.2f}, "
                 f"active_trade={active_trade:.{current_decimals}f}, trade_amount={trade_amount}"
             )
             logging.info(
-                f"Loaded state 2/2: current_trades={current_trades}, highest_price={highest_price:.{current_decimals}f}, "
+                f"Loaded state 2/3: current_trades={current_trades}, highest_price={highest_price:.{current_decimals}f}, "
                 f"trailing_active={trailing_profit_active}, start_bot={start_bot}, score_history={score_history}"
             )
-
+            logging.info(
+                f"Loaded state 3/3: second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
+                f"average_trade_price={average_trade_price}, highest_price_second_position={highest_price_second_position}, "
+                f"trailing_profit_second_position_active={trailing_profit_second_position_active}"
+            )
 
     except FileNotFoundError:
         # Initialize defaults if state file is not found
@@ -403,13 +421,24 @@ def load_state():
         trailing_profit_active = False
         start_bot = True  # Default to True if no state file
         score_history = []  # Initialize score history as an empty list
+
+        # Αρχικοποίηση μεταβλητών για τη δεύτερη θέση
+        second_trade_price = None
+        second_trade_amount = 0
+        average_trade_price = None
+        highest_price_second_position = None
+        trailing_profit_second_position_active = False
+
         save_state()  # Create the state file
         logging.info(
             f"State file not found. Initialized new state: daily_profit={daily_profit}, total_profit={total_profit}, "
             f"current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}, "
             f"highest_price={highest_price}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, "
-            f"score_history={score_history}"
+            f"score_history={score_history}, second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
+            f"average_trade_price={average_trade_price}, highest_price_second_position={highest_price_second_position}, "
+            f"trailing_profit_second_position_active={trailing_profit_second_position_active}"
         )
+
 
 
 
@@ -426,6 +455,13 @@ def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_i
         "trailing_profit_active": trailing_profit_active,
         "start_bot": start_bot,  # Save the start_bot status
         "score_history": [round(score, 2) for score in score_history],  # Round each score in score_history
+
+        # Μεταβλητές για τη δεύτερη θέση
+        "second_trade_price": round(second_trade_price, current_decimals) if second_trade_price is not None else 0,
+        "second_trade_amount": second_trade_amount,
+        "average_trade_price": round(average_trade_price, current_decimals) if average_trade_price is not None else 0,
+        "highest_price_second_position": round(highest_price_second_position, current_decimals) if highest_price_second_position is not None else 0,
+        "trailing_profit_second_position_active": trailing_profit_second_position_active,
     }
 
     # Save state to a file
@@ -438,8 +474,12 @@ def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_i
             f"Saved state: daily_profit={state['daily_profit']:.2f}, total_profit={state['total_profit']:.2f}, "
             f"current_trades={current_trades}, active_trade={state['active_trade']:.{current_decimals}f}, trade_amount={trade_amount}, "
             f"highest_price={state['highest_price']:.{current_decimals}f}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, "
-            f"score_history={[round(score, 2) for score in score_history]}"
+            f"score_history={[round(score, 2) for score in score_history]}, "
+            f"second_trade_price={state['second_trade_price']:.{current_decimals}f}, second_trade_amount={second_trade_amount}, "
+            f"average_trade_price={state['average_trade_price']:.{current_decimals}f}, highest_price_second_position={state['highest_price_second_position']:.{current_decimals}f}, "
+            f"trailing_profit_second_position_active={state['trailing_profit_second_position_active']}"
         )
+
 
 
 
@@ -467,6 +507,62 @@ def check_cooldown():
     current_time = time.time()
     remaining_time = COOLDOWN_DURATION - (current_time - last_reset_time)
     return remaining_time <= 0, max(0, int(remaining_time))
+
+
+
+
+
+
+
+
+def save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores):
+    """
+    Αποθηκεύει δεδομένα σε αρχείο CSV, προσθέτοντας μια νέα γραμμή κάθε φορά.
+
+    Args:
+        csv_file_path (str): Το όνομα ή η διαδρομή του αρχείου CSV.
+        CRYPTO_NAME (str): Το όνομα του crypto/bot.
+        current_price (float): Η τρέχουσα τιμή.
+        score (float): Η συνολική βαθμολογία.
+        scores (dict): Οι βαθμολογίες των τεχνικών δεικτών.
+
+    Returns:
+        None
+    """
+    
+    # Στρογγυλοποίηση του score στα 2 δεκαδικά ψηφία
+    score = round(score, 2)    
+    
+    
+    # Δημιουργία της νέας εγγραφής
+    new_entry = {
+        "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "bot_name": CRYPTO_NAME,
+        "macd_score": scores.get("macd", 0),
+        "rsi_score": scores.get("rsi", 0),
+        "bollinger_score": scores.get("bollinger", 0),
+        "vwap_score": scores.get("vwap", 0),
+        "current_price": current_price,
+        "score": score
+    }
+
+    # Έλεγχος αν υπάρχει το αρχείο
+    file_exists = os.path.exists(csv_file_path)
+
+    # Γράψιμο της εγγραφής
+    with open(csv_file_path, mode="a", newline='', encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=new_entry.keys())
+        
+        # Αν το αρχείο δεν υπάρχει, γράφουμε κεφαλίδες
+        if not file_exists:
+            writer.writeheader()
+        
+        # Προσθήκη της νέας γραμμής
+        writer.writerow(new_entry)
+
+    # Καταγραφή της επιτυχούς αποθήκευσης
+    logging.info(f"File {csv_file_path} found. Appending new data.")
+
 
 
 
@@ -625,12 +721,13 @@ def reset_bot_state():
                 logging.info("Bot state reset completed.")
 
         else:
-            logging.info(f"No active trade found. Updating total profit and resetting daily profit and current trades.")
+            logging.info(f"No active trade found. Resetting daily profit and current trades, updating total profit.")
             
             # Ανανεώνουμε το συνολικό κέρδος με το τρέχον ημερήσιο κέρδος πριν το reset
             total_profit += daily_profit
             daily_profit = 0
             current_trades = 0
+            start_bot = True
             score_history = []  # Reset του score_history
             
             # Αποθήκευση της νέας κατάστασης
@@ -700,46 +797,58 @@ def get_order_details(order_id, jwt_token):
         "Content-Type": "application/json"
     }
 
-    try:
-        response = requests.get(url, headers=headers)
+    
+    attempt = 0  # Μετρητής προσπαθειών
+    max_attempts = 3  # Μέγιστος αριθμός προσπαθειών
 
-        if response.status_code == 200:
-            order_details = response.json().get('order', {})
+    while attempt < max_attempts:
+        try:
+            response = requests.get(url, headers=headers)
 
-            # Logging για το πλήρες αντικείμενο της παραγγελίας
-            logging.debug(f"Full order details: {order_details}")
+            if response.status_code == 200:
+                order_details = response.json().get('order', {})
 
-            # Εξαγωγή των σημαντικών τιμών
-            executed_value = float(order_details.get("filled_value", 0))
-            filled_size = float(order_details.get("filled_size", 0))
-            average_filled_price = float(order_details.get("average_filled_price", 0))
-            total_fees = float(order_details.get("total_fees", 0))
-            status = order_details.get("status", "unknown")
+                # Logging για το πλήρες αντικείμενο της παραγγελίας
+                logging.debug(f"Full order details: {order_details}")
 
-            # Logging της κατάστασης της παραγγελίας
-            logging.debug(f"Order status: {status}")
+                # Εξαγωγή των σημαντικών τιμών
+                executed_value = float(order_details.get("filled_value", 0))
+                filled_size = float(order_details.get("filled_size", 0))
+                average_filled_price = float(order_details.get("average_filled_price", 0))
+                total_fees = float(order_details.get("total_fees", 0))
+                status = order_details.get("status", "unknown")
 
-            return {
-                "order_id": order_id,
-                "executed_value": executed_value,
-                "filled_size": filled_size,
-                "average_filled_price": average_filled_price,
-                "total_fees": total_fees,
-                "status": status
-            }
-        else:
-            logging.error(f"Failed to retrieve order details. Status: {response.status_code}, Data: {response.text}")
-            return {
-                "error": response.status_code,
-                "message": response.text
-            }
+                # Logging της κατάστασης της παραγγελίας
+                logging.debug(f"Order status: {status}")
 
-    except Exception as e:
-        logging.error(f"Error fetching order details: {e}")
-        return {
-            "error": "exception",
-            "message": str(e)
-        }
+                return {
+                    "order_id": order_id,
+                    "executed_value": executed_value,
+                    "filled_size": filled_size,
+                    "average_filled_price": average_filled_price,
+                    "total_fees": total_fees,
+                    "status": status
+                }
+            else:
+                # Αν η απάντηση δεν είναι επιτυχής, λογότυπος σφάλματος
+                logging.error(f"Failed to retrieve order details. Status: {response.status_code}, Data: {response.text}")
+
+        except Exception as e:
+            # Λογότυπος για σφάλμα που προκύπτει από την αίτηση
+            logging.error(f"Error fetching order details: {e}")
+
+        attempt += 1
+        if attempt < max_attempts:
+            # Καθυστέρηση πριν την επόμενη προσπάθεια
+            time.sleep(5)
+
+    # Αν αποτύχουν όλες οι προσπάθειες, επιστροφή λάθους
+    logging.error(f"Failed to retrieve order details after {max_attempts} attempts. Status: {response.status_code}, Data: {response.text}")
+    return {
+        "error": response.status_code,
+        "message": response.text
+    }
+
 
 
 
@@ -817,6 +926,7 @@ def get_portfolio_balance(portfolio_uuid):
 
 # Τοποθέτηση εντολών αγοράς/πώλησης με δυνατότητα demo mode
 def place_order(side, size, price):
+    global start_bot
     # Έλεγχος για demo mode
     if ENABLE_DEMO_MODE:
         # Mock response data για demo mode
@@ -896,7 +1006,7 @@ def place_order(side, size, price):
                     total_fees = order_details.get("total_fees")
 
                     if average_filled_price:
-                        logging.info(f"Order executed at price: {average_filled_price:.{current_decimals}f}, fees: {total_fees:.{current_decimals}f}")
+                        logging.info(f"Order executed at price: {average_filled_price:.{current_decimals}f} {CRYPTO_CURRENCY}, fees: {total_fees:.{current_decimals}f} {CRYPTO_CURRENCY}")
                         return True, average_filled_price, total_fees  # Επιστρέφουμε και τα fees
                     else:
                         # Fallback logic when no execution price is found
@@ -926,6 +1036,13 @@ def place_order(side, size, price):
                 logging.error(
                     f"Failed to place order. Status: {res.status}, Error: {error_message}, Details: {error_details}"
                 )
+                
+                send_push_notification(f"ALERT: Failed to place order for {CRYPTO_NAME} bot. Details: {error_details}")
+                
+                # Διακοπή bot και αποθήκευση κατάστασης
+                start_bot = False
+                save_state()  # Εκτελείται πριν το return για να αποθηκευτεί η κατάσταση
+                
                 return False, None, None
         else:
             logging.error(f"HTTP error occurred. Status: {res.status}, Data: {data}")
@@ -1096,51 +1213,44 @@ def calculate_stochastic(df, k_period=14, d_period=3):
 
 
 # Συνάρτηση για Έλεγχο Επιβεβαίωσης Όγκου μέσω Κινούμενου Μέσου Όρου
-def calculate_volume_confirmation(df, window=20, threshold=0.8):
+def calculate_volume_confirmation(df, window=20):
     """
     Calculates the average volume over a given time period (window) and
-    returns an indicator if the current volume meets the threshold of the average.
+    returns an indicator if the current volume exceeds the average.
 
     :param df: DataFrame containing the data with a 'volume' column
     :param window: The number of periods for the moving average
-    :param threshold: The minimum percentage of the average volume to confirm
-    :return: True if the current volume meets the threshold, otherwise False
+    :return: True if the current volume is above the average, otherwise False
     """
     if 'volume' not in df.columns:
         logging.info("The 'volume' column does not exist in the DataFrame.")
-        return False, None, None
-
+        return
+    
     # Convert the volume column to numeric format
     df['volume'] = pd.to_numeric(df['volume'], errors='coerce')
-
-    # Remove rows with invalid or non-positive volume values
-    df = df[df['volume'] > 0]
-
-    # Check if there is enough data for the rolling calculation
-    if len(df) < window:
-        logging.info("Not enough data to calculate the moving average volume.")
-        return False, None, None
+    
+    # Remove rows with invalid values (NaN)
+    df = df.dropna(subset=['volume'])
 
     # Calculate the moving average of the volume
     df['volume_avg'] = df['volume'].rolling(window=window).mean()
 
-    # Check if the last volume is above the threshold of the moving average
+    # Check if the last volume is above the moving average
     if not df.empty and 'volume_avg' in df.columns:
         current_volume = df['volume'].iloc[-1]
+        
         avg_volume = df['volume_avg'].iloc[-1]
+        
+        volume_confirmation = current_volume > avg_volume
 
-        # Adjust the confirmation to use the threshold
-        volume_confirmation = current_volume >= threshold * avg_volume
-
-        logging.info(f"Latest volume: {current_volume}, MAV ({window} periods): {avg_volume:.2f}")
-        logging.info(f"Threshold for confirmation: {threshold * 100}%")
-        logging.info(f"Volume confirmation: {'Yes' if volume_confirmation else 'No'}")
+        logging.info(f"Latest volume: {current_volume}, MAV ({window} periods): {avg_volume:.{current_decimals}f}")
+        #logging.info(f"Moving average volume ({window} periods): {avg_volume:.{current_decimals}f}")
+        #logging.info(f"Volume confirmation: {'Yes' if volume_confirmation else 'No'}")
 
         return volume_confirmation, current_volume, avg_volume
     else:
         logging.info("There is not enough data to calculate the moving average volume.")
         return False, None, None
-
 
 
 
@@ -1176,6 +1286,46 @@ def calculate_indicators(df, source_url, short_ma_period, long_ma_period):
         return False  # Επιστρέφει False για να δηλώσει ότι δεν υπάρχουν αρκετά δεδομένα
     return True  # Επιστρέφει True αν υπάρχουν αρκετά δεδομένα
 
+
+
+
+
+def fallback_conditions(df, atr_threshold=1.5, stochastic_threshold=20):
+    """
+    Ελέγχει fallback συνθήκες ATR και Stochastic όταν αποτυγχάνει η επιβεβαίωση όγκου.
+    
+    Args:
+        df: DataFrame με δεδομένα αγοράς (high, low, close).
+        atr_threshold: Πολλαπλασιαστής για ATR (π.χ. 1.5 = αυξημένη μεταβλητότητα).
+        stochastic_threshold: Κατώφλι για Stochastic (%K) (π.χ. κάτω από 20 = υπερπουλημένη αγορά).
+    
+    Returns:
+        Boolean: True αν οι fallback συνθήκες πληρούνται (να προχωρήσει σε αγορά), αλλιώς False.
+    """
+    # Υπολογισμός ATR και Stochastic
+    _, atr = calculate_adx(df)
+    k_percent, _ = calculate_stochastic(df)
+    
+    # Τρέχοντα δεδομένα ATR και Stochastic
+    current_atr = atr.iloc[-1]  # Τρέχον ATR
+    mean_atr = atr.mean()  # Μέσο ATR
+    current_k = k_percent.iloc[-1]  # Τρέχον %K
+    
+    # Κριτήρια για ATR και Stochastic
+    atr_condition = current_atr > (atr_threshold * mean_atr)
+    stochastic_condition = current_k < stochastic_threshold
+    
+    # Logging για ATR και Stochastic
+    logging.debug(f"ATR Check: Current ATR = {current_atr:.2f}, Mean ATR = {mean_atr:.2f}, Condition = {atr_condition}")
+    logging.debug(f"Stochastic Check: Current %K = {current_k:.2f}, Condition = {stochastic_condition}")
+    
+    # Επιστροφή απόφασης
+    if atr_condition or stochastic_condition:
+        logging.debug("Fallback conditions met. Proceeding with buy action despite failed volume confirmation.")
+        return True
+    else:
+        logging.debug("Fallback conditions not met. Buy action skipped.")
+        return False
 
 
 
@@ -1374,6 +1524,13 @@ def get_exchange_rate():
 
 # Νέα έκδοση της συνάρτησης get_crypto_price για χρήση με public endpoint (χωρίς authentication)
 def get_crypto_price(retries=3, delay=5):
+    # Mock-up mode
+    if ENABLE_DEMO_MODE:
+        mock_price = 96.01  # Παράδειγμα mock τιμής
+        logging.debug(f"Demo mode active: Returning mock price {mock_price} for {CRYPTO_NAME}.")
+        return mock_price
+    
+    
     method = "GET"
     # Δημόσιο endpoint για crypto
     request_path = f"/products/{CRYPTO_SYMBOL}/ticker"
@@ -1429,9 +1586,82 @@ def get_crypto_price(retries=3, delay=5):
     return None
 
 
+
+
+
+def execute_buy_action(
+    df,
+    portfolio_uuid,
+    TRADE_AMOUNT,
+    current_price,
+    macd_last,
+    signal_last,
+    rsi_last,
+    bollinger_upper_last,
+    bollinger_lower_last,
+    vwap_last,
+    score,
+    current_decimals
+):
+    global active_trade, trade_amount, highest_price, daily_profit, current_trades
+
+    # Εξαγωγή του υπολοίπου του χαρτοφυλακίου
+    portfolio_summary = get_portfolio_balance(portfolio_uuid)
+
+    if "error" not in portfolio_summary:
+        available_cash = portfolio_summary['total_cash_equivalent_balance']
+
+        amount_needed_to_buy = TRADE_AMOUNT * current_price
+        logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR, Amount needed: {amount_needed_to_buy:.2f} EUR ")
+
+        # Έλεγχος αν το ποσό της αγοράς επαρκεί
+        if amount_needed_to_buy <= available_cash:
+            logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
+            order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
+
+            if order_successful and execution_price:
+                # Ενημέρωση μεταβλητών
+                active_trade = execution_price
+                trade_amount = TRADE_AMOUNT
+                highest_price = execution_price
+                daily_profit -= fees
+                current_trades += 1
+
+                logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees:.{current_decimals}f}")
+
+                # Δημιουργία reasoning και final_score για email
+                reasoning = (
+                    f"Indicators: MACD={round(macd_last, 3)}, Signal={round(signal_last, 3)}, "
+                    f"RSI={round(rsi_last, 3)}, Bollinger Upper={round(bollinger_upper_last, 3)}, "
+                    f"Bollinger Lower={round(bollinger_lower_last, 3)}, "
+                    f"VWAP={round(vwap_last, 3)}")
+                final_score = f"Trade signal score is positive: {round(score, 3)}."
+
+                # Αποστολή email
+                sendgrid_email(trade_amount, "buy", execution_price, fees, final_score, reasoning)
+
+                # Αποθήκευση του state μετά την ενημέρωση
+                save_state()
+            else:
+                logging.info(f"Order placement failed. No buy action taken.")
+        else:
+            logging.warning(f"Insufficient funds. 4)  EUR, Available: {available_cash:.2f} EUR")
+            send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)            
+            return
+            
+    else:
+        logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
+        logging.error(f"Error details: {portfolio_summary['message']}")
+
+
+
+
+
 # Main trading logic (updated)
 def execute_scalping_trade(CRYPTO_SYMBOL):
     global daily_profit, current_trades, highest_price, active_trade, trade_amount, start_bot, trailing_profit_active
+    global second_trade_price, second_trade_amount, average_trade_price  # Υφιστάμενες global μεταβλητές
+    global highest_price_second_position, trailing_profit_second_position_active  # Προσθήκη των νέων μεταβλητών
 
     
     logging.info(f"Executing trade logic for {CRYPTO_SYMBOL}")
@@ -1456,6 +1686,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
     if not start_bot:
         logging.info("Bot is stopped.")
         return
+        
+
+
+        
 
     try:
         # Λήψη της τρέχουσας τιμής του κρυπτονομίσματος
@@ -1468,9 +1702,44 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         logging.debug(f"Current price for {CRYPTO_SYMBOL}: {current_price}")
         logging.debug(f"Current Price: {current_price}, Highest_price: {highest_price}")
 
+
+
+        #------------------------------------------------------------------------------------------------------------------ 
+        
+        # ΔΥΝΑΜΙΚΟ TRADE_AMOUNT - Υπολογισμός προσαρμοσμένου TRADE_AMOUNT
+        if DYNAMIC_TRADE_ENABLED:
+            
+            if trade_amount == 0:
+                trade_amount = 500  # Εξασφάλιση ότι χρησιμοποιείται η αρχική τιμή            
+            
+                #logging.info(f"Initial trade amount: {trade_amount}")    
+                PROFIT_OR_LOSS_CRYPTO = daily_profit / current_price  # Μετατροπή κέρδους/ζημίας σε αριθμό κρυπτονομισμάτων
+                trade_amount = trade_amount + PROFIT_OR_LOSS_CRYPTO
+                    
+                logging.info(f"Dynamic trade Enabled. New Trade Amount: {trade_amount:.{current_decimals}f} {CRYPTO_SYMBOL}")        
+         
+        #------------------------------------------------------------------------------------------------------------------
+
+
         # Αν υπάρχει ανοιχτή θέση, έλεγχος για πώληση
         if active_trade:
-            logging.info(f"Active trade exists at {active_trade:.{current_decimals}f} {CRYPTO_CURRENCY}. Checking for sell opportunity.")
+            # Πρώτο μέρος: Πληροφορίες για την πρώτη αγορά
+            log_message = f"Active trade exists at {active_trade:.{current_decimals}f} {CRYPTO_CURRENCY}."
+
+            # Δεύτερο μέρος: Αν υπάρχει δεύτερη αγορά, προσθέτουμε πληροφορίες
+            if second_trade_price:
+                log_message += f" Second trade exists at {second_trade_price:.{current_decimals}f} with amount {second_trade_amount}."
+
+            # Τρίτο μέρος: Προσθήκη του "Checking for sell opportunity." στο τέλος
+            log_message += " Checking for sell opportunity."
+
+            # Καταγραφή του τελικού μηνύματος
+            logging.info(log_message)
+
+
+
+
+
 
             # Αρχικοποίηση του highest_price αν είναι None
             if highest_price is None:
@@ -1611,8 +1880,174 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 ##########################################################################################################################################################################
 
+            #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+            # Dynamic MAX_DROP_PERCENTAGE
 
+            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:            
+                dynamic_adjustment = 0
+                
+                
+                # Call the calculate_adx function, which should return both adx and atr
+                adx, atr = calculate_adx(df)
+                # Λήψη της τελευταίας τιμής ADX και ATR
+                atr_value = atr.iloc[-1]
+                adx_value = adx.iloc[-1]
+                
+                # Υπολογισμός ATR ως ποσοστό της τρέχουσας τιμής
+                atr_percentage = atr_value / current_price
+
+                # Υπολογισμός δυναμικής προσαρμογής
+                if adx_value < ADX_THRESHOLD:
+                    # Αν η αγορά είναι σε πλάγια κίνηση, χρησιμοποιούμε το στατικό κατώφλι
+                    DYNAMIC_MAX_DROP_PERCENTAGE = MAX_DROP_PERCENTAGE
+                else:
+                    # Αν η αγορά έχει ισχυρή τάση, προσαρμόζουμε το κατώφλι
+                    dynamic_adjustment = ATR_FACTOR * atr_percentage
+                    DYNAMIC_MAX_DROP_PERCENTAGE = MAX_DROP_PERCENTAGE + dynamic_adjustment
+
+                # Εμφάνιση των αποτελεσμάτων
+                logging.info("Dynamic MAX_DROP_PERCENTAGE enabled.")
+                logging.info(f"ADX Value: {adx_value:.2f}, ATR Value: {atr_value:.2f}, ATR Percentage: {atr_percentage:.4f}")            
+                logging.info(f"Dynamic Adjustment: {dynamic_adjustment:.4f}, Dynamic Threshold: {DYNAMIC_MAX_DROP_PERCENTAGE:.4f}")
+                
+
+
+            #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            # DOLLAR COST AVERAGE STRATEGY
+            # Υπολογισμός της τιμής ενεργοποίησης δεύτερης αγοράς
+            
+            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:
+                second_buy_trigger_price = active_trade * (1 - DYNAMIC_MAX_DROP_PERCENTAGE)
+                logging.info(f"Second Buy Trigger Price with Dynamic Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
+            else:
+                second_buy_trigger_price = active_trade * (1 - MAX_DROP_PERCENTAGE)
+                logging.info(f"Second Buy Trigger Price with Static Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
+            
+
+
+            # Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ------------------------------------------
+            if not second_trade_price and current_price <= second_buy_trigger_price:
+                logging.info(f"Price dropped below threshold ({second_buy_trigger_price:.{current_decimals}f}). Executing second buy.")
+
+                # Εκτέλεση της εντολής αγοράς
+                second_trade_amount = trade_amount  # Ίδια ποσότητα με την αρχική
+                order_successful, execution_price, fees = place_order("buy", second_trade_amount, current_price)
+
+                if order_successful and execution_price:
+                    second_trade_price = execution_price
+
+                    # Υπολογισμός νέας μέσης τιμής
+                    second_total_cost = (trade_amount * active_trade) + (second_trade_amount * second_trade_price)
+                    second_total_amount = trade_amount + second_trade_amount
+                    average_trade_price = second_total_cost / second_total_amount
+                    
+                    # Προσθήκη των fees στο daily_profit                
+                    daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους                    
+
+                    logging.info(f"Second buy executed successfully at {second_trade_price:.{current_decimals}f}. "
+                                 f"New average price: {average_trade_price:.{current_decimals}f}.")
+
+                    send_push_notification(f"ALERT: Second buy executed successfully at {second_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                    
+                    
+                    # Αποθήκευση κατάστασης μετά την αγορά
+                    save_state()
+                    return
+
+                else:
+                    logging.error(f"Failed to execute second buy order at price: {current_price:.{current_decimals}f}.")
+
+
+            # Λογική για πώληση μετά τη 2η αγορά -------------------------------------------------------------
+            if second_trade_price:  # Εξασφαλίζουμε ότι υπάρχει 2η αγορά πριν υπολογίσουμε
+
+                # Υπολογισμός του συνολικού κόστους με fees
+                second_total_fees = (trade_amount * active_trade + second_trade_amount * second_trade_price) * FEES_PERCENTAGE
+                second_break_even_price = (trade_amount * active_trade + second_trade_amount * second_trade_price + second_total_fees) / (trade_amount + second_trade_amount)
+                remaining_to_break_even = max(0, second_break_even_price - current_price)
+                logging.info(f"[Second Position] Break-even sell price: {second_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+
+
+                # Έλεγχος για πώληση μόνο αν η τρέχουσα τιμή καλύπτει το κόστος + fees
+                if current_price >= second_break_even_price:
+                    logging.info(f"[Second Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} reached sell price {second_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+
+
+                    # Ενεργοποίηση trailing profit για τη δεύτερη θέση μόνο αν δεν είναι ήδη ενεργό
+                    if not trailing_profit_second_position_active:
+                        trailing_profit_second_position_active = True
+                        highest_price_second_position = current_price  # Αρχικοποίηση της μέγιστης τιμής
+                        logging.info(f"[Second Position] Trailing profit activated for second position and initialized highest price to {highest_price_second_position:.{current_decimals}f}.")
+                        save_state(log_info=False)  #χωρίς Logging.info
+
+
+
+                    # Ενημέρωση της μέγιστης τιμής για το trailing profit αυτού του block
+                    if current_price > highest_price_second_position:
+                        highest_price_second_position = current_price
+                        logging.info(f"[Second Position] Initialized highest_price to {highest_price_second_position:.{current_decimals}f}")
+                        save_state(log_info=False)  #χωρίς Logging.info
+                        
+
+                    # Υπολογισμός του trailing sell price για τη δεύτερη θέση
+                    trailing_sell_price_second_position = highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
+                    logging.debug(f"[Second Position] Trailing sell price updated to {trailing_sell_price_second_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+
+
+                    # Έλεγχος αν η τρέχουσα τιμή έχει πέσει κάτω από το trailing sell price
+                    if current_price <= trailing_sell_price_second_position:
+                        logging.info(f"[Second Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} dropped below trailing sell price ({trailing_sell_price_second_position:.{current_decimals}f}) {CRYPTO_CURRENCY}. Selling all positions.")
+
+                        # Υπολογισμός συνολικής ποσότητας προς πώληση
+                        total_amount_to_sell = trade_amount + second_trade_amount
+
+                        # Εκτέλεση εντολής πώλησης
+                        order_successful, execution_price, fees = place_order("sell", total_amount_to_sell, current_price)
+
+                        if order_successful:
+                            # Υπολογισμός καθαρού κέρδους
+                            profit_loss = (execution_price * total_amount_to_sell) - (trade_amount * active_trade + second_trade_amount * second_trade_price + second_total_fees)
+                            daily_profit += profit_loss
+
+                            logging.info(f"[Second Position] Sell order executed for total amount {total_amount_to_sell}. "
+                                         f"Profit/Loss: {profit_loss:.{current_decimals}f}, Fees: {fees}")
+
+                            # Καθαρισμός μεταβλητών μετά την πώληση
+                            active_trade = None
+                            trade_amount = 0
+                            second_trade_price = None
+                            second_trade_amount = 0
+                            average_trade_price = None
+                            highest_price = None
+                            highest_price_second_position = None
+                            trailing_profit_second_position_active = False
+                            current_trades += 1
+
+                            send_push_notification(f"ALERT: Trailing Profit Sale for second position executed for {CRYPTO_NAME} bot.")
+                            
+                            sendgrid_email(total_amount_to_sell, "sell", execution_price, profit_loss, "N/A", "DCA Strategy")
+
+                            # Αποθήκευση της νέας κατάστασης
+                            save_state()
+
+                            # Χρονική αναμονή μετά την πώληση για αποφυγή άμεσης αγοράς
+                            save_cooldown_state(custom_duration=1800)  # DCA strategy: 30 min cooldown
+                            
+                            return
                    
+                    
+                    else:
+                        logging.info(f"[Second Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} has not dropped below trailing sell price {trailing_sell_price_second_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+
+                # Δεν πουλάμε ακόμη, συνεχίζουμε να παρακολουθούμε
+                #logging.info(f"[Second Position] Waiting for price to reach break-even price {second_break_even_price:.{current_decimals}f}.")
+
+
+
+                
+        
+            #--------------------------------------------------------------------------------------------------------------------------------------------------------------                   
                    
             
             # Έλεγχος για την ενεργοποίηση του stop-loss
@@ -1667,7 +2102,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             # Υπολογισμός του scalp target price
             scalp_target_price = active_trade * SCALP_TARGET
 
-            if ENABLE_TRAILING_PROFIT:
+            if ENABLE_TRAILING_PROFIT and not trailing_profit_second_position_active:
                 # Έλεγχος αν το trailing profit είναι ενεργό ή αν πρέπει να ενεργοποιηθεί
                 if not trailing_profit_active and current_price >= scalp_target_price:
                     logging.info(f"Scalp target reached. Trailing profit activated.")
@@ -1740,7 +2175,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                 # Εκτίμηση των fees για τη συναλλαγή
                 estimated_fees = current_price * trade_amount * FEES_PERCENTAGE
-                logging.info(f"Estimated fees for the trade: {estimated_fees:.{current_decimals}f}")
+                
+                if not trailing_profit_second_position_active:
+                    logging.info(f"Estimated fees for the trade: {estimated_fees:.{current_decimals}f}")
 
                 # Υπολογισμός καθαρού κέρδους μετά την αφαίρεση των εκτιμώμενων fees
                 scalp_profit = potential_profit - estimated_fees
@@ -1934,140 +2371,41 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             score = 0
             scores = {}
 
-            #-------------------------------------------------------------------------------------------------------
             # Υπολογισμός MACD
-            if macd_last > signal_last:
-                if macd_last > 0:
-                    # Θετικό MACD, bullish σήμα (πλήρης θετική βαθμολογία)
-                    raw_score = 1  # Απόλυτη βαθμολογία πριν την εφαρμογή βαρών
-                else:
-                    # MACD > Signal αλλά αρνητικό (αδύναμη ανοδική κίνηση)
-                    raw_score = 0.3  # Περιορισμένη θετική βαθμολογία
-            else:
-                # MACD < Signal, bearish σήμα
-                raw_score = -1  # Απόλυτη βαθμολογία πριν την εφαρμογή βαρών
-
-            # Εφαρμογή του βάρους στο τελικό σκορ
-            scores['macd'] = weights['macd'] * raw_score
-
-            # Προσθήκη στο συνολικό σκορ
+            scores['macd'] = weights['macd'] * (1 if macd_last > signal_last else -1)
             score += scores['macd']
+            #logging.info(f"MACD Score: {scores['macd']}")
 
-            # logging.info(f"MACD Score: {scores['macd']}")  # Προαιρετικό logging
-            #-------------------------------------------------------------------------------------------------------
-
-            
-            # Υπολογισμός RSI
-            if rsi_last < 20:
-                raw_score = 1.5  # Πολύ ισχυρό bullish σήμα (βαθιά υπερπουλημένη ζώνη)
-            elif 20 <= rsi_last < 30:
-                raw_score = 1  # Ισχυρό bullish σήμα
-            elif 30 <= rsi_last < 40:
-                raw_score = 0.5  # Αδύναμο bullish σήμα
-            elif 40 <= rsi_last <= 60:
-                if rsi_last < 50:
-                    raw_score = 0.1  # Ελαφρύ bullish bias
-                else:
-                    raw_score = -0.1  # Ελαφρύ bearish bias
-            elif 60 < rsi_last <= 70:
-                raw_score = -0.5  # Αδύναμο bearish σήμα
-            elif 70 < rsi_last <= 80:
-                raw_score = -0.3  # Ασθενές bearish σήμα
-            else:  # rsi_last > 80
-                raw_score = -0.5  # Πολύ ισχυρό bearish σήμα (βαθιά υπεραγορασμένη ζώνη)
-
-            # Εφαρμογή βάρους στο σκορ RSI
-            scores['rsi'] = weights['rsi'] * raw_score
-
-            # Προσθήκη στο συνολικό σκορ
+            # Υπολογισμός RSI            
+            scores['rsi'] = weights['rsi'] * (1 if rsi_last < RSI_THRESHOLD else -1)
             score += scores['rsi']
-
-            # Προαιρετικό Logging
-            logging.info(f"RSI Last: {rsi_last:.2f}, Raw Score: {raw_score:.2f}, Weighted Score: {scores['rsi']:.2f}")
-
-
-            
-            #-------------------------------------------------------------------------------------------------------
-
+            #logging.info(f"RSI Score: {scores['rsi']}")
 
             # Υπολογισμός Bollinger Bands
-            mid_band = (bollinger_lower_last + bollinger_upper_last) / 2
-            band_width = bollinger_upper_last - bollinger_lower_last
-
             if current_price <= bollinger_lower_last:
-                if current_price < bollinger_lower_last * 0.98:
-                    raw_score = 1.5  # Πολύ κάτω από την κάτω μπάντα (ισχυρό bullish)
-                else:
-                    raw_score = 1  # Κάτω από την κάτω μπάντα
+                scores['bollinger'] = weights['bollinger'] * 1
             elif current_price >= bollinger_upper_last:
-                if current_price > bollinger_upper_last * 1.02:
-                    raw_score = -0.5  # Πολύ πάνω από την άνω μπάντα (ισχυρό bearish)
-                else:
-                    raw_score = -0.3  # Λίγο πάνω από την άνω μπάντα (ασθενές bearish)
-            elif abs(current_price - mid_band) <= band_width * 0.1:
-                raw_score = 0  # Κοντά στη μεσαία γραμμή (ουδέτερη ζώνη)
-            elif current_price < mid_band:
-                raw_score = 0.5  # Κοντά στην κάτω μπάντα (ασθενές bullish)
+                scores['bollinger'] = weights['bollinger'] * -1
             else:
-                raw_score = -0.5  # Κοντά στην άνω μπάντα (ασθενές bearish)
-
-            # Εφαρμογή βάρους στο σκορ Bollinger Bands
-            scores['bollinger'] = weights['bollinger'] * raw_score
-
-            # Προσθήκη στο συνολικό σκορ
+                scores['bollinger'] = 0
             score += scores['bollinger']
+            #logging.info(f"Bollinger Score: {scores['bollinger']}")
 
-            # logging.info(f"Bollinger Score: {scores['bollinger']}")
-
-
-            #-------------------------------------------------------------------------------------------------------
-
-
-            # Υπολογισμός ποσοστιαίας απόκλισης από το VWAP
-            vwap_diff = abs(current_price - vwap_last) / vwap_last  
-
-            if current_price > vwap_last:
-                if vwap_diff > 0.05:  # Τιμή >5% πάνω από το VWAP
-                    raw_score = 0.3  # Πολύ μικρό bullish σήμα λόγω υπερεκτεταμένης τιμής
-                elif vwap_diff > 0.03:  # Τιμή 3-5% πάνω από το VWAP
-                    raw_score = 0.5  # Ασθενές bullish σήμα
-                else:  # Τιμή <3% πάνω από το VWAP
-                    raw_score = 1  # Ισχυρό bullish σήμα
-            elif current_price < vwap_last:
-                if vwap_diff > 0.05:  # Τιμή >5% κάτω από το VWAP
-                    raw_score = -0.3  # Πολύ μικρό bearish σήμα
-                elif vwap_diff > 0.03:  # Τιμή 3-5% κάτω από το VWAP
-                    raw_score = -0.5  # Ασθενές bearish σήμα
-                else:  # Τιμή <3% κάτω από το VWAP
-                    raw_score = -1  # Ισχυρό bearish σήμα
-            else:
-                raw_score = 0  # Πολύ κοντά στο VWAP, ουδέτερη ζώνη
-
-
-            # Εφαρμογή βάρους στο σκορ VWAP
-            scores['vwap'] = weights['vwap'] * raw_score
-
-            # Προσθήκη στο συνολικό σκορ
+            # Υπολογισμός VWAP
+            scores['vwap'] = weights['vwap'] * (1 if current_price > vwap_last else -1)
             score += scores['vwap']
-
-            score = round(score, 2)
             
             
-            logging.info(f"Current Price: {current_price}, VWAP: {vwap_last:.2f}, VWAP Diff: {vwap_diff:.2f}, Raw Score: {raw_score}")
-
-
-            
-            #-------------------------------------------------------------------------------------------------------            
-                   
-
-            
-            
-            # Στρογγυλοποίηση όλων των τιμών στο Score Analysis
-            rounded_scores = {key: round(value, 2) for key, value in scores.items()}
-            
-            # Logging του στρογγυλοποιημένου αποτελέσματος
-            logging.info(f"Score Analysis: {rounded_scores}, Total Score: {round(score, 2)}")
+            # Συγκεντρωτικό logging
+            logging.info(f"Score Analysis: {scores}, Total Score: {score:.2f}")
             logging.debug(f"Score history before append: {[round(score, 2) for score in score_history]}")
+
+
+
+            # Αποθήκευση τιμών και σκορ σε excel
+            if ENABLE_SAVE_TO_CSV:
+                save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores)
+
 
             #Αναλυτικό μήνυμα για το συνολικό score και το score history.
             if ENABLE_SCORE_HISTORY:
@@ -2080,9 +2418,6 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             score_history.append(score)
 
             
-            # Ενημέρωση για θετική τιμή
-            if score >= BUY_THRESHOLD:
-                send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot.")
 
             
             # Διατήρηση μόνο των τελευταίων MAX_SCORE_HISTORY τιμών
@@ -2145,17 +2480,19 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 portfolio_summary = get_portfolio_balance(portfolio_uuid)  # Υποθέτουμε ότι έχεις το portfolio_uuid
                 if "error" not in portfolio_summary:
                     available_cash = portfolio_summary['total_cash_equivalent_balance']
-                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR")
+
+                    amount_needed_to_buy = TRADE_AMOUNT * current_price
+                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR, Amount needed: {amount_needed_to_buy:.2f} EUR ")
 
                     # Έλεγχος αν το ποσό της αγοράς επαρκεί
-                    if TRADE_AMOUNT <= available_cash:
+                    if amount_needed_to_buy <= available_cash:
                         logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
                         order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
 
                         if order_successful and execution_price:
                             active_trade = execution_price  # Ενημέρωση της ανοιχτής θέσης με την τιμή εκτέλεσης
                             trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
-                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees}")
+                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees:.{current_decimals}f}")
                             
                             # Προσθήκη των fees στο daily_profit                
                             daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους
@@ -2179,8 +2516,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         else:
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
-                        logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.2f} EUR")
-                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.")
+                        logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
+                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)                        
+                        return
+                        
                 else:
                     logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
                     logging.error(f"Error details: {portfolio_summary['message']}")
@@ -2192,38 +2531,71 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
         else:
             if score >= BUY_THRESHOLD:
-                logging.info(f"Trade signal score is positive: {score:.2f}. Initiating a buy at {current_price}.")
+                logging.info(f"Trade signal score is positive: {score:.2f}. Proceeding to volume confirmation check before initiating a buy at {current_price}.")
                 logging.info(f"Checking Volume Confirmation...")
+                
+                # Ενημέρωση για θετική τιμή σε silent mode
+                send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
 
                 # Έλεγχος επιβεβαίωσης όγκου πριν την αγορά
-                volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30, threshold=0.8)
+                volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30)
                 
                 if not volume_confirmation:
                     logging.info(f"Volume confirmation failed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
-                    logging.info("Buy action skipped due to insufficient volume confirmation.")
+                    logging.info(f"Checking fallback conditions ATR and Stochastic")
+
+                    # Κλήση της fallback συνάρτησης
+                    if fallback_conditions(df):
+                        # Κλήση execute_buy_action αν οι fallback συνθήκες πληρούνται
+                        execute_buy_action(
+                            df=df,
+                            portfolio_uuid=portfolio_uuid,
+                            TRADE_AMOUNT=TRADE_AMOUNT,
+                            current_price=current_price,
+                            macd_last=macd_last,
+                            signal_last=signal_last,
+                            rsi_last=rsi_last,
+                            bollinger_upper_last=bollinger_upper_last,
+                            bollinger_lower_last=bollinger_lower_last,
+                            vwap_last=vwap_last,
+                            score=score,
+                            current_decimals=current_decimals
+                        )
+                        logging.info("Buy action completed via fallback conditions.")
+
+                        # Ενημέρωση για θετική τιμή
+                        send_push_notification(f"Buy action completed via fallback conditions for {CRYPTO_NAME} bot.")
+                        
+                        return  # Τερματίζει την εκτέλεση του τρέχοντος block 
                     
-                    send_push_notification(f"Buy action skipped due to insufficient volume confirmation for {CRYPTO_NAME} bot.")
+                    else:
+                        logging.info(f"Failover condition check failed. ATR or Stochastic criteria not met.")                        
+                        logging.info("Buy action skipped due to failure of fallback conditions.")
+                        return  # Τερματίζει την εκτέλεση του τρέχοντος block αν η επιβεβαίωση όγκου είναι false             
                     
-                    return  # Τερματίζει την εκτέλεση του τρέχοντος block αν η επιβεβαίωση όγκου είναι false
 
                 logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
-                logging.info("Proceeding with buy action.")
+                
+                # Ενημέρωση για θετική τιμή
+                send_push_notification(f"Volume confirmation passed for {CRYPTO_NAME} bot.")
 
                 # Εξαγωγή του υπολοίπου του χαρτοφυλακίου
                 portfolio_summary = get_portfolio_balance(portfolio_uuid)  # Υποθέτουμε ότι έχεις το portfolio_uuid
                 if "error" not in portfolio_summary:
-                    available_cash = portfolio_summary['total_cash_equivalent_balance']
-                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR")
+                    available_cash = portfolio_summary['total_cash_equivalent_balance']                    
+                    
+                    amount_needed_to_buy = TRADE_AMOUNT * current_price
+                    logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR, Amount needed: {amount_needed_to_buy:.2f} EUR ")
 
                     # Έλεγχος αν το ποσό της αγοράς επαρκεί
-                    if TRADE_AMOUNT <= available_cash:
-                        logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
+                    if amount_needed_to_buy <= available_cash:
+                        logging.info(f"Sufficient funds available. Executing Buy Order.")
                         order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
 
                         if order_successful and execution_price:
                             active_trade = execution_price  # Ενημέρωση της ανοιχτής θέσης με την τιμή εκτέλεσης
                             trade_amount = TRADE_AMOUNT  # Καταχώρηση του ποσού συναλλαγής
-                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees}")
+                            logging.info(f"Order placed successfully at price: {execution_price:.{current_decimals}f} with fees: {fees:.{current_decimals}f}")
 
                             # Προσθήκη των fees στο daily_profit                
                             daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους
@@ -2247,16 +2619,15 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         else:
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
-                        logging.warning(f"Insufficient funds. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.{current_decimals}f} EUR")
-                        send_push_notification(f"Insufficient funds for {CRYPTO_NAME} bot. Needed: {TRADE_AMOUNT:.{current_decimals}f} EUR, Available: {available_cash:.{current_decimals}f} EUR")
+                        logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
+                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)                        
+                        return
+                        
                 else:
                     logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
                     logging.error(f"Error details: {portfolio_summary['message']}")
-                    send_push_notification(f"Failed to retrieve portfolio balance. No buy action taken for {CRYPTO_NAME} bot.")
             else:
                 logging.info(f"Trade signal score ({score:.2f}) was below the buy threshold ({BUY_THRESHOLD}). No action taken.")
-                logging.info(f"Score: {score:.8f}, Threshold: {BUY_THRESHOLD:.8f}")
-
 
 
 
@@ -2266,10 +2637,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 f"Daily profit target reached: {daily_profit:.2f} or maximum trades executed."
             )
             
-            # Αποστολή Push Notification #####################################
-            send_push_notification(f"Alert! Daily profit target reached ({DAILY_PROFIT_TARGET} {CRYPTO_CURRENCY}) for {CRYPTO_NAME} bot.")
-            logging.info(f"Push notification was sent. Bot is stopped.")
+            logging.info(f"The bot has been stopped. Push notification has been sent.")
             
+            # Αποστολή Push Notification #####################################
+            send_push_notification(f"Alert: The bot has been stopped. Daily profit target reached ({DAILY_PROFIT_TARGET} {CRYPTO_CURRENCY}) for {CRYPTO_NAME} bot.")
+                       
             start_bot = False
             save_state(log_info=False)  # Αποθήκευση κατάστασης όταν σταματάει το bot
 
@@ -2279,218 +2651,6 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         
         
         # ---------------------------------------
-
-
-
-def calculate_score(
-    macd_last, signal_last, rsi_last,
-    bollinger_upper_last, bollinger_lower_last,
-    vwap_last, current_price, weights
-):
-    """
-    Υπολογισμός συνολικού score για τους δείκτες: MACD, RSI, Bollinger Bands, VWAP.
-    """
-
-    # Αρχικοποίηση συνολικού score και βαθμολογιών δεικτών
-    score = 0
-    scores = {}
-
-    # -------------------------------------------------------------------------------------------------------
-    # Υπολογισμός MACD
-    if macd_last > signal_last:
-        raw_score = 1 if macd_last > 0 else 0.3  # Θετικό ή αδύναμο bullish σήμα
-    else:
-        raw_score = -1  # Bearish σήμα
-
-    scores['macd'] = weights['macd'] * raw_score
-    score += scores['macd']
-
-    # -------------------------------------------------------------------------------------------------------
-    # Υπολογισμός RSI
-    if rsi_last < 20:
-        raw_score = 1.5  # Πολύ ισχυρό bullish
-    elif 20 <= rsi_last < 30:
-        raw_score = 1  # Ισχυρό bullish
-    elif 30 <= rsi_last < 40:
-        raw_score = 0.5  # Αδύναμο bullish
-    elif 40 <= rsi_last <= 60:
-        raw_score = 0.1 if rsi_last < 50 else -0.1  # Ελαφρύ bullish/bearish bias
-    elif 60 < rsi_last <= 70:
-        raw_score = -0.5  # Αδύναμο bearish
-    elif 70 < rsi_last <= 80:
-        raw_score = -0.3  # Ασθενές bearish
-    else:  # rsi_last > 80
-        raw_score = -0.5  # Πολύ ισχυρό bearish
-
-    scores['rsi'] = weights['rsi'] * raw_score
-    score += scores['rsi']
-
-    # -------------------------------------------------------------------------------------------------------
-    # Υπολογισμός Bollinger Bands
-    mid_band = (bollinger_lower_last + bollinger_upper_last) / 2
-    band_width = bollinger_upper_last - bollinger_lower_last
-
-    if current_price <= bollinger_lower_last:
-        raw_score = 1.5 if current_price < bollinger_lower_last * 0.98 else 1  # Πολύ κάτω ή λίγο κάτω από την κάτω μπάντα
-    elif current_price >= bollinger_upper_last:
-        raw_score = -0.5 if current_price > bollinger_upper_last * 1.02 else -0.3  # Πολύ πάνω ή λίγο πάνω από την άνω μπάντα
-    elif abs(current_price - mid_band) <= band_width * 0.1:
-        raw_score = 0  # Ουδέτερη ζώνη
-    elif current_price < mid_band:
-        raw_score = 0.5  # Κοντά στην κάτω μπάντα
-    else:
-        raw_score = -0.5  # Κοντά στην άνω μπάντα
-
-    scores['bollinger'] = weights['bollinger'] * raw_score
-    score += scores['bollinger']
-
-    # -------------------------------------------------------------------------------------------------------
-    # Υπολογισμός VWAP
-    vwap_diff = abs(current_price - vwap_last) / vwap_last
-
-    if current_price > vwap_last:
-        if vwap_diff > 0.05:
-            raw_score = 0.3  # Υπερεκτεταμένο bullish
-        elif vwap_diff > 0.03:
-            raw_score = 0.5  # Ασθενές bullish
-        else:
-            raw_score = 1  # Ισχυρό bullish
-    elif current_price < vwap_last:
-        if vwap_diff > 0.05:
-            raw_score = -0.3  # Υπερεκτεταμένο bearish
-        elif vwap_diff > 0.03:
-            raw_score = -0.5  # Ασθενές bearish
-        else:
-            raw_score = -1  # Ισχυρό bearish
-    else:
-        raw_score = 0  # Ουδέτερη ζώνη
-
-    scores['vwap'] = weights['vwap'] * raw_score
-    score += scores['vwap']
-
-    return score, scores
-
-
-
-
-
-def run_backtesting(log_file, crypto_symbol, score_threshold=0.5):
-    """
-    Εκτελεί backtest με δυναμική φόρτωση βαρών από αρχείο JSON.
-    """
-
-    # Φόρτωση βαρών για το συγκεκριμένο κρυπτονόμισμα
-    weights = load_weights(CRYPTO_NAME)
-    if not weights:
-        print(f"Could not load weights for {crypto_symbol}. Please check the JSON file.")
-        return []
-
-    print(f"Weights loaded for {crypto_symbol}: {weights}")
-
-    with open(log_file, "r") as file:
-        log_lines = file.readlines()
-
-    rounds = []
-    current_round = []
-
-    for line in log_lines:
-        if "Starting" in line:
-            if current_round:
-                rounds.append(current_round)
-            current_round = [line]
-        else:
-            current_round.append(line)
-    if current_round:
-        rounds.append(current_round)
-
-    print(f"Total rounds found: {len(rounds)}")
-    passed_rounds = []
-
-    for i, round_lines in enumerate(rounds):
-        # Εξαγωγή τιμών από το round
-        date_pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),"
-        fetched_price_pattern = r"Fetched ETH price: (\d+\.\d+) EUR"
-        indicators_pattern = r"Indicators: MACD=(-?\d+\.\d+), Signal=(-?\d+\.\d+), RSI=(\d+\.\d+), Bollinger Upper=(\d+\.\d+), Bollinger Lower=(\d+\.\d+), Current Price=(\d+\.\d+), VWAP=(\d+\.\d+)"
-
-        date, price, macd, signal, rsi, bollinger_upper, bollinger_lower, vwap = (
-            None, None, None, None, None, None, None, None
-        )
-        for line in round_lines:
-            if re.search(date_pattern, line):
-                date = re.search(date_pattern, line).group(1)
-            if re.search(fetched_price_pattern, line):
-                price = float(re.search(fetched_price_pattern, line).group(1))
-            if re.search(indicators_pattern, line):
-                indicators = re.search(indicators_pattern, line)
-                macd = float(indicators.group(1))
-                signal = float(indicators.group(2))
-                rsi = float(indicators.group(3))
-                bollinger_upper = float(indicators.group(4))
-                bollinger_lower = float(indicators.group(5))
-                vwap = float(indicators.group(7))
-
-        # Υπολογισμός score
-        if all(v is not None for v in [macd, signal, rsi, bollinger_upper, bollinger_lower, vwap, price]):
-            passed, score = backtest(
-                macd, signal, rsi, 
-                bollinger_upper, bollinger_lower, 
-                vwap, price, weights, score_threshold=score_threshold
-            )
-            if passed:
-                passed_rounds.append({
-                    "Round": i + 1,
-                    "Date": date,
-                    "Price": price,
-                    "Score": score,
-                    "MACD": macd,
-                    "Signal": signal,
-                    "RSI": rsi,
-                    "Bollinger Upper": bollinger_upper,
-                    "Bollinger Lower": bollinger_lower,
-                    "VWAP": vwap,
-                })
-
-    print(f"Score block passed in {len(passed_rounds)} rounds (Threshold: {score_threshold}).")
-    for round_data in passed_rounds:
-        print(
-            f"Round {round_data['Round']} | Date: {round_data['Date']} | Score: {round_data['Score']:.2f} | Price: {round_data['Price']:.2f} | "
-            f"MACD: {round_data['MACD']}, Signal: {round_data['Signal']}, RSI: {round_data['RSI']} | "
-            f"Bollinger Bands: Upper={round_data['Bollinger Upper']}, Lower={round_data['Bollinger Lower']} | VWAP: {round_data['VWAP']}"
-        )
-
-    return passed_rounds
-
-
-
-
-
-
-
-
-def backtest(
-    macd_last, signal_last, rsi_last, 
-    bollinger_upper_last, bollinger_lower_last, 
-    vwap_last, current_price, weights, score_threshold=0.5
-):
-    """
-    Υπολογίζει το score και συγκρίνει με το παρεχόμενο threshold.
-    """
-    # Υπολογισμός του score χρησιμοποιώντας τη λογική του bot
-    score, _ = calculate_score(
-        macd_last, signal_last, rsi_last, 
-        bollinger_upper_last, bollinger_lower_last, 
-        vwap_last, current_price, weights
-    )
-    return score >= score_threshold, score
-
-
-
-
-
-
-
-
-
 
 
 # Main loop (updated to load state)
@@ -2506,7 +2666,8 @@ def run_bot():
     
     # Check if the bot is allowed to run
     load_state()  # Load the state to check start_bot status
-    
+ 
+ 
     #------------------------------------------------------------------------------------------------------------------
     
     if ENABLE_FAILOVER_BOT:
@@ -2541,25 +2702,7 @@ def run_bot():
 
 
 # Τροποποίηση της κύριας συνάρτησης για να ελέγχει το cooldown και να εμφανίζει το χρόνο που απομένει
-if __name__ == "__main__":
-    if args.backtesting:
-        log_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/{CRYPTO_NAME}_bot.log"        
-
-        # Εκτέλεση backtest με διαφορετικά thresholds
-        print("------------------------------------")
-        print("Running backtest with threshold 0.5")
-        trade_log = run_backtesting(log_file, CRYPTO_SYMBOL, score_threshold=0.5)
-
-        print("------------------------------------")
-        print("Running backtest with threshold 0.45")
-        trade_log = run_backtesting(log_file, CRYPTO_SYMBOL, score_threshold=0.45)
-
-        print("------------------------------------")
-        print("Running backtest with threshold 0.40")
-        trade_log = run_backtesting(log_file, CRYPTO_SYMBOL, score_threshold=0.40)
-        
-        sys.exit()  # Σταματάει το script εδώ
-
+if __name__ == "__main__":    
     if "--reset" in sys.argv:
         reset_bot_state()  # Εκτέλεση της συνάρτησης reset
     else:
