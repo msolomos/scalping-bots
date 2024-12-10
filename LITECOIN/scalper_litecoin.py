@@ -16,6 +16,7 @@ import random
 import os
 import sys
 import pushover
+import csv
 
 ###################################################################################################################################################################################################################################
 # Αρχικές μεταβλητές - πρέπει να οριστούν
@@ -92,12 +93,15 @@ ENABLE_PUSH_NOTIFICATIONS = True
 ENABLE_DEMO_MODE = False  # Ορισμός σε True για demo mode, False για live mode
 
 
+
 # 10. DOLLAR COST AVERAGE STRATEGY
 MAX_DROP_PERCENTAGE = 0.05       # 5% price drop
 TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το αν χρειάζεται)
-ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE = True
-ATR_FACTOR = 1  # Ευαισθησία στη μεταβλητότητα (ATR)
-ADX_THRESHOLD = 20  # Όριο ADX για ισχυρή τάση
+
+
+# 11. Λειτουργία Γραφήματος και back testing
+ENABLE_SAVE_TO_CSV = False
+
 
 
 ###################################################################################################################################################################################################################################
@@ -153,6 +157,8 @@ pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
 weights_file = f"/opt/python/scalping-bot/indicator_weights.json"
 
 
+# Διαδρομή για το αρχείο .csv
+csv_file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.csv"
 
 
 # Συνάρτηση για να φορτώσει τα κλειδιά από το αρχείο JSON
@@ -499,6 +505,62 @@ def check_cooldown():
     current_time = time.time()
     remaining_time = COOLDOWN_DURATION - (current_time - last_reset_time)
     return remaining_time <= 0, max(0, int(remaining_time))
+
+
+
+
+
+
+
+
+def save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores):
+    """
+    Αποθηκεύει δεδομένα σε αρχείο CSV, προσθέτοντας μια νέα γραμμή κάθε φορά.
+
+    Args:
+        csv_file_path (str): Το όνομα ή η διαδρομή του αρχείου CSV.
+        CRYPTO_NAME (str): Το όνομα του crypto/bot.
+        current_price (float): Η τρέχουσα τιμή.
+        score (float): Η συνολική βαθμολογία.
+        scores (dict): Οι βαθμολογίες των τεχνικών δεικτών.
+
+    Returns:
+        None
+    """
+    
+    # Στρογγυλοποίηση του score στα 2 δεκαδικά ψηφία
+    score = round(score, 2)    
+    
+    
+    # Δημιουργία της νέας εγγραφής
+    new_entry = {
+        "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "bot_name": CRYPTO_NAME,
+        "macd_score": scores.get("macd", 0),
+        "rsi_score": scores.get("rsi", 0),
+        "bollinger_score": scores.get("bollinger", 0),
+        "vwap_score": scores.get("vwap", 0),
+        "current_price": current_price,
+        "score": score
+    }
+
+    # Έλεγχος αν υπάρχει το αρχείο
+    file_exists = os.path.exists(csv_file_path)
+
+    # Γράψιμο της εγγραφής
+    with open(csv_file_path, mode="a", newline='', encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=new_entry.keys())
+        
+        # Αν το αρχείο δεν υπάρχει, γράφουμε κεφαλίδες
+        if not file_exists:
+            writer.writeheader()
+        
+        # Προσθήκη της νέας γραμμής
+        writer.writerow(new_entry)
+
+    # Καταγραφή της επιτυχούς αποθήκευσης
+    logging.info(f"File {csv_file_path} found. Appending new data.")
+
 
 
 
@@ -1813,49 +1875,12 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 ##########################################################################################################################################################################
 
-            #--------------------------------------------------------------------------------------------------------------------------------------------------------------
-            # Dynamic MAX_DROP_PERCENTAGE
-
-            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:            
-                dynamic_adjustment = 0
-                
-                
-                # Call the calculate_adx function, which should return both adx and atr
-                adx, atr = calculate_adx(df)
-                # Λήψη της τελευταίας τιμής ADX και ATR
-                atr_value = atr.iloc[-1]
-                adx_value = adx.iloc[-1]
-                
-                # Υπολογισμός ATR ως ποσοστό της τρέχουσας τιμής
-                atr_percentage = atr_value / current_price
-
-                # Υπολογισμός δυναμικής προσαρμογής
-                if adx_value < ADX_THRESHOLD:
-                    # Αν η αγορά είναι σε πλάγια κίνηση, χρησιμοποιούμε το στατικό κατώφλι
-                    DYNAMIC_MAX_DROP_PERCENTAGE = MAX_DROP_PERCENTAGE
-                else:
-                    # Αν η αγορά έχει ισχυρή τάση, προσαρμόζουμε το κατώφλι
-                    dynamic_adjustment = ATR_FACTOR * atr_percentage
-                    DYNAMIC_MAX_DROP_PERCENTAGE = MAX_DROP_PERCENTAGE + dynamic_adjustment
-
-                # Εμφάνιση των αποτελεσμάτων
-                logging.info("Dynamic MAX_DROP_PERCENTAGE enabled.")
-                logging.info(f"ADX Value: {adx_value:.2f}, ATR Value: {atr_value:.2f}, ATR Percentage: {atr_percentage:.4f}")            
-                logging.info(f"Dynamic Adjustment: {dynamic_adjustment:.4f}, Dynamic Threshold: {DYNAMIC_MAX_DROP_PERCENTAGE:.4f}")
-                
-
 
             #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
             # DOLLAR COST AVERAGE STRATEGY
             # Υπολογισμός της τιμής ενεργοποίησης δεύτερης αγοράς
-            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:
-                second_buy_trigger_price = active_trade * (1 - DYNAMIC_MAX_DROP_PERCENTAGE)
-                logging.info(f"Second Buy Trigger Price with Dynamic Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
-            else:
-                second_buy_trigger_price = active_trade * (1 - MAX_DROP_PERCENTAGE)
-                logging.info(f"Second Buy Trigger Price with Static Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
-            
+            second_buy_trigger_price = active_trade * (1 - MAX_DROP_PERCENTAGE)
 
             # Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ------------------------------------------
             if not second_trade_price and current_price <= second_buy_trigger_price:
@@ -2330,6 +2355,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             # Συγκεντρωτικό logging
             logging.info(f"Score Analysis: {scores}, Total Score: {score:.2f}")
             logging.debug(f"Score history before append: {[round(score, 2) for score in score_history]}")
+
+
+
+            # Αποθήκευση τιμών και σκορ σε excel
+            if ENABLE_SAVE_TO_CSV:
+                save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores)
+
 
             #Αναλυτικό μήνυμα για το συνολικό score και το score history.
             if ENABLE_SCORE_HISTORY:

@@ -16,6 +16,7 @@ import random
 import os
 import sys
 import pushover
+import csv
 
 ###################################################################################################################################################################################################################################
 # Αρχικές μεταβλητές - πρέπει να οριστούν
@@ -92,9 +93,15 @@ ENABLE_PUSH_NOTIFICATIONS = True
 ENABLE_DEMO_MODE = False  # Ορισμός σε True για demo mode, False για live mode
 
 
+
 # 10. DOLLAR COST AVERAGE STRATEGY
 MAX_DROP_PERCENTAGE = 0.05       # 5% price drop
 TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το αν χρειάζεται)
+
+
+# 11. Λειτουργία Γραφήματος και back testing
+ENABLE_SAVE_TO_CSV = False
+
 
 
 ###################################################################################################################################################################################################################################
@@ -150,6 +157,8 @@ pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
 weights_file = f"/opt/python/scalping-bot/indicator_weights.json"
 
 
+# Διαδρομή για το αρχείο .csv
+csv_file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.csv"
 
 
 # Συνάρτηση για να φορτώσει τα κλειδιά από το αρχείο JSON
@@ -496,6 +505,62 @@ def check_cooldown():
     current_time = time.time()
     remaining_time = COOLDOWN_DURATION - (current_time - last_reset_time)
     return remaining_time <= 0, max(0, int(remaining_time))
+
+
+
+
+
+
+
+
+def save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores):
+    """
+    Αποθηκεύει δεδομένα σε αρχείο CSV, προσθέτοντας μια νέα γραμμή κάθε φορά.
+
+    Args:
+        csv_file_path (str): Το όνομα ή η διαδρομή του αρχείου CSV.
+        CRYPTO_NAME (str): Το όνομα του crypto/bot.
+        current_price (float): Η τρέχουσα τιμή.
+        score (float): Η συνολική βαθμολογία.
+        scores (dict): Οι βαθμολογίες των τεχνικών δεικτών.
+
+    Returns:
+        None
+    """
+    
+    # Στρογγυλοποίηση του score στα 2 δεκαδικά ψηφία
+    score = round(score, 2)    
+    
+    
+    # Δημιουργία της νέας εγγραφής
+    new_entry = {
+        "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "bot_name": CRYPTO_NAME,
+        "macd_score": scores.get("macd", 0),
+        "rsi_score": scores.get("rsi", 0),
+        "bollinger_score": scores.get("bollinger", 0),
+        "vwap_score": scores.get("vwap", 0),
+        "current_price": current_price,
+        "score": score
+    }
+
+    # Έλεγχος αν υπάρχει το αρχείο
+    file_exists = os.path.exists(csv_file_path)
+
+    # Γράψιμο της εγγραφής
+    with open(csv_file_path, mode="a", newline='', encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=new_entry.keys())
+        
+        # Αν το αρχείο δεν υπάρχει, γράφουμε κεφαλίδες
+        if not file_exists:
+            writer.writeheader()
+        
+        # Προσθήκη της νέας γραμμής
+        writer.writerow(new_entry)
+
+    # Καταγραφή της επιτυχούς αποθήκευσης
+    logging.info(f"File {csv_file_path} found. Appending new data.")
+
 
 
 
@@ -2018,6 +2083,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     
                     
                     # Ενημέρωση του trailing sell price
+                    trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
                     trailing_sell_price = max(trailing_sell_price, active_trade)  # Ensure sell price is above active trade             <<<----------------------------- new additional to correct negative trailing price
                     logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f}")         # <<<---------------------------------------------------------------------------------------------
 
@@ -2289,6 +2355,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             # Συγκεντρωτικό logging
             logging.info(f"Score Analysis: {scores}, Total Score: {score:.2f}")
             logging.debug(f"Score history before append: {[round(score, 2) for score in score_history]}")
+
+
+
+            # Αποθήκευση τιμών και σκορ σε excel
+            if ENABLE_SAVE_TO_CSV:
+                save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores)
+
 
             #Αναλυτικό μήνυμα για το συνολικό score και το score history.
             if ENABLE_SCORE_HISTORY:
