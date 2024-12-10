@@ -93,11 +93,13 @@ ENABLE_PUSH_NOTIFICATIONS = True
 ENABLE_DEMO_MODE = False  # Ορισμός σε True για demo mode, False για live mode
 
 
-
 # 10. DOLLAR COST AVERAGE STRATEGY
 MAX_DROP_PERCENTAGE = 0.05       # 5% price drop
-TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το αν χρειάζεται)
+ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE = True   ## Δυναμικό κατώφλι buy back αγοράς σε πτώση
+ATR_FACTOR = 1  # Ευαισθησία στη μεταβλητότητα (ATR)
+ADX_THRESHOLD = 20  # Όριο ADX για ισχυρή τάση                                         
 
+TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το αν χρειάζεται)
 
 # 11. Λειτουργία Γραφήματος και back testing
 ENABLE_SAVE_TO_CSV = False
@@ -1875,12 +1877,51 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 ##########################################################################################################################################################################
 
+            #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+            # Dynamic MAX_DROP_PERCENTAGE
+
+            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:            
+                dynamic_adjustment = 0
+                
+                
+                # Call the calculate_adx function, which should return both adx and atr
+                adx, atr = calculate_adx(df)
+                # Λήψη της τελευταίας τιμής ADX και ATR
+                atr_value = atr.iloc[-1]
+                adx_value = adx.iloc[-1]
+                
+                # Υπολογισμός ATR ως ποσοστό της τρέχουσας τιμής
+                atr_percentage = atr_value / current_price
+
+                # Υπολογισμός δυναμικής προσαρμογής
+                if adx_value < ADX_THRESHOLD:
+                    # Αν η αγορά είναι σε πλάγια κίνηση, χρησιμοποιούμε το στατικό κατώφλι
+                    DYNAMIC_MAX_DROP_PERCENTAGE = MAX_DROP_PERCENTAGE
+                else:
+                    # Αν η αγορά έχει ισχυρή τάση, προσαρμόζουμε το κατώφλι
+                    dynamic_adjustment = ATR_FACTOR * atr_percentage
+                    DYNAMIC_MAX_DROP_PERCENTAGE = MAX_DROP_PERCENTAGE + dynamic_adjustment
+
+                # Εμφάνιση των αποτελεσμάτων
+                logging.info("Dynamic MAX_DROP_PERCENTAGE enabled.")
+                logging.info(f"ADX Value: {adx_value:.2f}, ATR Value: {atr_value:.2f}, ATR Percentage: {atr_percentage:.4f}")            
+                logging.info(f"Dynamic Adjustment: {dynamic_adjustment:.4f}, Dynamic Threshold: {DYNAMIC_MAX_DROP_PERCENTAGE:.4f}")
+                
+
 
             #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
             # DOLLAR COST AVERAGE STRATEGY
             # Υπολογισμός της τιμής ενεργοποίησης δεύτερης αγοράς
-            second_buy_trigger_price = active_trade * (1 - MAX_DROP_PERCENTAGE)
+            
+            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:
+                second_buy_trigger_price = active_trade * (1 - DYNAMIC_MAX_DROP_PERCENTAGE)
+                logging.info(f"Second Buy Trigger Price with Dynamic Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
+            else:
+                second_buy_trigger_price = active_trade * (1 - MAX_DROP_PERCENTAGE)
+                logging.info(f"Second Buy Trigger Price with Static Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
+            
+
 
             # Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ------------------------------------------
             if not second_trade_price and current_price <= second_buy_trigger_price:
