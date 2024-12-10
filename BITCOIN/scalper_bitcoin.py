@@ -1037,7 +1037,14 @@ def place_order(side, size, price):
                     f"Failed to place order. Status: {res.status}, Error: {error_message}, Details: {error_details}"
                 )
                 
-                send_push_notification(f"ALERT: Failed to place order for {CRYPTO_NAME} bot. Details: {error_details}")
+                # Format the JSON details
+                formatted_error_details = json.dumps(error_details, indent=4)  # indent=4 για καλύτερη αναγνωσιμότητα
+
+                # Send push notification
+                send_push_notification(
+                    f"ALERT: Failed to place order for {CRYPTO_NAME} bot.\nError Details:\n{formatted_error_details}",
+                    Logfile=False
+)
                 
                 # Διακοπή bot και αποθήκευση κατάστασης
                 start_bot = False
@@ -1928,7 +1935,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
             # Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ------------------------------------------
             if not second_trade_price and current_price <= second_buy_trigger_price:
-                logging.info(f"Price dropped below threshold ({second_buy_trigger_price:.{current_decimals}f}). Executing second buy.")
+                logging.info(f"Price {current_price} {CRYPTO_CURRENCY} dropped below threshold {second_buy_trigger_price:.{current_decimals}f} {CRYPTO_CURRENCY}. Executing second buy.")
 
                 # Εκτέλεση της εντολής αγοράς
                 second_trade_amount = trade_amount  # Ίδια ποσότητα με την αρχική
@@ -1957,6 +1964,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                 else:
                     logging.error(f"Failed to execute second buy order at price: {current_price:.{current_decimals}f}.")
+                    return
+                    
 
 
             # Λογική για πώληση μετά τη 2η αγορά -------------------------------------------------------------
