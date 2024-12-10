@@ -25,7 +25,7 @@ import re
 # 1. Crypto asset to scalping - coinbase
 CRYPTO_SYMBOL = "ETH-EUR"
 CRYPTO_NAME = "ETH"
-CRYPTO_FULLNAME = "ETHEREUM"
+CRYPTO_FULLNAME = "ETHEREUM_VERSION2"
 CRYPTO_CURRENCY = "EUR"
 portfolio_uuid = "0054c157-a5c9-4e91-a3c4-bb1f5d638c5c"
 
