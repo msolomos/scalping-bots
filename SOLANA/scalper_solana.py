@@ -1890,7 +1890,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             #--------------------------------------------------------------------------------------------------------------------------------------------------------------
             # Dynamic MAX_DROP_PERCENTAGE
 
-            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:            
+            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE and not second_trade_amount:            
                 dynamic_adjustment = 0
                 
                 
@@ -1902,6 +1902,12 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 
                 # Υπολογισμός ATR ως ποσοστό της τρέχουσας τιμής
                 atr_percentage = atr_value / current_price
+                
+                # Έλεγχος Εγκυρότητας Δεδομένων
+                if atr_value <= 0 or adx_value <= 0 or current_price <= 0:
+                    logging.warning("Invalid market data for ADX or ATR. Skipping dynamic adjustment.")
+                    return                
+                
 
                 # Υπολογισμός δυναμικής προσαρμογής
                 if adx_value < ADX_THRESHOLD:
@@ -1917,20 +1923,21 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"ADX Value: {adx_value:.2f}, ATR Value: {atr_value:.2f}, ATR Percentage: {atr_percentage:.4f}")            
                 logging.info(f"Dynamic Adjustment: {dynamic_adjustment:.4f}, Dynamic Threshold: {DYNAMIC_MAX_DROP_PERCENTAGE:.4f}")
                 
+                # Υπολογισμός δυναμικού ποσοστού
+                second_buy_trigger_price = active_trade * (1 - DYNAMIC_MAX_DROP_PERCENTAGE)
+                logging.info(f"Second Buy Trigger Price with Dynamic Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")               
+            
+          
+            else:
+                second_buy_trigger_price = active_trade * (1 - MAX_DROP_PERCENTAGE)
+                #logging.info(f"Second Buy Trigger Price with Static Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
+            
+
 
 
             #--------------------------------------------------------------------------------------------------------------------------------------------------------------
-
             # DOLLAR COST AVERAGE STRATEGY
             # Υπολογισμός της τιμής ενεργοποίησης δεύτερης αγοράς
-            
-            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE:
-                second_buy_trigger_price = active_trade * (1 - DYNAMIC_MAX_DROP_PERCENTAGE)
-                logging.info(f"Second Buy Trigger Price with Dynamic Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
-            else:
-                second_buy_trigger_price = active_trade * (1 - MAX_DROP_PERCENTAGE)
-                logging.info(f"Second Buy Trigger Price with Static Threshold: {second_buy_trigger_price:.2f} {CRYPTO_CURRENCY}")
-            
 
 
             # Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ------------------------------------------
