@@ -94,7 +94,7 @@ ENABLE_DEMO_MODE = False  # Ορισμός σε True για demo mode, False γ�
 
 
 # 10. DOLLAR COST AVERAGE STRATEGY
-MAX_DROP_PERCENTAGE = 0.05       # 5% price drop
+MAX_DROP_PERCENTAGE = 0.05     # 5% price drop
 ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE = True   ## Δυναμικό κατώφλι buy back αγοράς σε πτώση
 ATR_FACTOR = 1  # Ευαισθησία στη μεταβλητότητα (ATR)
 ADX_THRESHOLD = 20  # Όριο ADX για ισχυρή τάση                                         
@@ -1889,10 +1889,14 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
             #--------------------------------------------------------------------------------------------------------------------------------------------------------------
             # Dynamic MAX_DROP_PERCENTAGE
+            
+            # Logging πριν το statement
+            logging.debug(f"ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE: {ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE}")
+            logging.debug(f"Second_trade_price: {second_trade_price}")
 
-            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE and not second_trade_amount:            
-                dynamic_adjustment = 0
+            if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE and not second_trade_price:            
                 
+                dynamic_adjustment = 0
                 
                 # Call the calculate_adx function, which should return both adx and atr
                 adx, atr = calculate_adx(df)
@@ -1971,6 +1975,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                 else:
                     logging.error(f"Failed to execute second buy order at price: {current_price:.{current_decimals}f}.")
+                    second_trade_amount = 0
+                    save_state(log_info=False)
                     return
                     
 
