@@ -39,12 +39,13 @@ bot_files = [
     '/opt/python/scalping-bot/XRP/state.json',
     '/opt/python/scalping-bot/CARDANO/state.json',
     '/opt/python/scalping-bot/POLKADOT/state.json',
-    '/opt/python/scalping-bot/DOGECOIN/state.json', # Νέο bot
-    '/opt/python/scalping-bot/POLYGON/state.json'   # Νέο bot
+    '/opt/python/scalping-bot/DOGECOIN/state.json', # Νέο bot    
+    '/opt/python/scalping-bot/POLYGON/state.json',   # Νέο bot
+    '/opt/python/scalping-bot/STELLAR/state.json', # Νέο bot
 ]
 
 # Λίστα με τα ονόματα των bots
-bot_names = ['AVAX', 'SOLANA', 'LITECOIN', 'ETHEREUM', 'BITCOIN', 'XRP', 'CARDANO', 'POLKADOT', 'DOGECOIN', 'POLYGON']
+bot_names = ['AVAX', 'SOLANA', 'LITECOIN', 'ETHEREUM', 'BITCOIN', 'XRP', 'CARDANO', 'POLKADOT', 'DOGECOIN', 'POLYGON', 'STELLAR']
 
 # Συνάρτηση για ανάγνωση των δεδομένων από το state.json κάθε bot
 def analyze_bot_data(file_path):

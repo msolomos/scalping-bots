@@ -51,6 +51,7 @@ log_files = [
     "/opt/python/scalping-bot/XRP/XRP_bot.log",
     "/opt/python/scalping-bot/DOGECOIN/DOGE_bot.log",   #new bot
     "/opt/python/scalping-bot/POLYGON/MATIC_bot.log",   #new bot
+    "/opt/python/scalping-bot/STELLAR/XLM_bot.log",   #new bot
     "/opt/python/failover-decision-bot/trading_decisions.log",
     "/opt/python/short-selling-bot/logging.log"
 ]
