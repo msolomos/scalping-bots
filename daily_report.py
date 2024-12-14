@@ -59,35 +59,53 @@ def analyze_bot_data(file_path):
     active_trade = data.get('active_trade', 0) or 0
     trade_amount = data.get('trade_amount', 0) or 0
     total_active_trade_value = active_trade * trade_amount
-    return daily_profit, total_profit, current_trades, total_active_trade_value, trade_amount
+    
+    # Διαχείριση δεύτερης θέσης
+    second_trade_price = data.get('second_trade_price', 0)
+    second_trade_amount = data.get('second_trade_amount', 0)
+    average_trade_price = data.get('average_trade_price', 0)
+    second_position_open = second_trade_price > 0 and second_trade_amount > 0
+    second_trade_value = second_trade_price * second_trade_amount if second_position_open else 0
+
+    return {
+        'daily_profit': daily_profit,
+        'total_profit': total_profit,
+        'current_trades': current_trades,
+        'active_trade': active_trade,
+        'trade_amount': trade_amount,
+        'total_active_trade_value': total_active_trade_value,
+        'second_trade_price': second_trade_price,
+        'second_trade_amount': second_trade_amount,
+        'average_trade_price': average_trade_price,
+        'second_trade_value': second_trade_value,
+        'second_position_open': second_position_open
+    }
 
 # Ανάλυση δεδομένων για κάθε bot και αποθήκευση αποτελεσμάτων για ταξινόμηση
 bot_data = []
 for i, bot_file in enumerate(bot_files):
     result = analyze_bot_data(bot_file)
     if result:
-        daily_profit, total_profit, current_trades, total_active_trade_value, trade_amount = result
-        bot_data.append({
-            'name': bot_names[i],
-            'daily_profit': daily_profit,
-            'total_profit': total_profit,
-            'current_trades': current_trades,
-            'total_active_trade_value': total_active_trade_value,
-            'trade_amount': trade_amount
-        })
+        result['name'] = bot_names[i]  # Προσθήκη του ονόματος του bot στο dictionary
+        bot_data.append(result)
 
 # Ταξινόμηση των bots με βάση την ανοικτή θέση (total_active_trade_value) από το μεγαλύτερο στο μικρότερο
 bot_data = sorted(bot_data, key=lambda x: x['total_active_trade_value'], reverse=True)
+
 
 # Δημιουργία HTML περιεχομένου με απλό πίνακα χωρίς εξωτερικό CSS ή Bootstrap
 current_date = datetime.now().strftime('%d-%m-%Y')
 table_rows = ''.join([
     f"""
-    <tr>
+    <tr style="{'background-color: #ffcccc;' if bot['second_position_open'] else ''}">
         <td>{bot['name']}</td>
         <td>{bot['current_trades']}</td>
         <td>{bot['trade_amount']:.2f}</td>
+        <td>{bot['active_trade']:.2f} EUR</td>
         <td>{bot['total_active_trade_value']:.2f} EUR</td>
+        <td>{bot['second_trade_price']:.2f} EUR</td>
+        <td>{bot['second_trade_value']:.2f} EUR</td>        
+        <td>{bot['average_trade_price']:.2f} EUR</td>        
         <td>{bot['daily_profit']:.2f} EUR</td>
         <td>{bot['total_profit']:.2f} EUR</td>
     </tr>
@@ -98,18 +116,22 @@ report_html = f"""
 <html>
 <body>
     <h2>Ημερήσια Αναφορά {current_date}</h2>
-    <p><strong>Συνολικό Κέρδος Ημέρας:</strong> {sum(bot['daily_profit'] for bot in bot_data):.2f} EUR</p>
-    <p><strong>Συνολικό Κέρδος Όλων των Εποχών:</strong> {sum(bot['total_profit'] for bot in bot_data):.2f} EUR</p>
-    <p><strong>Συνολικός Αριθμός Συναλλαγών:</strong> {sum(bot['current_trades'] for bot in bot_data)}</p>
-    <p><strong>Συνολικές Ενεργές Συναλλαγές:</strong> {sum(bot['total_active_trade_value'] for bot in bot_data):.2f} EUR</p>
+    <p><strong>Ημερήσιο Κέρδος:</strong> {sum(bot['daily_profit'] for bot in bot_data):.2f} EUR</p>
+    <p><strong>Συνολικό Κέρδος:</strong> {sum(bot['total_profit'] for bot in bot_data):.2f} EUR</p>
+    <p><strong>Ημερήσιος Αριθμός Συναλλαγών:</strong> {sum(bot['current_trades'] for bot in bot_data)}</p>
+    <p><strong>Συνολικό Άνοιγμα:</strong> {sum(bot['total_active_trade_value'] for bot in bot_data):.2f} EUR</p>
     <h3>Λεπτομέρειες ανά bot:</h3>
-     <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 50%; border: 1px solid #eeeeee;">
+    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 80%; border: 1px solid #eeeeee;">
         <thead>
             <tr style="background-color: #d3d3d3; color: #000;">
                 <th>Bot Name</th>
                 <th>Συναλλαγές</th>
                 <th>Τεμάχια</th>
-                <th>Ανοικτή Θέση</th>
+                <th>Τιμή Αγοράς</th>
+                <th>Συνολικό Άνοιγμα</th>
+                <th>Δεύτερη Τιμή Αγοράς</th>
+                <th>Αξία Δεύτερης Θέσης</th>                
+                <th>Μέσος Ορος DCA</th>
                 <th>Κέρδος Ημέρας</th>
                 <th>Συνολικό Κέρδος</th>
             </tr>
@@ -118,6 +140,7 @@ report_html = f"""
             {table_rows}
         </tbody>
     </table>
+    <p><i>Τα bots με ανοιχτή δεύτερη θέση επισημαίνονται με κόκκινο φόντο.</i></p>
 </body>
 </html>
 """
