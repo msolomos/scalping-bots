@@ -96,7 +96,7 @@ ENABLE_DEMO_MODE = False  # Ορισμός σε True για demo mode, False γ�
 # 10. DOLLAR COST AVERAGE STRATEGY
 MAX_DROP_PERCENTAGE = 0.05       # 5% price drop
 ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE = True   ## Δυναμικό κατώφλι buy back αγοράς σε πτώση
-ATR_FACTOR = 1  # Ευαισθησία στη μεταβλητότητα (ATR)
+ATR_FACTOR = 3  # Ευαισθησία στη μεταβλητότητα (ATR)
 ADX_THRESHOLD = 20  # Όριο ADX για ισχυρή τάση                                         
 
 TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το αν χρειάζεται)
