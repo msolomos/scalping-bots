@@ -1649,16 +1649,20 @@ def execute_buy_action(
 
                 # Αποθήκευση του state μετά την ενημέρωση
                 save_state()
+                
+                return True, "Order placed successfully."
             else:
                 logging.info(f"Order placement failed. No buy action taken.")
+                return False, "Order placement failed."
         else:
-            logging.warning(f"Insufficient funds. 4)  EUR, Available: {available_cash:.2f} EUR")
-            send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)            
-            return
+            logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
+            send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)
+            return False, "Insufficient funds."
             
     else:
         logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
         logging.error(f"Error details: {portfolio_summary['message']}")
+        return False, "Portfolio balance retrieval failed."
 
 
 
@@ -2583,17 +2587,14 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             score=score,
                             current_decimals=current_decimals
                         )
-                        logging.info("Buy action completed via fallback conditions.")
-
-                        # Ενημέρωση για θετική τιμή
-                        send_push_notification(f"Buy action completed via fallback conditions for {CRYPTO_NAME} bot.")
                         
-                        return  # Τερματίζει την εκτέλεση του τρέχοντος block 
-                    
-                    else:
-                        logging.info(f"Failover condition check failed. ATR or Stochastic criteria not met.")                        
-                        logging.info("Buy action skipped due to failure of fallback conditions.")
-                        return  # Τερματίζει την εκτέλεση του τρέχοντος block αν η επιβεβαίωση όγκου είναι false             
+                        
+                        if success:
+                            logging.info("Buy action completed via fallback conditions.")
+                            send_push_notification(f"Buy action completed via fallback conditions for {CRYPTO_NAME} bot.")
+                        else:
+                            logging.warning(f"Buy action failed via fallback conditions. Reason: {reason}")
+                        return  # Τερματισμός της εκτέλεσης
                     
 
                 logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
