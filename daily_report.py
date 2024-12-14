@@ -66,6 +66,11 @@ def analyze_bot_data(file_path):
     average_trade_price = data.get('average_trade_price', 0)
     second_position_open = second_trade_price > 0 and second_trade_amount > 0
     second_trade_value = second_trade_price * second_trade_amount if second_position_open else 0
+    
+    # Υπολογισμός ποσοστιαίας διαφοράς
+    price_difference_percent = 0
+    if second_position_open:
+        price_difference_percent = ((second_trade_price - active_trade) / active_trade) * 100 if active_trade > 0 else 0    
 
     return {
         'daily_profit': daily_profit,
@@ -78,7 +83,8 @@ def analyze_bot_data(file_path):
         'second_trade_amount': second_trade_amount,
         'average_trade_price': average_trade_price,
         'second_trade_value': second_trade_value,
-        'second_position_open': second_position_open
+        'second_position_open': second_position_open,
+        'price_difference_percent': price_difference_percent  # Προσθήκη ποσοστιαίας διαφοράς
     }
 
 # Ανάλυση δεδομένων για κάθε bot και αποθήκευση αποτελεσμάτων για ταξινόμηση
@@ -103,7 +109,10 @@ table_rows = ''.join([
         <td>{bot['trade_amount']:.2f}</td>
         <td>{bot['active_trade']:.2f} EUR</td>
         <td>{bot['total_active_trade_value']:.2f} EUR</td>
-        <td>{bot['second_trade_price']:.2f} EUR</td>
+        <td>
+            {bot['second_trade_price']:.2f} EUR 
+            {"(" + f"{bot['price_difference_percent']:.2f}%" + ")" if bot['second_position_open'] else ""}
+        </td>
         <td>{bot['second_trade_value']:.2f} EUR</td>        
         <td>{bot['average_trade_price']:.2f} EUR</td>        
         <td>{bot['daily_profit']:.2f} EUR</td>
