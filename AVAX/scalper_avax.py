@@ -1955,7 +1955,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 return
         # ---------------------------------------
 
+
         # ---------------------------------------
+        
         # Συμπληρωματικός Έλεγχος για επιβεβαίωση δεικτών (προαιρετικός)
         if ENABLE_ADDITIONAL_CHECKS:
             try:
@@ -2102,11 +2104,6 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             score_history.append(score)
 
             
-            # Ενημέρωση για θετική τιμή
-            if score >= BUY_THRESHOLD:
-                send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot.")
-
-            
             # Διατήρηση μόνο των τελευταίων MAX_SCORE_HISTORY τιμών
             if len(score_history) > MAX_SCORE_HISTORY:
                 score_history.pop(0)
@@ -2216,6 +2213,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         else:
             if score >= BUY_THRESHOLD:
                 logging.info(f"Trade signal score is positive: {score:.2f}. Proceeding with LunarCrush score evaluation.")
+                send_push_notification(f"Trade signal score is positive: {score:.2f}. Proceeding with LunarCrush score evaluation for {CRYPTO_NAME} bot.", Logfile=False)
 
                 # Κλήση της συνάρτησης LunarCrush για περαιτέρω επιβεβαίωση
                 if lunarcrush_score(galaxy_score=galaxy_score, alt_rank=alt_rank, weights=weights):
@@ -2244,14 +2242,18 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                                 reasoning = (
                                     f"Indicators: MACD={round(macd_last, 3)}, Signal={round(signal_last, 3)}, "
                                     f"RSI={round(rsi_last, 3)}, Bollinger Upper={round(bollinger_upper_last, 3)}, "
-                                    f"Bollinger Lower={round(bollinger_lower_last, 3)}, "
-                                    f"VWAP={round(vwap_last, 3)}")
+                                    f"Bollinger Lower={round(bollinger_lower_last, 3)}, VWAP={round(vwap_last, 3)}, "
+                                    f"Galaxy Score={galaxy_score}, Alt Rank={alt_rank}"
+                                )
                                 
                                 # Δημιουργία του final_score ως string για χρήση στην κλήση της sendgrid
                                 final_score = f"Trade signal score is positive: {round(score, 3)}."
                                 
                                 # Κλήση της συνάρτησης για αποστολή email πριν μηδενιστούν οι τιμές
                                 sendgrid_email(trade_amount, "buy", execution_price, fees, final_score, reasoning)
+                                
+                                # Κλήση της συνάρτησης για αποστολή push σε silent mode
+                                send_push_notification(f"Order placed successfully at price: {execution_price:.2f} with fees: {fees}", Logfile=False)
 
                                 highest_price = execution_price
                                 current_trades += 1
@@ -2265,6 +2267,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         logging.error(f"Error details: {portfolio_summary['message']}")
                 else:
                     logging.info(f"Sentimental score (lunarcrush) is negative. No buy action taken.")
+                    send_push_notification(f"Sentimental score (lunarcrush) is negative. No buy action taken.", Logfile=False)
             else:
                 logging.info(f"Trade signal score ({score:.2f}) was below the buy threshold ({BUY_THRESHOLD}). No action taken.")
 
