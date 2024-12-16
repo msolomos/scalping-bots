@@ -1763,14 +1763,19 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         # Αν υπάρχει ανοιχτή θέση, έλεγχος για πώληση
         if active_trade:
             # Πρώτο μέρος: Πληροφορίες για την πρώτη αγορά
-            log_message = f"Active trade exists at {active_trade:.{current_decimals}f} {CRYPTO_CURRENCY}."
+            log_message = f"Active trade at {active_trade:.{current_decimals}f} {CRYPTO_CURRENCY}."
 
             # Δεύτερο μέρος: Αν υπάρχει δεύτερη αγορά, προσθέτουμε πληροφορίες
             if second_trade_price:
-                log_message += f" Second trade exists at {second_trade_price:.{current_decimals}f} with amount {second_trade_amount}."
+                log_message += f" Second trade at {second_trade_price:.{current_decimals}f} with {second_trade_amount} {CRYPTO_NAME}."
+                
+                
+            # Τρίτο μέρος: Αν υπάρχει τρίτη αγορά, προσθέτουμε πληροφορίες
+            if third_trade_price:
+                log_message += f" Third trade at {third_trade_price:.{current_decimals}f} with {third_trade_amount} {CRYPTO_NAME}."                
 
-            # Τρίτο μέρος: Προσθήκη του "Checking for sell opportunity." στο τέλος
-            log_message += " Checking for sell opportunity."
+            # Τέταρτο μέρος: Προσθήκη του "Checking for sell opportunity." στο τέλος
+            log_message += " Checking sell opportunity."
 
             # Καταγραφή του τελικού μηνύματος
             logging.info(log_message)
