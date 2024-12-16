@@ -110,6 +110,8 @@ def get_crypto_info():
                     "start_bot": file_data.get("start_bot", None),  # Αν δεν υπάρχει το κλειδί, αφήνει κενό
                     "active_trade": file_data.get("active_trade"),
                     "trade_amount": file_data.get("trade_amount"),
+                    "second_trade_price": file_data.get("second_trade_price"),
+                    "second_trade_amount": file_data.get("second_trade_amount"),                    
                     "euro_pair": euro_pair
                 })
         else:
@@ -119,6 +121,8 @@ def get_crypto_info():
                 "start_bot": None,
                 "active_trade": None,
                 "trade_amount": None,
+                "second_trade_price": None,
+                "second_trade_amount": None,
                 "euro_pair": euro_pair
             })
     return jsonify(data)
