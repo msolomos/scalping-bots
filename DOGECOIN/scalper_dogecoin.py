@@ -1599,7 +1599,7 @@ def get_crypto_price(retries=3, delay=5):
             price = float(data["price"])    
             current_rate = get_exchange_rate()
             
-            logline_price = f"Fetched {CRYPTO_NAME} price: {price} {CRYPTO_CURRENCY}"         # δημιουργία Logline
+            logline_price = f"Fetched {CRYPTO_NAME} price: {price:.{current_decimals}f} {CRYPTO_CURRENCY}"         # δημιουργία Logline
             if current_rate is not None:
                 price_in_usd = price * current_rate
                 logline_price += f", equivalent to {price_in_usd:.{current_decimals}f} USD."      # προσθήκη στο logline
@@ -1797,7 +1797,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"Updated highest_price to {highest_price}")
                 save_state(log_info=False)  # Αποθήκευση του ενημερωμένου highest_price χωρίς Logging.info
 
-            logging.info(f"Current Price: {current_price} {CRYPTO_CURRENCY}, Highest Price: {highest_price} {CRYPTO_CURRENCY}.")
+            logging.info(f"Current Price: {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}, Highest Price: {highest_price} {CRYPTO_CURRENCY}.")
 
 
 
