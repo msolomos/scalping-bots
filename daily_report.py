@@ -67,10 +67,27 @@ def analyze_bot_data(file_path):
     second_position_open = second_trade_price > 0 and second_trade_amount > 0
     second_trade_value = second_trade_price * second_trade_amount if second_position_open else 0
     
-    # Υπολογισμός ποσοστιαίας διαφοράς
+    # Διαχείριση τρίτης θέσης
+    third_trade_price = data.get('third_trade_price', 0)
+    third_trade_amount = data.get('third_trade_amount', 0)    
+    third_position_open = third_trade_price > 0 and third_trade_amount > 0
+    third_trade_value = third_trade_price * third_trade_amount if third_position_open else 0
+
+
+    # Επαναϋπολογισμός του total_active_trade_value
+    total_active_trade_value += second_trade_value + third_trade_value    
+
+    
+    # Υπολογισμός ποσοστιαίας διαφοράς 2ής αγοράς
     price_difference_percent = 0
     if second_position_open:
-        price_difference_percent = ((second_trade_price - active_trade) / active_trade) * 100 if active_trade > 0 else 0    
+        price_difference_percent = ((second_trade_price - active_trade) / active_trade) * 100 if active_trade > 0 else 0
+        
+        
+    # Υπολογισμός ποσοστιαίας διαφοράς 3ής αγοράς
+    price_difference_percent_third_buy = 0
+    if third_position_open:
+        price_difference_percent_third_buy = ((third_trade_price - second_trade_price) / second_trade_price) * 100 if second_trade_price > 0 else 0            
 
     return {
         'daily_profit': daily_profit,
@@ -79,12 +96,19 @@ def analyze_bot_data(file_path):
         'active_trade': active_trade,
         'trade_amount': trade_amount,
         'total_active_trade_value': total_active_trade_value,
+        # 2η αγορά
         'second_trade_price': second_trade_price,
         'second_trade_amount': second_trade_amount,
         'average_trade_price': average_trade_price,
         'second_trade_value': second_trade_value,
         'second_position_open': second_position_open,
-        'price_difference_percent': price_difference_percent  # Προσθήκη ποσοστιαίας διαφοράς
+        'price_difference_percent': price_difference_percent,  # Προσθήκη ποσοστιαίας διαφοράς
+        # 3η αγορά
+        'third_trade_price': third_trade_price,
+        'third_trade_amount': third_trade_amount,
+        'third_position_open': third_position_open,
+        'third_trade_value': third_trade_value,
+        'price_difference_percent_third_buy': price_difference_percent_third_buy        
     }
 
 # Ανάλυση δεδομένων για κάθε bot και αποθήκευση αποτελεσμάτων για ταξινόμηση
@@ -103,18 +127,25 @@ bot_data = sorted(bot_data, key=lambda x: x['total_active_trade_value'], reverse
 current_date = datetime.now().strftime('%d-%m-%Y')
 table_rows = ''.join([
     f"""
-    <tr style="{'background-color: #ffcccc;' if bot['second_position_open'] else ''}">
+    <tr style="{ 
+        'background-color: #ccccff;' if bot['third_position_open'] else 
+        'background-color: #ffcccc;' if bot['second_position_open'] else '' }">
         <td>{bot['name']}</td>
         <td>{bot['current_trades']}</td>
         <td>{bot['trade_amount']:.2f}</td>
-        <td>{bot['active_trade']:.2f} EUR</td>
-        <td>{bot['total_active_trade_value']:.2f} EUR</td>
+        <td>{bot['active_trade']:.2f} EUR</td>        
         <td>
             {bot['second_trade_price']:.2f} EUR 
             {"(" + f"{bot['price_difference_percent']:.2f}%" + ")" if bot['second_position_open'] else ""}
         </td>
         <td>{bot['second_trade_value']:.2f} EUR</td>        
-        <td>{bot['average_trade_price']:.2f} EUR</td>        
+        <td>{bot['average_trade_price']:.2f} EUR</td>
+        <td>
+            {bot['third_trade_price']:.2f} EUR 
+            {"(" + f"{bot['price_difference_percent_third_buy']:.2f}%" + ")" if bot['third_position_open'] else ""}
+        </td>
+        <td>{bot['third_trade_value']:.2f} EUR</td> 
+        <td>{bot['total_active_trade_value']:.2f} EUR</td>
         <td>{bot['daily_profit']:.2f} EUR</td>
         <td>{bot['total_profit']:.2f} EUR</td>
     </tr>
@@ -130,17 +161,21 @@ report_html = f"""
     <p><strong>Ημερήσιος Αριθμός Συναλλαγών:</strong> {sum(bot['current_trades'] for bot in bot_data)}</p>
     <p><strong>Συνολικό Άνοιγμα:</strong> {sum(bot['total_active_trade_value'] for bot in bot_data):.2f} EUR</p>
     <h3>Λεπτομέρειες ανά bot:</h3>
-    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 80%; border: 1px solid #eeeeee;">
+    <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 95%; border: 1px solid #eeeeee;">
         <thead>
             <tr style="background-color: #d3d3d3; color: #000;">
                 <th>Bot Name</th>
                 <th>Συναλλαγές</th>
                 <th>Τεμάχια</th>
                 <th>Τιμή Αγοράς</th>
-                <th>Συνολικό Άνοιγμα</th>
-                <th>Δεύτερη Τιμή Αγοράς</th>
-                <th>Αξία Δεύτερης Θέσης</th>                
+                
+                <th>Τιμή Δεύτερης Αγοράς</th>
+                <th>Αξία Δεύτερης Αγοράς</th>                
                 <th>Μέσος Ορος DCA</th>
+                
+                <th>Τιμή Τρίτης Αγοράς</th>
+                <th>Αξία Τρίτης Αγοράς</th>
+                <th>Συνολικό Άνοιγμα</th>
                 <th>Κέρδος Ημέρας</th>
                 <th>Συνολικό Κέρδος</th>
             </tr>
@@ -150,6 +185,7 @@ report_html = f"""
         </tbody>
     </table>
     <p><i>Τα bots με ανοιχτή δεύτερη θέση επισημαίνονται με κόκκινο φόντο.</i></p>
+    <p><i>Τα bots με ανοιχτή δεύτερη και τρίτη θέση επισημαίνονται με μπλέ φόντο.</i></p>
 </body>
 </html>
 """
