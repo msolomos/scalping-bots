@@ -105,6 +105,11 @@ TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το 
 ENABLE_SAVE_TO_CSV = False
 
 
+# 12. Debugging 
+ENABLE_FULL_RESPONSE_DATA = False   # Full API Response για συνάρτηση fetch_data()
+LEVEL_LOGGING = "INFO"              # Μεταβλητή με επίπεδο καταγραφής
+
+
 
 ###################################################################################################################################################################################################################################
 
@@ -128,9 +133,14 @@ if CRYPTO_NAME not in DECIMAL_CONFIG:
 current_decimals = DECIMAL_CONFIG.get(CRYPTO_NAME, {}).get("decimals", 2)  # Default to 2 decimals
 
 
+
+# Μετατροπή του string σε logging level
+logging_level = getattr(logging, LEVEL_LOGGING.upper(), logging.INFO)
+
+
 # Configure logging to both file and console
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging_level,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
         logging.FileHandler(
@@ -1419,11 +1429,13 @@ def fetch_data():
                     continue
 
                 data = res.read().decode("utf-8")
-                logging.debug(f"Raw response from {url}: {data}")
+                if ENABLE_FULL_RESPONSE_DATA:
+                    logging.debug(f"Raw response from {url}: {data}")
 
                 try:
                     response_json = json.loads(data)
-                    logging.debug(f"Parsed JSON data structure from {url}: {response_json}")
+                    if ENABLE_FULL_RESPONSE_DATA:
+                        logging.debug(f"Parsed JSON data structure from {url}: {response_json}")
                 except json.JSONDecodeError:
                     logging.error(f"Failed to parse JSON from {url}. Response body: {data}")
                     break
@@ -1493,8 +1505,9 @@ def fetch_data():
                     
 
                 # Logging για να διαγνωστεί η δομή και οι τύποι δεδομένων
-                logging.debug(f"Data structure from {url}: \n{df.head()}")
-                logging.debug(f"Data types from {url}: \n{df.dtypes}")
+                if ENABLE_FULL_RESPONSE_DATA:
+                    logging.debug(f"Data structure from {url}: \n{df.head()}")
+                    logging.debug(f"Data types from {url}: \n{df.dtypes}")
 
                 # Μετατροπή όλων των στηλών σε αριθμητικές τιμές για να αποφευχθούν σφάλματα τύπου
                 for column in ["open", "high", "low", "close", "volume"]:
@@ -2063,13 +2076,19 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         logging.info(f"[Second Position] Initialized highest_price to {highest_price_second_position:.{current_decimals}f}")
                         save_state(log_info=False)  #χωρίς Logging.info
                         
-
+                
+                # ===== Νέο Block: Έλεγχος Trailing Sell Εκτός Break-even Check =====
+                if trailing_profit_second_position_active:
+                
                     # Υπολογισμός του trailing sell price για τη δεύτερη θέση
                     trailing_sell_price_second_position = highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
-                    logging.debug(f"[Second Position] Trailing sell price updated to {trailing_sell_price_second_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+                    logging.debug(f"[Second Position] Trailing sell price: {trailing_sell_price_second_position:.8f}, Highest price: {highest_price_second_position:.8f}")
 
 
                     # Έλεγχος αν η τρέχουσα τιμή έχει πέσει κάτω από το trailing sell price
+                    logging.debug(f"DEBUG: Current Price: {current_price:.8f}, Trailing Sell Price: {trailing_sell_price_second_position:.8f}")
+                    logging.debug(f"DEBUG: Highest Price: {highest_price_second_position}, Trailing Sell Price: {trailing_sell_price_second_position}")
+
                     if current_price <= trailing_sell_price_second_position:
                         logging.info(f"[Second Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} dropped below trailing sell price ({trailing_sell_price_second_position:.{current_decimals}f}) {CRYPTO_CURRENCY}. Selling all positions.")
 

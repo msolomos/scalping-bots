@@ -106,9 +106,8 @@ ENABLE_SAVE_TO_CSV = True
 
 
 # 12. Debugging 
-ENABLE_FULL_RESPONSE_DATA = False
-# Μεταβλητή με επίπεδο καταγραφής (π.χ., από αρχείο ρυθμίσεων ή περιβάλλοντος)
-LEVEL_LOGGING = "INFO"
+ENABLE_FULL_RESPONSE_DATA = False   # Full API Response για συνάρτηση fetch_data()
+LEVEL_LOGGING = "INFO"              # Μεταβλητή με επίπεδο καταγραφής
 
 
 

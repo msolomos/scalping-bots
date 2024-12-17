@@ -105,6 +105,11 @@ TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το 
 ENABLE_SAVE_TO_CSV = False
 
 
+# 12. Debugging 
+ENABLE_FULL_RESPONSE_DATA = False   # Full API Response για συνάρτηση fetch_data()
+LEVEL_LOGGING = "INFO"              # Μεταβλητή με επίπεδο καταγραφής
+
+
 
 ###################################################################################################################################################################################################################################
 
@@ -128,9 +133,14 @@ if CRYPTO_NAME not in DECIMAL_CONFIG:
 current_decimals = DECIMAL_CONFIG.get(CRYPTO_NAME, {}).get("decimals", 2)  # Default to 2 decimals
 
 
+
+# Μετατροπή του string σε logging level
+logging_level = getattr(logging, LEVEL_LOGGING.upper(), logging.INFO)
+
+
 # Configure logging to both file and console
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging_level,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
         logging.FileHandler(
@@ -376,6 +386,7 @@ def load_state():
     global second_trade_price, second_trade_amount, average_trade_price  # Νέες μεταβλητές
     global highest_price_second_position, trailing_profit_second_position_active  # Νέες μεταβλητές για τη δεύτερη θέση
     global third_trade_price, third_trade_amount, highest_price_third_position, trailing_profit_third_position_active  # Μεταβλητές για την τρίτη θέση
+    global manual_second_buy  # Νέα μεταβλητή
 
     try:
         with open(state_file, "r") as f:
@@ -402,6 +413,10 @@ def load_state():
             third_trade_amount = state.get("third_trade_amount", 0)
             highest_price_third_position = state.get("highest_price_third_position", None)
             trailing_profit_third_position_active = state.get("trailing_profit_third_position_active", False)
+            
+            # Νέα μεταβλητή
+            manual_second_buy = state.get("manual_second_buy", False)
+            
 
             logging.info(
                 f"Loaded state 1/3: daily_profit={daily_profit:.2f}, total_profit={total_profit:.2f}, "
@@ -409,7 +424,7 @@ def load_state():
             )
             logging.info(
                 f"Loaded state 2/3: current_trades={current_trades}, highest_price={highest_price:.{current_decimals}f}, "
-                f"trailing_active={trailing_profit_active}, start_bot={start_bot}, score_history={score_history}"
+                f"trailing_active={trailing_profit_active}, start_bot={start_bot}, score_history={score_history}, manual_second_buy={manual_second_buy}"
             )
             logging.info(
                 f"Loaded state 3/3: second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
@@ -423,6 +438,7 @@ def load_state():
             )
 
     except FileNotFoundError:
+        
         # Initialize defaults if state file is not found
         daily_profit = 0
         total_profit = 0
@@ -446,12 +462,15 @@ def load_state():
         third_trade_amount = 0
         highest_price_third_position = None
         trailing_profit_third_position_active = False
+        
+        # Default value for new variable
+        manual_second_buy = False        
 
         save_state()  # Create the state file
         logging.info(
             f"State file not found. Initialized new state: daily_profit={daily_profit}, total_profit={total_profit}, "
             f"current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}, "
-            f"highest_price={highest_price}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, "
+            f"highest_price={highest_price}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, manual_second_buy={manual_second_buy}, "
             f"score_history={score_history}, second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
             f"average_trade_price={average_trade_price}, highest_price_second_position={highest_price_second_position}, "
             f"trailing_profit_second_position_active={trailing_profit_second_position_active}, "
@@ -459,6 +478,7 @@ def load_state():
             f"highest_price_third_position={highest_price_third_position}, "
             f"trailing_profit_third_position_active={trailing_profit_third_position_active}"
         )
+        
 
 # Save the state to the file
 def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_info
@@ -485,6 +505,10 @@ def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_i
         "third_trade_amount": third_trade_amount,
         "highest_price_third_position": round(highest_price_third_position, current_decimals) if highest_price_third_position is not None else 0,
         "trailing_profit_third_position_active": trailing_profit_third_position_active,
+        
+        # Νέα μεταβλητή για χειροκίνητη αγορά δεύτερης θέσης
+        "manual_second_buy": manual_second_buy   
+        
     }
 
     # Save state to a file
@@ -503,7 +527,8 @@ def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_i
             f"trailing_profit_second_position_active={state['trailing_profit_second_position_active']}, "
             f"third_trade_price={state['third_trade_price']:.{current_decimals}f}, third_trade_amount={third_trade_amount}, "
             f"highest_price_third_position={state['highest_price_third_position']:.{current_decimals}f}, "
-            f"trailing_profit_third_position_active={state['trailing_profit_third_position_active']}"
+            f"trailing_profit_third_position_active={state['trailing_profit_third_position_active']}, "
+            f"manual_second_buy={state['manual_second_buy']}"
         )
         
 
@@ -1404,11 +1429,13 @@ def fetch_data():
                     continue
 
                 data = res.read().decode("utf-8")
-                logging.debug(f"Raw response from {url}: {data}")
+                if ENABLE_FULL_RESPONSE_DATA:
+                    logging.debug(f"Raw response from {url}: {data}")
 
                 try:
                     response_json = json.loads(data)
-                    logging.debug(f"Parsed JSON data structure from {url}: {response_json}")
+                    if ENABLE_FULL_RESPONSE_DATA:
+                        logging.debug(f"Parsed JSON data structure from {url}: {response_json}")
                 except json.JSONDecodeError:
                     logging.error(f"Failed to parse JSON from {url}. Response body: {data}")
                     break
@@ -1478,8 +1505,9 @@ def fetch_data():
                     
 
                 # Logging για να διαγνωστεί η δομή και οι τύποι δεδομένων
-                logging.debug(f"Data structure from {url}: \n{df.head()}")
-                logging.debug(f"Data types from {url}: \n{df.dtypes}")
+                if ENABLE_FULL_RESPONSE_DATA:
+                    logging.debug(f"Data structure from {url}: \n{df.head()}")
+                    logging.debug(f"Data types from {url}: \n{df.dtypes}")
 
                 # Μετατροπή όλων των στηλών σε αριθμητικές τιμές για να αποφευχθούν σφάλματα τύπου
                 for column in ["open", "high", "low", "close", "volume"]:
@@ -1599,7 +1627,7 @@ def get_crypto_price(retries=3, delay=5):
             price = float(data["price"])    
             current_rate = get_exchange_rate()
             
-            logline_price = f"Fetched {CRYPTO_NAME} price: {price} {CRYPTO_CURRENCY}"         # δημιουργία Logline
+            logline_price = f"Fetched {CRYPTO_NAME} price: {price:.{current_decimals}f} {CRYPTO_CURRENCY}"         # δημιουργία Logline
             if current_rate is not None:
                 price_in_usd = price * current_rate
                 logline_price += f", equivalent to {price_in_usd:.{current_decimals}f} USD."      # προσθήκη στο logline
@@ -1700,6 +1728,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
     global second_trade_price, second_trade_amount, average_trade_price  # Υφιστάμενες global μεταβλητές για τη 2η αγορά
     global highest_price_second_position, trailing_profit_second_position_active  # Προσθήκη μεταβλητών για τη 2η θέση
     global third_trade_price, third_trade_amount, highest_price_third_position, trailing_profit_third_position_active  # Νέες global μεταβλητές για την 3η αγορά
+    global manual_second_buy
 
 
     
@@ -1763,14 +1792,19 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
         # Αν υπάρχει ανοιχτή θέση, έλεγχος για πώληση
         if active_trade:
             # Πρώτο μέρος: Πληροφορίες για την πρώτη αγορά
-            log_message = f"Active trade exists at {active_trade:.{current_decimals}f} {CRYPTO_CURRENCY}."
+            log_message = f"Active trade at {active_trade:.{current_decimals}f} {CRYPTO_CURRENCY}."
 
             # Δεύτερο μέρος: Αν υπάρχει δεύτερη αγορά, προσθέτουμε πληροφορίες
             if second_trade_price:
-                log_message += f" Second trade exists at {second_trade_price:.{current_decimals}f} with amount {second_trade_amount}."
+                log_message += f" Second trade at {second_trade_price:.{current_decimals}f} with {second_trade_amount} {CRYPTO_NAME}."
+                
+                
+            # Τρίτο μέρος: Αν υπάρχει τρίτη αγορά, προσθέτουμε πληροφορίες
+            if third_trade_price:
+                log_message += f" Third trade at {third_trade_price:.{current_decimals}f} with {third_trade_amount} {CRYPTO_NAME}."                
 
-            # Τρίτο μέρος: Προσθήκη του "Checking for sell opportunity." στο τέλος
-            log_message += " Checking for sell opportunity."
+            # Τέταρτο μέρος: Προσθήκη του "Checking for sell opportunity." στο τέλος
+            log_message += " Checking sell opportunity."
 
             # Καταγραφή του τελικού μηνύματος
             logging.info(log_message)
@@ -1792,7 +1826,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"Updated highest_price to {highest_price}")
                 save_state(log_info=False)  # Αποθήκευση του ενημερωμένου highest_price χωρίς Logging.info
 
-            logging.info(f"Current Price: {current_price} {CRYPTO_CURRENCY}, Highest Price: {highest_price} {CRYPTO_CURRENCY}.")
+            logging.info(f"Current Price: {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}, Highest Price: {highest_price} {CRYPTO_CURRENCY}.")
 
 
 
@@ -1967,10 +2001,14 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             # DOLLAR COST AVERAGE STRATEGY
             # Υπολογισμός της τιμής ενεργοποίησης δεύτερης αγοράς
 
-
+            logging.debug(f"Manual second buy state is: {manual_second_buy}")
+            
             # Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ------------------------------------------
-            if not second_trade_price and current_price <= second_buy_trigger_price:
-                logging.info(f"Price {current_price} {CRYPTO_CURRENCY} dropped below threshold {second_buy_trigger_price:.{current_decimals}f} {CRYPTO_CURRENCY}. Executing second buy.")
+            if not second_trade_price and (current_price <= second_buy_trigger_price or manual_second_buy):
+                if manual_second_buy:
+                    logging.info(f"Manual trigger activated for second buy. Executing second buy at current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+                else:
+                    logging.info(f"Price {current_price} {CRYPTO_CURRENCY} dropped below threshold {second_buy_trigger_price:.{current_decimals}f} {CRYPTO_CURRENCY}. Executing second buy.")
 
                 # Εκτέλεση της εντολής αγοράς
                 second_trade_amount = trade_amount  # Ίδια ποσότητα με την αρχική
@@ -1991,10 +2029,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                                  f"New average price: {average_trade_price:.{current_decimals}f}.")
 
                     send_push_notification(f"ALERT: Second buy executed successfully at {second_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                                                            
                     
                     
                     # Αποθήκευση κατάστασης μετά την αγορά
+                    manual_second_buy = False       # Επαναφορά του flag
                     save_state()
+                    
                     return
 
                 else:
@@ -2035,13 +2076,19 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         logging.info(f"[Second Position] Initialized highest_price to {highest_price_second_position:.{current_decimals}f}")
                         save_state(log_info=False)  #χωρίς Logging.info
                         
-
+                
+                # ===== Νέο Block: Έλεγχος Trailing Sell Εκτός Break-even Check =====
+                if trailing_profit_second_position_active:
+                
                     # Υπολογισμός του trailing sell price για τη δεύτερη θέση
                     trailing_sell_price_second_position = highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
-                    logging.debug(f"[Second Position] Trailing sell price updated to {trailing_sell_price_second_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+                    logging.debug(f"[Second Position] Trailing sell price: {trailing_sell_price_second_position:.8f}, Highest price: {highest_price_second_position:.8f}")
 
 
                     # Έλεγχος αν η τρέχουσα τιμή έχει πέσει κάτω από το trailing sell price
+                    logging.debug(f"DEBUG: Current Price: {current_price:.8f}, Trailing Sell Price: {trailing_sell_price_second_position:.8f}")
+                    logging.debug(f"DEBUG: Highest Price: {highest_price_second_position}, Trailing Sell Price: {trailing_sell_price_second_position}")
+
                     if current_price <= trailing_sell_price_second_position:
                         logging.info(f"[Second Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} dropped below trailing sell price ({trailing_sell_price_second_position:.{current_decimals}f}) {CRYPTO_CURRENCY}. Selling all positions.")
 
