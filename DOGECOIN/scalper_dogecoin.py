@@ -386,7 +386,7 @@ def load_state():
     global second_trade_price, second_trade_amount, average_trade_price  # Νέες μεταβλητές
     global highest_price_second_position, trailing_profit_second_position_active  # Νέες μεταβλητές για τη δεύτερη θέση
     global third_trade_price, third_trade_amount, highest_price_third_position, trailing_profit_third_position_active  # Μεταβλητές για την τρίτη θέση
-    global manual_second_buy  # Νέα μεταβλητή
+    global manual_second_buy, manual_third_buy  # Νέες μεταβλητές
 
     try:
         with open(state_file, "r") as f:
@@ -414,8 +414,9 @@ def load_state():
             highest_price_third_position = state.get("highest_price_third_position", None)
             trailing_profit_third_position_active = state.get("trailing_profit_third_position_active", False)
             
-            # Νέα μεταβλητή
+            # Νέες μεταβλητές
             manual_second_buy = state.get("manual_second_buy", False)
+            manual_third_buy = state.get("manual_third_buy", False)
             
 
             logging.info(
@@ -424,7 +425,7 @@ def load_state():
             )
             logging.info(
                 f"Loaded state 2/3: current_trades={current_trades}, highest_price={highest_price:.{current_decimals}f}, "
-                f"trailing_active={trailing_profit_active}, start_bot={start_bot}, score_history={score_history}, manual_second_buy={manual_second_buy}"
+                f"trailing_active={trailing_profit_active}, start_bot={start_bot}, score_history={score_history}, manual_second_buy={manual_second_buy}, manual_third_buy={manual_third_buy}"
             )
             logging.info(
                 f"Loaded state 3/3: second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
@@ -463,14 +464,15 @@ def load_state():
         highest_price_third_position = None
         trailing_profit_third_position_active = False
         
-        # Default value for new variable
+        # Default value for new variables
         manual_second_buy = False        
+        manual_third_buy = False
 
         save_state()  # Create the state file
         logging.info(
             f"State file not found. Initialized new state: daily_profit={daily_profit}, total_profit={total_profit}, "
             f"current_trades={current_trades}, active_trade={active_trade}, trade_amount={trade_amount}, "
-            f"highest_price={highest_price}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, manual_second_buy={manual_second_buy}, "
+            f"highest_price={highest_price}, trailing_profit_active={trailing_profit_active}, start_bot={start_bot}, manual_second_buy={manual_second_buy}, manual_third_buy={manual_third_buy}, "
             f"score_history={score_history}, second_trade_price={second_trade_price}, second_trade_amount={second_trade_amount}, "
             f"average_trade_price={average_trade_price}, highest_price_second_position={highest_price_second_position}, "
             f"trailing_profit_second_position_active={trailing_profit_second_position_active}, "
@@ -507,7 +509,8 @@ def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_i
         "trailing_profit_third_position_active": trailing_profit_third_position_active,
         
         # Νέα μεταβλητή για χειροκίνητη αγορά δεύτερης θέσης
-        "manual_second_buy": manual_second_buy   
+        "manual_second_buy": manual_second_buy,
+        "manual_third_buy": manual_third_buy
         
     }
 
@@ -528,7 +531,7 @@ def save_state(log_info=True):  # Προσθέτουμε το όρισμα log_i
             f"third_trade_price={state['third_trade_price']:.{current_decimals}f}, third_trade_amount={third_trade_amount}, "
             f"highest_price_third_position={state['highest_price_third_position']:.{current_decimals}f}, "
             f"trailing_profit_third_position_active={state['trailing_profit_third_position_active']}, "
-            f"manual_second_buy={state['manual_second_buy']}"
+            f"manual_second_buy={state['manual_second_buy']}, manual_third_buy={state['manual_third_buy']}"
         )
         
 
@@ -2142,10 +2145,16 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
             # Έλεγχος για 3η αγορά του crypto -------------------------------------------------------------------
-            if not third_trade_price and second_trade_price and current_price <= third_buy_trigger_price:
-                logging.info(f"Price {current_price} {CRYPTO_CURRENCY} dropped below threshold {third_buy_trigger_price:.{current_decimals}f} {CRYPTO_CURRENCY}. Executing third buy.")
+            logging.debug(f"Manual third buy state is: {manual_third_buy}")
 
-                # Έκτελεση της εντολής αγοράς
+            if not third_trade_price and second_trade_price and (current_price <= third_buy_trigger_price or manual_third_buy):
+                if manual_third_buy:
+                    logging.info(f"Manual trigger activated for third buy. Executing third buy at current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+                else:
+                    logging.info(f"Price {current_price} {CRYPTO_CURRENCY} dropped below threshold {third_buy_trigger_price:.{current_decimals}f} {CRYPTO_CURRENCY}. Executing third buy.")
+
+
+                # Έκτελεση της εντολής αγοράς για την 3η θέση
                 third_trade_amount = trade_amount  # Ίδια ποσότητα με την αρχική
                 order_successful, execution_price, fees = place_order("buy", third_trade_amount, current_price)
 
@@ -2166,6 +2175,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     send_push_notification(f"ALERT: Third buy executed successfully at {third_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
 
                     # Αποθήκευση κατάστασης μετά την αγορά
+                    manual_third_buy = False       # Επαναφορά του flag
                     save_state()
                     return
 
