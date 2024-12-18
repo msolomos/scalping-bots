@@ -1731,7 +1731,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
     global second_trade_price, second_trade_amount, average_trade_price  # Υφιστάμενες global μεταβλητές για τη 2η αγορά
     global highest_price_second_position, trailing_profit_second_position_active  # Προσθήκη μεταβλητών για τη 2η θέση
     global third_trade_price, third_trade_amount, highest_price_third_position, trailing_profit_third_position_active  # Νέες global μεταβλητές για την 3η αγορά
-    global manual_second_buy
+    global manual_second_buy, manual_third_buy
 
 
     
