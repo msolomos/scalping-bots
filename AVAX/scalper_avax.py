@@ -100,6 +100,7 @@ ATR_FACTOR = 5  # Ευαισθησία στη μεταβλητότητα (ATR)
 ADX_THRESHOLD = 20  # Όριο ADX για ισχυρή τάση                                         
 
 TRAILING_PROFIT_SECOND_PERCENTAGE = 0.005   # 0.5% (προσαρμόστε το αν χρειάζεται)
+TRAILING_PROFIT_THIRD_PERCENTAGE = 0.005
 
 # 11. Λειτουργία Γραφήματος και back testing
 ENABLE_SAVE_TO_CSV = False
@@ -318,6 +319,24 @@ def check_buy_signal():
     else:
         logging.info("No external buy signal found.")
         return False  # Return False if no buy signal is found
+
+
+
+
+def check_sell_all_signal():
+    # Ορισμός του μονοπατιού για το αρχείο `sell_all_signal.txt` για αυτό το bot
+    signal_file = os.path.join(os.getcwd(), f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/sell_all_signal.txt")
+    
+    # Έλεγχος αν υπάρχει το αρχείο `sell_all_signal.txt`
+    if os.path.exists(signal_file):
+        sell_all_positions()  # Εκτέλεση πώλησης όλων των θέσεων
+        os.remove(signal_file)  # Διαγραφή του αρχείου μετά την εκτέλεση
+        logging.info("Sell all signal executed and `sell_all_signal.txt` file deleted.")
+        return True  # Επιστρέφει True για να σταματήσει η εκτέλεση του bot για αυτόν τον κύκλο
+    else:
+        logging.info("No external sell all signal found.")
+        return False  # Επιστρέφει False αν δεν βρεθεί το αρχείο
+
 
 
 
@@ -649,6 +668,74 @@ def save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores):
 
 
 
+
+# Συνάρτηση για πώληση όλων των ανοιχτών θέσεων απο macro excel
+def sell_all_positions():
+    global active_trade, trade_amount, second_trade_price, second_trade_amount
+    global third_trade_price, third_trade_amount, daily_profit, current_trades
+    global highest_price, highest_price_second_position, highest_price_third_position
+    global trailing_profit_active, trailing_profit_second_position_active, trailing_profit_third_position_active
+    
+    logging.info("Sell All Positions was executed through macro call.")
+    
+    load_state()
+    
+    current_price = get_crypto_price()
+    if current_price is None:
+        logging.error("Failed to fetch current price. Skipping trade execution.")
+        return
+    
+    # Υπολογισμός συνολικής ποσότητας προς πώληση
+    total_amount_to_sell = trade_amount + second_trade_amount + third_trade_amount
+
+    if total_amount_to_sell == 0:
+        logging.info("No active positions to sell. Skipping execution.")
+        return
+
+    # Υπολογισμός καθαρών κερδών για όλες τις θέσεις
+    potential_profit = (current_price - active_trade) * trade_amount if active_trade else 0
+    potential_profit += (current_price - second_trade_price) * second_trade_amount if second_trade_price else 0
+    potential_profit += (current_price - third_trade_price) * third_trade_amount if third_trade_price else 0
+
+    # Εκτίμηση των fees για τη συναλλαγή
+    estimated_fees = current_price * total_amount_to_sell * FEES_PERCENTAGE
+    logging.info(f"Estimated fees for the trade: {estimated_fees:.{current_decimals}f}")
+
+    # Υπολογισμός καθαρού κέρδους μετά την αφαίρεση των fees
+    net_profit = potential_profit - estimated_fees
+
+    # Εκτέλεση της εντολής πώλησης
+    order_successful, execution_price, fees = place_order("sell", total_amount_to_sell, current_price)
+    if order_successful and execution_price:
+        logging.info(f"Sold total {total_amount_to_sell} of {CRYPTO_NAME} at {execution_price:.{current_decimals}f} "
+                     f"with net profit: {net_profit:.{current_decimals}f}")
+        
+        # Ανανεώνουμε το κέρδος με το κέρδος της συναλλαγής
+        daily_profit += net_profit
+        
+        sendgrid_email(total_amount_to_sell, "sell", execution_price, net_profit, "N/A", "Macro Call")
+
+        # Reset όλων των μεταβλητών στο state.json μόνο αν εκτελέστηκε η πώληση
+        current_trades += 1
+        active_trade = None
+        trade_amount = 0
+        second_trade_price = None
+        second_trade_amount = 0
+        third_trade_price = None
+        third_trade_amount = 0
+        highest_price = None
+        highest_price_second_position = None
+        highest_price_third_position = None
+        trailing_profit_active = False
+        trailing_profit_second_position_active = False
+        trailing_profit_third_position_active = False
+
+        # Αποθήκευση του χρόνου τελευταίου reset για να ενεργοποιηθεί το cooldown
+        save_state()
+        save_cooldown_state(custom_duration=2700)  # macro call 45 minutes
+
+    else:
+        logging.info(f"Failed to execute sell all order at {current_price}. No state reset performed.")
 
 
 
@@ -2982,13 +3069,20 @@ def run_bot():
     logging.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     logging.info(f"Starting {CRYPTO_FULLNAME} ({CRYPTO_NAME}) bot...")
     
-    # Check for URGENTG sell signal at the beginning (macro call via excel)
+
+    # Check for URGENT SELL ALL signal (macro call via excel)
+    if check_sell_all_signal():
+        logging.info("Bot execution stopped for this round due to sell ALL signal.")
+        return  # Stop bot execution for this round
+
+
+    # Check for URGENT sell signal at the beginning (macro call via excel)
     if check_sell_signal():
         logging.info("Bot execution stopped for this round due to sell signal.")
         return  # Stop bot execution for this round
         
 
-    # Check for buy signal (macro call via external file)
+    # Check for URGENT buy signal at the beginning (macro call via excel)
     if check_buy_signal():
         logging.info("Bot execution stopped for this round due to buy signal.")
         return  # Stop bot execution for this round        
