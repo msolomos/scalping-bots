@@ -2874,7 +2874,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     # Κλήση της fallback συνάρτησης
                     if fallback_conditions(df):
                         # Κλήση execute_buy_action αν οι fallback συνθήκες πληρούνται
-                        execute_buy_action(
+                        success, reason = execute_buy_action(
                             df=df,
                             portfolio_uuid=portfolio_uuid,
                             TRADE_AMOUNT=TRADE_AMOUNT,
