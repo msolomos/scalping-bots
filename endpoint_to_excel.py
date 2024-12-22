@@ -176,6 +176,54 @@ def buy_position():
     else:
         return jsonify({"status": "error", "message": f"Το bot '{bot_name}' δεν βρέθηκε."}), 404
         
+        
+        
+
+
+# Νέο endpoint για πώληση όλων των θέσεων ενός συγκεκριμένου bot
+@app.route('/api/sell_all_positions', methods=['POST'])
+def sell_all_positions():
+    data = request.json
+    bot_name = data.get("name")  # Λαμβάνει το όνομα του bot, π.χ., "AVAX"
+    
+    # Ελέγχει αν το bot υπάρχει στο crypto_info dictionary
+    if bot_name in crypto_info:
+        # Λήψη δεδομένων για το bot
+        bot_info_path = crypto_info[bot_name]['path']
+        
+        # Φόρτωση του αρχείου JSON με τις θέσεις
+        try:
+            with open(bot_info_path, "r") as f:
+                bot_data = json.load(f)
+        except FileNotFoundError:
+            return jsonify({"status": "error", "message": f"The data file for bot '{bot_name}' was not found."}), 404
+        except json.JSONDecodeError:
+            return jsonify({"status": "error", "message": f"The data file for bot '{bot_name}' is not valid."}), 500
+        
+        # Υπολογισμός συνολικής ποσότητας προς πώληση
+        total_amount_to_sell = bot_data.get("trade_amount", 0) + \
+                               bot_data.get("second_trade_amount", 0) + \
+                               bot_data.get("third_trade_amount", 0)
+        
+        if total_amount_to_sell > 0:
+            # Δημιουργία του αρχείου σήματος πώλησης
+            bot_folder = os.path.dirname(bot_info_path)
+            signal_file = os.path.join(bot_folder, "sell_all_signal.txt")
+            
+            with open(signal_file, "w") as f:
+                f.write("SELL_ALL")
+            
+            return jsonify({
+                "status": "success",
+                "message": f"Sell all positions for bot '{bot_name}' was successfully requested.",
+                "total_amount_to_sell": total_amount_to_sell
+            })
+        else:
+            return jsonify({"status": "error", "message": f"Bot '{bot_name}' has no active positions to sell."}), 400
+    else:
+        return jsonify({"status": "error", "message": f"Bot '{bot_name}' not found."}), 404
+        
+        
 
 
 
