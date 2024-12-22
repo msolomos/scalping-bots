@@ -295,6 +295,35 @@ def check_sell_signal():
 
 
 
+
+def check_buy_signal():
+    """
+    Ελέγχει αν υπάρχει σήμα αγοράς και το εκτελεί αν βρεθεί το αρχείο `buy_signal.txt`.
+    """
+    # Define the path to the `buy_signal.txt` file for this specific bot
+    signal_file = os.path.join(os.getcwd(), f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/buy_signal.txt")
+
+    # Check if the `buy_signal.txt` file exists
+    if os.path.exists(signal_file):
+        success, message = buy_open_position()  # Execute the buy
+
+        if success:
+            os.remove(signal_file)  # Delete the file after successful execution
+            logging.info(f"Buy signal executed successfully: {message}. `buy_signal.txt` file deleted.")
+            return True  # Return True to stop the bot execution for this round
+        else:
+            logging.error(f"Buy signal execution failed: {message}. `buy_signal.txt` file remains.")
+            return True  # Return True to stop the bot execution for this round
+
+    else:
+        logging.info("No external buy signal found.")
+        return False  # Return False if no buy signal is found
+
+
+
+
+
+
 # Ειδοποίηση μέσω Pushover
 def send_push_notification(message, Logfile=True):
     """
@@ -669,6 +698,74 @@ def sell_open_position():
 
     else:
         logging.info(f"Failed to execute sell order at {current_price}. No state reset performed.")
+
+
+
+
+def buy_open_position():
+    """
+    Εκτελεί αγορά με βάση τη στατική ποσότητα TRADE_AMOUNT.
+    """
+    global active_trade, trade_amount, daily_profit, current_trades, highest_price, trailing_profit_active, TRADE_AMOUNT
+    logging.info("Immediate Buy was executed through macro call.")
+
+    load_state()
+
+    current_price = get_crypto_price()
+    if current_price is None:
+        logging.error("Failed to fetch current price. Skipping trade execution.")
+        return
+
+    # Λήψη διαθέσιμου υπολοίπου
+    portfolio_summary = get_portfolio_balance(portfolio_uuid)
+    
+    if "error" not in portfolio_summary:
+        available_cash = portfolio_summary['total_cash_equivalent_balance']
+        
+        # Υπολογισμός ποσού που απαιτείται για την αγορά
+        amount_needed_to_buy = TRADE_AMOUNT * current_price
+        logging.info(f"Available cash in portfolio: {available_cash:.2f} EUR, Amount needed: {amount_needed_to_buy:.2f} EUR ")
+
+        if amount_needed_to_buy <= available_cash:
+            logging.info(f"Sufficient funds available ({available_cash:.2f} EUR). Executing Buy Order.")
+            
+
+            # Εκτίμηση των fees για τη συναλλαγή
+            estimated_fees = current_price * TRADE_AMOUNT * FEES_PERCENTAGE
+            logging.info(f"Estimated fees for the trade: {estimated_fees:.{current_decimals}f}")
+
+            # Εκτέλεση της αγοράς
+            order_successful, execution_price, fees = place_order("buy", TRADE_AMOUNT, current_price)
+            
+            if order_successful and execution_price:
+                logging.info(f"Bought {TRADE_AMOUNT} of {CRYPTO_NAME} at {execution_price:.{current_decimals}f}.")
+
+                # Ενημέρωση των μεταβλητών μετά την αγορά
+                active_trade = execution_price
+                trade_amount = TRADE_AMOUNT
+                daily_profit -= fees
+                highest_price = execution_price  # Ενημέρωση για trailing profit logic
+                current_trades += 1
+
+                sendgrid_email(TRADE_AMOUNT, "buy", execution_price, "N/A", "N/A", "Macro Call")
+
+                # Χρονική αναμονή μετά την αγορά για αποφυγή άμεσης πώλησης
+                save_cooldown_state(custom_duration=2700)  # macro call 45 minutes
+                
+                # Αποθήκευση της κατάστασης
+                save_state()
+                
+                return True, "Order placed successfully."
+
+        else:
+            logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
+            send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)
+            return False, "Insufficient funds."
+            
+    else:
+        logging.error(f"Failed to retrieve portfolio balance. No buy action taken.")
+        logging.error(f"Error details: {portfolio_summary['message']}")
+        return False, "Portfolio balance retrieval failed."
 
 
 
@@ -2889,8 +2986,14 @@ def run_bot():
     if check_sell_signal():
         logging.info("Bot execution stopped for this round due to sell signal.")
         return  # Stop bot execution for this round
-    
-    
+        
+
+    # Check for buy signal (macro call via external file)
+    if check_buy_signal():
+        logging.info("Bot execution stopped for this round due to buy signal.")
+        return  # Stop bot execution for this round        
+   
+   
     # Check if the bot is allowed to run
     load_state()  # Load the state to check start_bot status
  
