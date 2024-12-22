@@ -151,6 +151,31 @@ def sell_position():
         return jsonify({"status": "success", "message": f"Πώληση για το bot {bot_name} ζητήθηκε επιτυχώς."})
     else:
         return jsonify({"status": "error", "message": f"Το bot '{bot_name}' δεν βρέθηκε."}), 404
+        
+        
+        
+
+
+# Νέο endpoint για αγορά θέσης για συγκεκριμένο bot
+@app.route('/api/buy_position', methods=['POST'])
+def buy_position():
+    data = request.json
+    bot_name = data.get("name")  # Λαμβάνει το όνομα του bot, π.χ., "AVAX"
+    
+    # Ελέγχει αν το bot υπάρχει στο crypto_info dictionary
+    if bot_name in crypto_info:
+        # Λήψη του μονοπατιού του bot από το dictionary
+        bot_folder = os.path.dirname(crypto_info[bot_name]['path'])
+        signal_file = os.path.join(bot_folder, "buy_signal.txt")
+        
+        # Δημιουργία του αρχείου σήματος αγοράς
+        with open(signal_file, "w") as f:
+            f.write("BUY")
+        
+        return jsonify({"status": "success", "message": f"Αγορά για το bot {bot_name} ζητήθηκε επιτυχώς."})
+    else:
+        return jsonify({"status": "error", "message": f"Το bot '{bot_name}' δεν βρέθηκε."}), 404
+        
 
 
 
