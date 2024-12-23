@@ -44,7 +44,7 @@ long_ma_period = 50  # 20 περιόδων
 RSI_THRESHOLD = 30
 ADX_THRESHOLD = 25
 STOCHASTIC_OVERSOLD_THRESHOLD = 40
-BUY_THRESHOLD = 0.5    # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά                                                                          
+BUY_THRESHOLD = -0.5    # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά                                                                          
 GRANULARITY = 300
 GRANULARITY_TEXT = "FIVE_MINUTE"
 ENABLE_TABULATE_INDICATORS = False      # αποτελέσματα δεικτών σε γραμμογραφημένη μορφή
@@ -1565,11 +1565,9 @@ def fallback_conditions(df, atr_threshold=1.5, stochastic_threshold=20):
     logging.debug(f"Stochastic Check: Current %K = {current_k:.2f}, Condition = {stochastic_condition}")
     
     # Επιστροφή απόφασης
-    if atr_condition or stochastic_condition:
-        logging.debug("Fallback conditions met. Proceeding with buy action despite failed volume confirmation.")
+    if atr_condition or stochastic_condition:        
         return True
-    else:
-        logging.debug("Fallback conditions not met. Buy action skipped.")
+    else:        
         return False
 
 
@@ -1897,7 +1895,10 @@ def execute_buy_action(
                 return False, "Order placement failed."
         else:
             logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
-            send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)
+            send_push_notification(
+                f"ALERT: Insufficient funds for {CRYPTO_NAME} bot. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR. This alert originates from the fallback_conditions block. Please ensure sufficient funds as this message will appear every 2 minutes.",
+                Logfile=False
+            )
             return False, "Insufficient funds."
             
     else:
@@ -2949,7 +2950,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"Checking Volume Confirmation...")
                 
                 # Ενημέρωση για θετική τιμή σε silent mode
-                send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
+                #send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
 
                 # Έλεγχος επιβεβαίωσης όγκου πριν την αγορά
                 volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30)
@@ -2960,6 +2961,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                     # Κλήση της fallback συνάρτησης
                     if fallback_conditions(df):
+                        logging.info("Fallback conditions met. Proceeding with buy action despite failed volume confirmation.")
+                        
                         # Κλήση execute_buy_action αν οι fallback συνθήκες πληρούνται
                         success, reason = execute_buy_action(
                             df=df,
@@ -2984,12 +2987,12 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             logging.warning(f"Buy action failed via fallback conditions. Reason: {reason}")
                         return  # Τερματισμός της εκτέλεσης
                     
+                    else:
+                        logging.info("Fallback conditions not met. Buy action skipped.")
+                        return  # Τερματισμός της εκτέλεσης
 
                 logging.info(f"Volume confirmation passed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
                 
-                # Ενημέρωση για θετική τιμή
-                send_push_notification(f"Volume confirmation passed for {CRYPTO_NAME} bot.")
-
                 # Εξαγωγή του υπολοίπου του χαρτοφυλακίου
                 portfolio_summary = get_portfolio_balance(portfolio_uuid)  # Υποθέτουμε ότι έχεις το portfolio_uuid
                 if "error" not in portfolio_summary:
@@ -3031,7 +3034,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
                         logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
-                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)                        
+                        send_push_notification(
+                            f"ALERT: Insufficient funds for {CRYPTO_NAME} bot. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR. This alert originates from the volume confirmation block. Please ensure sufficient funds as this message will appear every 2 minutes.",
+                            Logfile=False
+                        )
                         return
                         
                 else:
