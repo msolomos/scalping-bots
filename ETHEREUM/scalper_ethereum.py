@@ -44,7 +44,7 @@ long_ma_period = 50  # 20 περιόδων
 RSI_THRESHOLD = 30
 ADX_THRESHOLD = 25
 STOCHASTIC_OVERSOLD_THRESHOLD = 40
-BUY_THRESHOLD = -0.5    # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά                                                                          
+BUY_THRESHOLD = 0.5    # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά                                                                          
 GRANULARITY = 300
 GRANULARITY_TEXT = "FIVE_MINUTE"
 ENABLE_TABULATE_INDICATORS = False      # αποτελέσματα δεικτών σε γραμμογραφημένη μορφή
