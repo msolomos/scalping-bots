@@ -26,7 +26,6 @@ CRYPTO_SYMBOL = "ETH-EUR"
 CRYPTO_NAME = "ETH"
 CRYPTO_FULLNAME = "ETHEREUM"
 CRYPTO_CURRENCY = "EUR"
-portfolio_uuid = "0054c157-a5c9-4e91-a3c4-bb1f5d638c5c"
 
 # 2. Ειδική περίπτωση URL απο Binance
 BINANCE_PAIR = "ETHEUR"
@@ -84,8 +83,6 @@ SELL_ON_TRAILING = False  # ή False ανάλογα με την επιθυμητ
 
 
 # 8. Παράμετροι Αποστολής E-mail
-EMAIL_SENDER= 'info@f2d.gr'
-EMAIL_RECIPIENT= 'info@f2d.gr'
 ENABLE_EMAIL_NOTIFICATIONS = True
 ENABLE_PUSH_NOTIFICATIONS = True
 
@@ -179,22 +176,29 @@ def load_keys(json_path="/opt/python/scalping-bot/api_keys.json"):
     try:
         with open(json_path, "r") as file:
             keys = json.load(file)
+            # Βασικά κλειδιά
             key_name = keys.get("key_name")
             key_secret = keys.get("key_secret")
             SENDGRID_API_KEY = keys.get("SENDGRID_API_KEY")
             PUSHOVER_TOKEN = keys.get("PUSHOVER_TOKEN")
             PUSHOVER_USER = keys.get("PUSHOVER_USER")
+            # Νέες μεταβλητές
+            portfolio_uuid = keys.get("portfolio_uuid")
+            EMAIL_SENDER = keys.get("EMAIL_SENDER")
+            EMAIL_RECIPIENT = keys.get("EMAIL_RECIPIENT")
 
-            if not key_name or not key_secret or not SENDGRID_API_KEY:
-                raise ValueError("Key name, secret, or SendGrid API key is missing in the JSON file.")
-            if not PUSHOVER_TOKEN or not PUSHOVER_USER:
-                raise ValueError("Pushover token or user key is missing in the JSON file.")
+            # Έλεγχος αν λείπουν υποχρεωτικές μεταβλητές
+            if not all([key_name, key_secret, SENDGRID_API_KEY, PUSHOVER_TOKEN, PUSHOVER_USER]):
+                raise ValueError("One or more required keys are missing in the JSON file.")
+            if not all([portfolio_uuid, EMAIL_SENDER, EMAIL_RECIPIENT]):
+                raise ValueError("Portfolio UUID, Email Sender, or Email Recipient is missing in the JSON file.")
 
-            return key_name, key_secret, SENDGRID_API_KEY, PUSHOVER_TOKEN, PUSHOVER_USER
+            return key_name, key_secret, SENDGRID_API_KEY, PUSHOVER_TOKEN, PUSHOVER_USER, portfolio_uuid, EMAIL_SENDER, EMAIL_RECIPIENT
     except FileNotFoundError:
         raise FileNotFoundError(f"The specified JSON file '{json_path}' was not found.")
     except json.JSONDecodeError:
         raise ValueError(f"The JSON file '{json_path}' is not properly formatted.")
+
 
 
 
@@ -225,8 +229,8 @@ if os.path.exists(pause_file):
 
 
 
-# Φόρτωση των κλειδιών
-key_name, key_secret, SENDGRID_API_KEY, PUSHOVER_TOKEN, PUSHOVER_USER = load_keys()
+# Φόρτωση όλων των μεταβλητών από το JSON αρχείο
+key_name, key_secret, SENDGRID_API_KEY, PUSHOVER_TOKEN, PUSHOVER_USER, portfolio_uuid, EMAIL_SENDER, EMAIL_RECIPIENT = load_keys()
 
 
 
@@ -846,7 +850,10 @@ def buy_open_position():
 
         else:
             logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
-            send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)
+            send_push_notification(
+                f"ALERT: Insufficient funds for {CRYPTO_NAME} bot. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR. This alert originates from the macro buy definition. Please ensure sufficient funds as this message will appear every 2 minutes.",
+                Logfile=False
+            )
             return False, "Insufficient funds."
             
     else:
@@ -2932,7 +2939,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             logging.info(f"Order placement failed. No buy action taken.")
                     else:
                         logging.warning(f"Insufficient funds. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR")
-                        send_push_notification(f"ALERT: Insufficient funds for {CRYPTO_NAME} bot.", Logfile=False)                        
+                        send_push_notification(
+                            f"ALERT: Insufficient funds for {CRYPTO_NAME} bot. Needed: {amount_needed_to_buy:.2f} EUR, Available: {available_cash:.2f} EUR. This alert originates from the score history block. Please ensure sufficient funds as this message will appear every 2 minutes.",
+                            Logfile=False
+                        )                        
                         return
                         
                 else:
