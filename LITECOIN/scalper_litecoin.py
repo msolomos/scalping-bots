@@ -2281,7 +2281,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     trailing_sell_price_second_position = max(
                         second_break_even_price,
                         highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
-                    )                    
+                    )                   
                     
                     logging.debug(f"[Second Position] Trailing sell price: {trailing_sell_price_second_position:.8f}, Highest price: {highest_price_second_position:.8f}")
 
@@ -2290,8 +2290,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     logging.debug(f"DEBUG: Current Price: {current_price:.8f}, Trailing Sell Price: {trailing_sell_price_second_position:.8f}")
                     logging.debug(f"DEBUG: Highest Price: {highest_price_second_position}, Trailing Sell Price: {trailing_sell_price_second_position}")
 
-                    #if current_price <= trailing_sell_price_second_position:
-                    if current_price <= trailing_sell_price_second_position and current_price >= second_break_even_price:
+                    if current_price <= trailing_sell_price_second_position:
                         logging.info(f"[Second Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} dropped below trailing sell price ({trailing_sell_price_second_position:.{current_decimals}f}) {CRYPTO_CURRENCY}. Selling all positions.")
 
                         # Υπολογισμός συνολικής ποσότητας προς πώληση
@@ -2421,10 +2420,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                 # Υπολογισμός του trailing sell price για τη τρίτη θέση
                 #trailing_sell_price_third_position = highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
+                
                 trailing_sell_price_third_position = max(
                     third_break_even_price,
                     highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
-                )              
+                )           
                 
                 logging.debug(f"[Third Position] Trailing sell price updated to {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
 
@@ -2433,7 +2433,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.debug(f"DEBUG: Current Price: {current_price:.8f}, Trailing Sell Price: {trailing_sell_price_third_position:.8f}")
                 logging.debug(f"DEBUG: Highest Price: {highest_price_third_position}, Trailing Sell Price: {trailing_sell_price_third_position}")
                                     
-                if current_price <= trailing_sell_price_third_position and current_price >= third_break_even_price:
+                if current_price <= trailing_sell_price_third_position:
                     logging.info(f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} dropped below trailing sell price ({trailing_sell_price_third_position:.{current_decimals}f}) {CRYPTO_CURRENCY}. Selling all positions.")
 
                     # Υπολογισμός συνολικής ποσότητας προς πώληση
