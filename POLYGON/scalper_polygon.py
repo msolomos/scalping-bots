@@ -2276,7 +2276,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 if trailing_profit_second_position_active:
                 
                     # Υπολογισμός του trailing sell price για τη δεύτερη θέση
-                    trailing_sell_price_second_position = highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
+                    #trailing_sell_price_second_position = highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
+                    
+                    trailing_sell_price_second_position = max(
+                        second_break_even_price,
+                        highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
+                    )                   
+                    
                     logging.debug(f"[Second Position] Trailing sell price: {trailing_sell_price_second_position:.8f}, Highest price: {highest_price_second_position:.8f}")
 
 
@@ -2413,7 +2419,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             if trailing_profit_third_position_active:                       
 
                 # Υπολογισμός του trailing sell price για τη τρίτη θέση
-                trailing_sell_price_third_position = highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
+                #trailing_sell_price_third_position = highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
+                
+                trailing_sell_price_third_position = max(
+                    third_break_even_price,
+                    highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
+                )           
+                
                 logging.debug(f"[Third Position] Trailing sell price updated to {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
 
 
