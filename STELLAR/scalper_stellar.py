@@ -2563,21 +2563,29 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     # Ενημέρωση του trailing sell price
                     trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
                     trailing_sell_price = max(trailing_sell_price, active_trade)  # Ensure sell price is above active trade             <<<----------------------------- new additional to correct negative trailing price
-                    logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f}")         # <<<---------------------------------------------------------------------------------------------
+                    logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")         # <<<---------------------------------------------------------------------------------------------
 
                     # Έλεγχος αν πρέπει να πουλήσουμε λόγω trailing profit
                     if current_price <= trailing_sell_price:
-                        logging.info(f"Trailing profit triggered. Selling at {current_price}")
+                        logging.info(f"Trailing profit triggered. Selling at {current_price} {CRYPTO_CURRENCY}.")
                         order_successful, execution_price, fees = place_order("sell", trade_amount, current_price)
 
                         if order_successful and execution_price:
                             
                             # Ενημέρωση daily_profit λαμβάνοντας υπόψη και τα fees
                             profit_trailing = (execution_price - active_trade) * trade_amount - fees
+                            logging.info(f"The sale was completed with a net profit of {profit_trailing:.2f} {CRYPTO_CURRENCY}.")
+                            
                             daily_profit += profit_trailing
                             
-                            sendgrid_email(trade_amount, "sell", execution_price, profit_trailing, "N/A", "Trailing Profit")
+                            # Αποστολή ειδοποιήσεων για την πώληση
+                            sendgrid_email(trade_amount, "sell", execution_price, profit_trailing, "N/A", "Trailing Profit")                            
+                            send_push_notification(
+                                f"ALERT: Trailing Profit Sale was executed for {CRYPTO_NAME} bot at {execution_price} {CRYPTO_CURRENCY}. "
+                                f"The net profit after calculating and subtracting the fees is {profit_trailing:.2f} {CRYPTO_CURRENCY}."
+                            )
                             
+                            # Ενημέρωση μεταβλητών                          
                             active_trade = None
                             trade_amount = 0
                             highest_price = None
