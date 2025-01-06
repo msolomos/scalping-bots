@@ -3143,6 +3143,8 @@ def run_bot():
     logging.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     logging.info(f"Starting {CRYPTO_FULLNAME} ({CRYPTO_NAME}) bot...")
     
+    iteration_start = time.time()    
+    
 
     # Check for URGENT SELL ALL signal (macro call via excel)
     if check_sell_all_signal():
@@ -3195,8 +3197,11 @@ def run_bot():
     
   
     execute_scalping_trade(CRYPTO_SYMBOL) 
-    logging.info("Bot execution completed.")
-
+    
+    # Μετά την ολοκλήρωση του iteration
+    iteration_end = time.time()
+    logging.info(f"Bot execution completed in {iteration_end - iteration_start:.2f} seconds.")    
+    
 
 
 # Τροποποίηση της κύριας συνάρτησης για να ελέγχει το cooldown και να εμφανίζει το χρόνο που απομένει
