@@ -33,7 +33,7 @@ BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
 SCALP_TARGET = 1.02
-TRADE_AMOUNT = 1000  # Μονάδα κρυπτονομίσματος
+TRADE_AMOUNT = 2000  # Μονάδα κρυπτονομίσματος
 DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός επένδυσης σύμφωνα με το ημερήσιο κέρδος / ζημιά
 
 
