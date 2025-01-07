@@ -32,7 +32,7 @@ BINANCE_PAIR = "ETHEUR"
 BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
-SCALP_TARGET = 1.02
+SCALP_TARGET = 1.015
 TRADE_AMOUNT = 1  # Μονάδα κρυπτονομίσματος
 DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός επένδυσης σύμφωνα με το ημερήσιο κέρδος / ζημιά                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 
