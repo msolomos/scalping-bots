@@ -33,7 +33,7 @@ BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
 SCALP_TARGET = 1.01
-TRADE_AMOUNT = 50  # Μονάδα κρυπτονομίσματος
+TRADE_AMOUNT = 1  # Μονάδα κρυπτονομίσματος
 DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός επένδυσης σύμφωνα με το ημερήσιο κέρδος / ζημιά
 
 
@@ -142,7 +142,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
         logging.FileHandler(
-            f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/{CRYPTO_NAME}_bot.log"
+            f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/new_version_bot.log"
         ),  # Log to file
         logging.StreamHandler(),  # Log to console
     ],
@@ -152,15 +152,15 @@ logging.basicConfig(
 
 
 # Διαδρομή για το cooldownfile
-cooldown_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/cooldown_state.json"
+cooldown_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/new_version_cooldown_state.json"
 
 
 # Διαδρομή για το state file
-state_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/state.json"
+state_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/new_version_state.json"
 
 
 # Διαδρομή για το pause flag
-pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
+pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/new_version_pause.flag"
 
 
 # Διαδρομή για το αρχείο βαρύτητας
@@ -168,7 +168,7 @@ weights_file = f"/opt/python/scalping-bot/indicator_weights.json"
 
 
 # Διαδρομή για το αρχείο .csv
-csv_file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.csv"
+csv_file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/new_version_crypto_scores.csv"
 
 
 # Συνάρτηση για να φορτώσει τα κλειδιά από το αρχείο JSON
@@ -1621,12 +1621,20 @@ def fallback_conditions(df, atr_threshold=1.5, stochastic_threshold=20, stoch_rs
 
 
     # Αντί για αυστηρό AND, χρησιμοποιούμε weighting:    
-    total_conditions = trend_condition + momentum_condition + volatility_condition
+    
+    # logging πριν την προσθεση
+    logging.debug(f">>>> Trend Condition: {trend_condition}, Momentum Condition: {momentum_condition}, Volatility Condition: {volatility_condition}")
+
+    total_conditions = int(trend_condition) + int(momentum_condition) + int(volatility_condition)
+    
+    # Logging πριν το IF και μετά την προσθεση
+    logging.debug(f">>>> Total conditions calculated: {total_conditions}")
+    
     if total_conditions >= 2:  # Πρέπει να πληρούνται τουλάχιστον 2 συνθήκες
         return True
     else:
         return False
-        
+
 
 
 
@@ -3200,6 +3208,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                 # Έλεγχος επιβεβαίωσης όγκου πριν την αγορά
                 volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30)
+                
                 
                 if not volume_confirmation:
                     logging.info(f"Volume confirmation failed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
