@@ -108,6 +108,7 @@ def get_crypto_info():
                 data.append({
                     "name": name,
                     "start_bot": file_data.get("start_bot", None),  # Αν δεν υπάρχει το κλειδί, αφήνει κενό
+                    "manual_third_buy": file_data.get("manual_third_buy", None),  # Προσθήκη manual_third_buy
                     "active_trade": file_data.get("active_trade"),
                     "trade_amount": file_data.get("trade_amount"),
                     "second_trade_price": file_data.get("second_trade_price"),
@@ -121,6 +122,7 @@ def get_crypto_info():
             data.append({
                 "name": name,
                 "start_bot": None,
+                "manual_third_buy": None,  # Προσθήκη manual_third_buy
                 "active_trade": None,
                 "trade_amount": None,
                 "second_trade_price": None,
@@ -179,12 +181,20 @@ def buy_position():
         
         
 
-
 # Νέο endpoint για πώληση όλων των θέσεων ενός συγκεκριμένου bot
 @app.route('/api/sell_all_positions', methods=['POST'])
 def sell_all_positions():
     data = request.json
+    if not data:
+        logging.error("No JSON data received.")
+        return jsonify({"status": "error", "message": "Invalid or missing JSON data."}), 400    
+    
+    
     bot_name = data.get("name")  # Λαμβάνει το όνομα του bot, π.χ., "AVAX"
+    if not bot_name:
+        logging.error("Missing 'name' in JSON data.")
+        return jsonify({"status": "error", "message": "Missing 'name' in JSON data."}), 400    
+    
     
     # Ελέγχει αν το bot υπάρχει στο crypto_info dictionary
     if bot_name in crypto_info:
@@ -224,6 +234,42 @@ def sell_all_positions():
         return jsonify({"status": "error", "message": f"Bot '{bot_name}' not found."}), 404
         
         
+
+
+# Endpoint to enable manual third buy for a specific bot
+@app.route('/api/manual_third_buy', methods=['POST'])
+def manual_third_buy():
+    data = request.json
+    bot_name = data.get("name")
+
+    if bot_name in crypto_info:
+        state_file_path = crypto_info[bot_name]['path']
+
+        try:
+            with open(state_file_path, 'r+') as f:
+                state = json.load(f)
+                state['manual_third_buy'] = True  # Set to enable manual third buy
+
+                # Write changes back to the file
+                f.seek(0)
+                json.dump(state, f, indent=4)
+                f.truncate()
+            
+            # Logging for success
+            app.logger.info(f"Manual third buy enabled for bot {bot_name}.")
+
+            return jsonify({"status": "success", "message": f"Manual third buy enabled for bot {bot_name}."})
+        
+        except Exception as e:
+            # Logging for error
+            app.logger.error(f"Error updating state file for bot {bot_name}: {str(e)}")
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+    else:
+        # Logging for bot not found
+        app.logger.warning(f"Bot '{bot_name}' not found.")
+        return jsonify({"status": "error", "message": f"Bot '{bot_name}' not found."}), 404
+
 
 
 
