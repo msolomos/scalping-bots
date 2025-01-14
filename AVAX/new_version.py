@@ -2281,11 +2281,22 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     # Προσθήκη των fees στο daily_profit                
                     daily_profit -= fees  # Αφαιρούμε τα fees από το daily_profit για ακριβή υπολογισμό του κόστους                    
 
-                    logging.info(f"Second buy executed successfully at {second_trade_price:.{current_decimals}f} {CRYPTO_CURRENCY}. "
-                                 f"New average price: {average_trade_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+                   
 
-                    send_push_notification(f"ALERT: Second buy executed successfully at {second_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                    # Ειδοποίηση με διαφορετικό μήνυμα ανάλογα με το manual second buy
+                    if manual_second_buy:
+                        send_push_notification(f"ALERT: Manual second buy executed successfully at {second_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                        
+                        logging.info(f"Manual second buy executed successfully at {second_trade_price:.{current_decimals}f}. "
+                                     f"New average price: {average_trade_price:.{current_decimals}f}.")                        
+                        
+                    else:
+                        send_push_notification(f"ALERT: Second buy executed automatically at {second_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                        
+                        logging.info(f"Second buy executed automatically at {second_trade_price:.{current_decimals}f}. "
+                                     f"New average price: {average_trade_price:.{current_decimals}f}.")                         
                                                             
+
                     
                     
                     # Αποθήκευση κατάστασης μετά την αγορά
@@ -2454,10 +2465,21 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     # Προσθήκη των fees στο daily_profit
                     daily_profit -= fees
 
-                    logging.info(f"Third buy executed successfully at {third_trade_price:.{current_decimals}f}. "
-                                 f"New average price: {average_trade_price:.{current_decimals}f}.")
-
-                    send_push_notification(f"ALERT: Third buy executed successfully at {third_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                  
+                    # Ειδοποίηση με διαφορετικό μήνυμα ανάλογα με το manual τρίτο buy
+                    if manual_third_buy:
+                        send_push_notification(f"ALERT: Manual third buy executed successfully at {third_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                        
+                        logging.info(f"Manual third buy executed successfully at {third_trade_price:.{current_decimals}f}. "
+                                     f"New average price: {average_trade_price:.{current_decimals}f}.")                        
+                        
+                    else:
+                        send_push_notification(f"ALERT: Third buy executed automatically at {third_trade_price:.{current_decimals}f} for {CRYPTO_NAME} bot.")
+                        
+                        logging.info(f"Third buy executed automatically at {third_trade_price:.{current_decimals}f}. "
+                                     f"New average price: {average_trade_price:.{current_decimals}f}.")                        
+                        
+                        
 
                     # Αποθήκευση κατάστασης μετά την αγορά
                     manual_third_buy = False       # Επαναφορά του flag
