@@ -2255,7 +2255,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 second_break_even_price = (trade_amount * active_trade + second_trade_amount * second_trade_price + second_total_fees) / (trade_amount + second_trade_amount)
                 remaining_to_break_even = max(0, second_break_even_price - current_price)
                 logging.info(f"[Second Position] Break-even sell price: {second_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
-
+                
+                
 
                 # Έλεγχος για πώληση μόνο αν η τρέχουσα τιμή καλύπτει το κόστος + fees
                 if current_price >= second_break_even_price:
@@ -2277,13 +2278,19 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         logging.info(f"[Second Position] Initialized highest_price to {highest_price_second_position:.{current_decimals}f}")
                         save_state(log_info=False)  #χωρίς Logging.info
                         
+                        
+                       
+                        
                 
                 # ===== Νέο Block: Έλεγχος Trailing Sell Εκτός Break-even Check =====
                 if trailing_profit_second_position_active:
                 
-                    # Υπολογισμός του trailing sell price για τη δεύτερη θέση
-                    #trailing_sell_price_second_position = highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
                     
+                    # Υπολογισμός ποσοστού δυναμικά βάσει των θέσεων
+                    TRAILING_PROFIT_SECOND_PERCENTAGE = round((active_trade - second_trade_price) / active_trade, 3)
+                    logging.info(f"[Second Position] Trailing profit recalculated to {TRAILING_PROFIT_SECOND_PERCENTAGE}")
+                    
+                    # Υπολογισμός του trailing sell price για τη δεύτερη θέση                   
                     trailing_sell_price_second_position = max(
                         second_break_even_price,
                         highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
@@ -2466,9 +2473,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         
             # ===== Νέο Block: Έλεγχος Trailing Sell, για 3ή αγορά, εκτός Break-even Check =====
             if trailing_profit_third_position_active:                       
-
-                # Υπολογισμός του trailing sell price για τη τρίτη θέση
-                #trailing_sell_price_third_position = highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
+              
+                TRAILING_PROFIT_THIRD_PERCENTAGE = 0.02  # 2% σταθερό ποσοστό για την 3η θέση
+                
                 
                 trailing_sell_price_third_position = max(
                     third_break_even_price,
@@ -2617,21 +2624,40 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     trailing_profit_active = True
                     save_state(log_info=False)  #χωρίς Logging.info
                                                                                                                     
+
                 if trailing_profit_active:
                     if ENABLE_DYNAMIC_TRAILING_PROFIT:
-                        # Μεγαλύτερο period (π.χ., 21)
-                        atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
-                        last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
-                        logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
+                        if second_trade_price in [None, 0] and third_trade_price in [None, 0]:
+                            # Δυναμικός υπολογισμός για την active_trade (1η θέση)
+                            atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
+                            last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
+                            logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
 
-                        
-                        # Υπολογισμός δυναμικού threshold
-                        TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price  # ATR_MULTIPLIER είναι ο πολλαπλασιαστής
-                        logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                            # Υπολογισμός δυναμικού threshold
+                            TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
+                            logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+
+                        elif third_trade_price in [None, 0]:
+                            # Δυναμικός υπολογισμός για τη second_trade_price (2η θέση)
+                            atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
+                            last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
+                            logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
+
+                            # Υπολογισμός δυναμικού threshold
+                            TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
+                            logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                            
+
+                        else:
+                            # Λογική για την 1η θέση: Υπολογισμός με ποσοστό (1η - 2η θέση)
+                            TRAILING_PROFIT_THRESHOLD = (active_trade - second_trade_price) / active_trade
+                            logging.info(f"Dynamic (ATR) trailing profit disabled. Threshold for active_trade: {TRAILING_PROFIT_THRESHOLD:.4f}")
+
                     else:
                         # Χρήση στατικού threshold
                         TRAILING_PROFIT_THRESHOLD = STATIC_TRAILING_PROFIT_THRESHOLD
-                        logging.info(f"Static trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")                    
+                        logging.info(f"Static trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                  
                     
                     
                     # Ενημέρωση του trailing sell price
