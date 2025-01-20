@@ -1458,6 +1458,33 @@ def calculate_stochastic(df, k_period=14, d_period=3):
     df.drop(['low_k', 'high_k'], axis=1, inplace=True)
     
     return df['%K'], df['%D']
+    
+    
+    
+def calculate_stochastic_rsi(df, period=14):
+    """
+    Υπολογίζει το Stochastic RSI για ένα DataFrame.
+    
+    Args:
+        df: DataFrame με τιμές 'close'.
+        period: Περίοδος για τον υπολογισμό (default 14).
+    
+    Returns:
+        pd.Series: Τιμές του Stochastic RSI.
+    """
+    # Υπολογισμός RSI
+    delta = df['close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rsi = 100 - (100 / (1 + gain / loss))
+    
+    # Υπολογισμός Stochastic RSI
+    lowest_rsi = rsi.rolling(window=period).min()
+    highest_rsi = rsi.rolling(window=period).max()
+    stoch_rsi = (rsi - lowest_rsi) / (highest_rsi - lowest_rsi)
+    
+    return stoch_rsi
+    
 
 
 
@@ -1539,40 +1566,77 @@ def calculate_indicators(df, source_url, short_ma_period, long_ma_period):
 
 
 
-def fallback_conditions(df, atr_threshold=1.5, stochastic_threshold=20):
+def fallback_conditions(df, atr_threshold=1.5, stochastic_threshold=20, stoch_rsi_threshold=0.2):
     """
-    Ελέγχει fallback συνθήκες ATR και Stochastic όταν αποτυγχάνει η επιβεβαίωση όγκου.
+    Συνδυαστική λογική για fallback συνθήκες: επιβεβαίωση τάσης, δυναμικής και μεταβλητότητας.
     
     Args:
         df: DataFrame με δεδομένα αγοράς (high, low, close).
         atr_threshold: Πολλαπλασιαστής για ATR (π.χ. 1.5 = αυξημένη μεταβλητότητα).
         stochastic_threshold: Κατώφλι για Stochastic (%K) (π.χ. κάτω από 20 = υπερπουλημένη αγορά).
+        stoch_rsi_threshold: Κατώφλι για Stochastic RSI (π.χ. κάτω από 0.2 = υπερπουλημένο RSI).
     
     Returns:
-        Boolean: True αν οι fallback συνθήκες πληρούνται (να προχωρήσει σε αγορά), αλλιώς False.
+        Boolean: True αν όλες οι συνδυαστικές συνθήκες πληρούνται (να προχωρήσει σε αγορά), αλλιώς False.
     """
-    # Υπολογισμός ATR και Stochastic
-    _, atr = calculate_adx(df)
-    k_percent, _ = calculate_stochastic(df)
-    
-    # Τρέχοντα δεδομένα ATR και Stochastic
+    # Υπολογισμός δεικτών
+    macd_signal, macd_histogram = calculate_macd(df)  # MACD
+    _, atr = calculate_adx(df)  # ATR μέσω ADX υπολογισμού
+    k_percent, _ = calculate_stochastic(df)  # Stochastic Oscillator
+    stoch_rsi = calculate_stochastic_rsi(df)  # Stochastic RSI
+    vwap = calculate_vwap(df)  # VWAP
+
+    # Τρέχοντα δεδομένα
     current_atr = atr.iloc[-1]  # Τρέχον ATR
     mean_atr = atr.mean()  # Μέσο ATR
     current_k = k_percent.iloc[-1]  # Τρέχον %K
+    current_stoch_rsi = stoch_rsi.iloc[-1]  # Τρέχον Stochastic RSI
+    current_vwap = vwap.iloc[-1]  # Τρέχον VWAP
+    current_price = df['close'].iloc[-1]  # Τρέχουσα τιμή
+
+    # 1. Επιβεβαίωση Τάσης (Trend Condition)
+    trend_condition = (current_price > current_vwap) and (macd_histogram.iloc[-1] > 0)
+
+    # 2. Επιβεβαίωση Δυναμικής (Momentum Condition)
+    momentum_condition = (current_k < stochastic_threshold) or (current_stoch_rsi < stoch_rsi_threshold)
+
+    # 3. Επιβεβαίωση Μεταβλητότητας (Volatility Condition)
+    volatility_condition = current_atr > (atr_threshold * mean_atr)
+
+    # Logging για debugging
+    logging.info(f"Trend Condition: Price > VWAP = {current_price > current_vwap}, MACD Histogram > 0 = {macd_histogram.iloc[-1] > 0}, Condition = {trend_condition}")
+    logging.info(f"Momentum Condition: %K = {current_k:.2f}, StochRSI = {current_stoch_rsi:.2f}, Condition = {momentum_condition}")
+    logging.info(f"Volatility Condition: Current ATR = {current_atr:.2f}, Mean ATR = {mean_atr:.2f}, Condition = {volatility_condition}")
+
+
+
+    #---------------------------------------------------------------------------------------------
+    #Χαλάρωση της λογικής (weighted):
+    # # Τελική απόφαση (όλες οι συνθήκες πρέπει να πληρούνται)
+    # if trend_condition and momentum_condition and volatility_condition:
+        # return True
+    # else:
+        # return False
+    #---------------------------------------------------------------------------------------------
+
+
+    # Αντί για αυστηρό AND, χρησιμοποιούμε weighting:    
     
-    # Κριτήρια για ATR και Stochastic
-    atr_condition = current_atr > (atr_threshold * mean_atr)
-    stochastic_condition = current_k < stochastic_threshold
+    # logging πριν την προσθεση
+    logging.debug(f">>>> Trend Condition: {trend_condition}, Momentum Condition: {momentum_condition}, Volatility Condition: {volatility_condition}")
+
+    total_conditions = int(trend_condition) + int(momentum_condition) + int(volatility_condition)
     
-    # Logging για ATR και Stochastic
-    logging.debug(f"ATR Check: Current ATR = {current_atr:.2f}, Mean ATR = {mean_atr:.2f}, Condition = {atr_condition}")
-    logging.debug(f"Stochastic Check: Current %K = {current_k:.2f}, Condition = {stochastic_condition}")
+    # Logging πριν το IF και μετά την προσθεση
+    logging.debug(f">>>> Total conditions calculated: {total_conditions}")
     
-    # Επιστροφή απόφασης
-    if atr_condition or stochastic_condition:        
+    if total_conditions >= 2:  # Πρέπει να πληρούνται τουλάχιστον 2 συνθήκες
         return True
-    else:        
+    else:
         return False
+
+
+
 
 
 
@@ -2255,7 +2319,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 second_break_even_price = (trade_amount * active_trade + second_trade_amount * second_trade_price + second_total_fees) / (trade_amount + second_trade_amount)
                 remaining_to_break_even = max(0, second_break_even_price - current_price)
                 logging.info(f"[Second Position] Break-even sell price: {second_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
-
+                
+                
 
                 # Έλεγχος για πώληση μόνο αν η τρέχουσα τιμή καλύπτει το κόστος + fees
                 if current_price >= second_break_even_price:
@@ -2277,13 +2342,19 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         logging.info(f"[Second Position] Initialized highest_price to {highest_price_second_position:.{current_decimals}f}")
                         save_state(log_info=False)  #χωρίς Logging.info
                         
+                        
+                       
+                        
                 
                 # ===== Νέο Block: Έλεγχος Trailing Sell Εκτός Break-even Check =====
                 if trailing_profit_second_position_active:
                 
-                    # Υπολογισμός του trailing sell price για τη δεύτερη θέση
-                    #trailing_sell_price_second_position = highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
                     
+                    # Υπολογισμός ποσοστού δυναμικά βάσει των θέσεων
+                    TRAILING_PROFIT_SECOND_PERCENTAGE = round((active_trade - second_trade_price) / active_trade, 3)
+                    logging.info(f"[Second Position] Trailing profit recalculated to {TRAILING_PROFIT_SECOND_PERCENTAGE}")
+                    
+                    # Υπολογισμός του trailing sell price για τη δεύτερη θέση                   
                     trailing_sell_price_second_position = max(
                         second_break_even_price,
                         highest_price_second_position * (1 - TRAILING_PROFIT_SECOND_PERCENTAGE)
@@ -2466,9 +2537,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         
             # ===== Νέο Block: Έλεγχος Trailing Sell, για 3ή αγορά, εκτός Break-even Check =====
             if trailing_profit_third_position_active:                       
-
-                # Υπολογισμός του trailing sell price για τη τρίτη θέση
-                #trailing_sell_price_third_position = highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
+              
+                TRAILING_PROFIT_THIRD_PERCENTAGE = 0.02  # 2% σταθερό ποσοστό για την 3η θέση
+                
                 
                 trailing_sell_price_third_position = max(
                     third_break_even_price,
@@ -2617,21 +2688,40 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     trailing_profit_active = True
                     save_state(log_info=False)  #χωρίς Logging.info
                                                                                                                     
+
                 if trailing_profit_active:
                     if ENABLE_DYNAMIC_TRAILING_PROFIT:
-                        # Μεγαλύτερο period (π.χ., 21)
-                        atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
-                        last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
-                        logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
+                        if second_trade_price in [None, 0] and third_trade_price in [None, 0]:
+                            # Δυναμικός υπολογισμός για την active_trade (1η θέση)
+                            atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
+                            last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
+                            logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
 
-                        
-                        # Υπολογισμός δυναμικού threshold
-                        TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price  # ATR_MULTIPLIER είναι ο πολλαπλασιαστής
-                        logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                            # Υπολογισμός δυναμικού threshold
+                            TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
+                            logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+
+                        elif third_trade_price in [None, 0]:
+                            # Δυναμικός υπολογισμός για τη second_trade_price (2η θέση)
+                            atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
+                            last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
+                            logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
+
+                            # Υπολογισμός δυναμικού threshold
+                            TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
+                            logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                            
+
+                        else:
+                            # Λογική για την 1η θέση: Υπολογισμός με ποσοστό (1η - 2η θέση)
+                            TRAILING_PROFIT_THRESHOLD = (active_trade - second_trade_price) / active_trade
+                            logging.info(f"Dynamic (ATR) trailing profit disabled. Threshold for active_trade: {TRAILING_PROFIT_THRESHOLD:.4f}")
+
                     else:
                         # Χρήση στατικού threshold
                         TRAILING_PROFIT_THRESHOLD = STATIC_TRAILING_PROFIT_THRESHOLD
-                        logging.info(f"Static trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")                    
+                        logging.info(f"Static trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                  
                     
                     
                     # Ενημέρωση του trailing sell price
@@ -2903,35 +2993,143 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             score = 0
             scores = {}
 
-            # Υπολογισμός MACD
-            scores['macd'] = weights['macd'] * (1 if macd_last > signal_last else -1)
-            score += scores['macd']
-            #logging.info(f"MACD Score: {scores['macd']}")
 
-            # Υπολογισμός RSI            
-            scores['rsi'] = weights['rsi'] * (1 if rsi_last < RSI_THRESHOLD else -1)
+            #-------------------------------------------------------------------------------------------------------
+            # Υπολογισμός MACD
+            if macd_last > signal_last:
+                if macd_last > 0:
+                    # Θετικό MACD, bullish σήμα (πλήρης θετική βαθμολογία)
+                    raw_score = 1  # Απόλυτη βαθμολογία πριν την εφαρμογή βαρών
+                else:
+                    # MACD > Signal αλλά αρνητικό (αδύναμη ανοδική κίνηση)
+                    raw_score = 0.3  # Περιορισμένη θετική βαθμολογία
+            else:
+                # MACD < Signal, bearish σήμα
+                raw_score = -1  # Απόλυτη βαθμολογία πριν την εφαρμογή βαρών
+
+            # Εφαρμογή του βάρους στο τελικό σκορ
+            scores['macd'] = weights['macd'] * raw_score
+
+            # Προσθήκη στο συνολικό σκορ
+            score += scores['macd']
+
+            # logging.info(f"MACD Score: {scores['macd']}")  # Προαιρετικό logging
+            #-------------------------------------------------------------------------------------------------------
+
+            
+            # Υπολογισμός RSI
+            if rsi_last < 20:
+                raw_score = 1.5  # Πολύ ισχυρό bullish σήμα (βαθιά υπερπουλημένη ζώνη)
+            elif 20 <= rsi_last < 30:
+                raw_score = 1  # Ισχυρό bullish σήμα
+            elif 30 <= rsi_last < 40:
+                raw_score = 0.5  # Αδύναμο bullish σήμα
+            elif 40 <= rsi_last <= 60:
+                if rsi_last < 50:
+                    raw_score = 0.1  # Ελαφρύ bullish bias
+                else:
+                    raw_score = -0.1  # Ελαφρύ bearish bias
+            elif 60 < rsi_last <= 70:
+                raw_score = -0.5  # Αδύναμο bearish σήμα
+            elif 70 < rsi_last <= 80:
+                raw_score = -0.3  # Ασθενές bearish σήμα
+            else:  # rsi_last > 80
+                raw_score = -0.5  # Πολύ ισχυρό bearish σήμα (βαθιά υπεραγορασμένη ζώνη)
+
+            # Εφαρμογή βάρους στο σκορ RSI
+            scores['rsi'] = weights['rsi'] * raw_score
+
+            # Προσθήκη στο συνολικό σκορ
             score += scores['rsi']
-            #logging.info(f"RSI Score: {scores['rsi']}")
+
+            # Προαιρετικό Logging
+            logging.info(f"RSI Last: {rsi_last:.2f}, Raw Score: {raw_score:.2f}, Weighted Score: {scores['rsi']:.2f}")
+
+
+            
+            #-------------------------------------------------------------------------------------------------------
+
 
             # Υπολογισμός Bollinger Bands
-            if current_price <= bollinger_lower_last:
-                scores['bollinger'] = weights['bollinger'] * 1
-            elif current_price >= bollinger_upper_last:
-                scores['bollinger'] = weights['bollinger'] * -1
-            else:
-                scores['bollinger'] = 0
-            score += scores['bollinger']
-            #logging.info(f"Bollinger Score: {scores['bollinger']}")
+            mid_band = (bollinger_lower_last + bollinger_upper_last) / 2
+            band_width = bollinger_upper_last - bollinger_lower_last
 
-            # Υπολογισμός VWAP
-            scores['vwap'] = weights['vwap'] * (1 if current_price > vwap_last else -1)
+            if current_price <= bollinger_lower_last:
+                if current_price < bollinger_lower_last * 0.98:
+                    raw_score = 1.5  # Πολύ κάτω από την κάτω μπάντα (ισχυρό bullish)
+                else:
+                    raw_score = 1  # Κάτω από την κάτω μπάντα
+            elif current_price >= bollinger_upper_last:
+                if current_price > bollinger_upper_last * 1.02:
+                    raw_score = -0.5  # Πολύ πάνω από την άνω μπάντα (ισχυρό bearish)
+                else:
+                    raw_score = -0.3  # Λίγο πάνω από την άνω μπάντα (ασθενές bearish)
+            elif abs(current_price - mid_band) <= band_width * 0.1:
+                raw_score = 0  # Κοντά στη μεσαία γραμμή (ουδέτερη ζώνη)
+            elif current_price < mid_band:
+                raw_score = 0.5  # Κοντά στην κάτω μπάντα (ασθενές bullish)
+            else:
+                raw_score = -0.5  # Κοντά στην άνω μπάντα (ασθενές bearish)
+
+            # Εφαρμογή βάρους στο σκορ Bollinger Bands
+            scores['bollinger'] = weights['bollinger'] * raw_score
+
+            # Προσθήκη στο συνολικό σκορ
+            score += scores['bollinger']
+
+            # logging.info(f"Bollinger Score: {scores['bollinger']}")
+
+
+            #-------------------------------------------------------------------------------------------------------
+
+
+            # Υπολογισμός ποσοστιαίας απόκλισης από το VWAP
+            vwap_diff = abs(current_price - vwap_last) / vwap_last  
+
+            if current_price > vwap_last:
+                if vwap_diff > 0.05:  # Τιμή >5% πάνω από το VWAP
+                    raw_score = 0.3  # Πολύ μικρό bullish σήμα λόγω υπερεκτεταμένης τιμής
+                elif vwap_diff > 0.03:  # Τιμή 3-5% πάνω από το VWAP
+                    raw_score = 0.5  # Ασθενές bullish σήμα
+                else:  # Τιμή <3% πάνω από το VWAP
+                    raw_score = 1  # Ισχυρό bullish σήμα
+            elif current_price < vwap_last:
+                if vwap_diff > 0.05:  # Τιμή >5% κάτω από το VWAP
+                    raw_score = -0.3  # Πολύ μικρό bearish σήμα
+                elif vwap_diff > 0.03:  # Τιμή 3-5% κάτω από το VWAP
+                    raw_score = -0.5  # Ασθενές bearish σήμα
+                else:  # Τιμή <3% κάτω από το VWAP
+                    raw_score = -1  # Ισχυρό bearish σήμα
+            else:
+                raw_score = 0  # Πολύ κοντά στο VWAP, ουδέτερη ζώνη
+
+            # Εφαρμογή βάρους στο σκορ VWAP
+            scores['vwap'] = weights['vwap'] * raw_score
+
+            # Προσθήκη στο συνολικό σκορ
             score += scores['vwap']
+            
+
+            #-------------------------------------------------------------------------------------------------------
+          
+            
+            score = round(score, 2)         
+                      
+            logging.info(f"Current Price: {current_price}, VWAP: {vwap_last:.2f}, VWAP Diff: {vwap_diff:.2f}, Raw Score: {raw_score}")
+
+           
+
+            # Στρογγυλοποίηση όλων των τιμών στο Score Analysis
+            rounded_scores = {key: round(value, 2) for key, value in scores.items()}                      
             
             
             # Συγκεντρωτικό logging
-            logging.info(f"Score Analysis: {scores}, Total Score: {score:.2f}")
+            logging.info(f"Score Analysis: {rounded_scores}, Total Score: {score:.2f}")
             logging.debug(f"Score history before append: {[round(score, 2) for score in score_history]}")
 
+
+
+            #-------------------------------------------------------------------------------------------------------      
 
 
             # Αποθήκευση τιμών και σκορ σε excel
@@ -2939,11 +3137,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 save_to_csv(csv_file_path, CRYPTO_NAME, current_price, score, scores)
 
 
+
+            
             #Αναλυτικό μήνυμα για το συνολικό score και το score history.
             if ENABLE_SCORE_HISTORY:
                 logging.info(f"Total Score for this round: {score:.2f}. Score History is activated.")
-                 
-                                                                        
             
             
                 # Προσθήκη νέου score στο score_history
@@ -2956,7 +3154,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
             
             else:
                 logging.info(f"Total Score for this round: {score:.2f}")
-
+            
+            
+      
 
               
             if ENABLE_TABULATE_INDICATORS:
@@ -3071,10 +3271,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"Checking Volume Confirmation...")
                 
                 # Ενημέρωση για θετική τιμή σε silent mode
-                #send_push_notification(f"Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
+                send_push_notification(f"ALERT: Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
 
                 # Έλεγχος επιβεβαίωσης όγκου πριν την αγορά
                 volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30)
+                
                 
                 if not volume_confirmation:
                     logging.info(f"Volume confirmation failed. Current Volume: {current_volume}, Average Volume: {avg_volume:.2f}")
@@ -3103,6 +3304,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                         
                         if success:
                             logging.info("Buy action completed via fallback conditions.")
+                            
                             # Send push notification
                             send_push_notification(
                                 f"Buy action executed under fallback conditions for the {CRYPTO_NAME} bot. "
@@ -3110,6 +3312,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                                 f"despite a lack of volume confirmation. "
                                 f"This strategic move aligns with the fallback logic to seize potential opportunities in the market."
                             )
+
                         else:
                             logging.warning(f"Buy action failed via fallback conditions. Reason: {reason}")
                         return  # Τερματισμός της εκτέλεσης
