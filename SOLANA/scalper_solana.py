@@ -69,6 +69,7 @@ ENABLE_TRAILING_PROFIT = True
 ENABLE_DYNAMIC_TRAILING_PROFIT = True   # True για δυναμικό trailing profit, False για στατικό
 STATIC_TRAILING_PROFIT_THRESHOLD = 0.01 # 1% στατικό trailing profit
 ENABLE_ADDITIONAL_CHECKS = False  # Αλλαγή σε False αν θέλεις να απενεργοποιήσεις τους πρόσθετους ελέγχους
+EXTRA_PROFIT_MARGIN = 20  # Μεταβλητή για μαξιλαράκι ζημίας για trailing profit
 
 DAILY_PROFIT_TARGET = 500
 MAX_TRADES_PER_DAY = 100  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
@@ -2726,8 +2727,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     
                     # Ενημέρωση του trailing sell price
                     trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
-                    trailing_sell_price = max(trailing_sell_price, active_trade)  # Ensure sell price is above active trade             <<<----------------------------- new additional to correct negative trailing price
-                    logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")         # <<<---------------------------------------------------------------------------------------------
+                    trailing_sell_price = max(trailing_sell_price, active_trade + EXTRA_PROFIT_MARGIN)
+                    
+                    logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
 
                     # Έλεγχος αν πρέπει να πουλήσουμε λόγω trailing profit
                     if current_price <= trailing_sell_price:
@@ -3271,7 +3273,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 logging.info(f"Checking Volume Confirmation...")
                 
                 # Ενημέρωση για θετική τιμή σε silent mode
-                send_push_notification(f"ALERT: Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
+                #send_push_notification(f"ALERT: Positive score detected: {score:.2f} for {CRYPTO_NAME} bot. Proceeding to volume confirmation check before initiating a buy at {current_price}.", Logfile=False)
 
                 # Έλεγχος επιβεβαίωσης όγκου πριν την αγορά
                 volume_confirmation, current_volume, avg_volume = calculate_volume_confirmation(df, window=30)
