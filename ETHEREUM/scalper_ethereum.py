@@ -69,7 +69,7 @@ ENABLE_TRAILING_PROFIT = True
 ENABLE_DYNAMIC_TRAILING_PROFIT = True   # True για δυναμικό trailing profit, False για στατικό
 STATIC_TRAILING_PROFIT_THRESHOLD = 0.01 # 1% στατικό trailing profit
 ENABLE_ADDITIONAL_CHECKS = False  # Αλλαγή σε False αν θέλεις να απενεργοποιήσεις τους πρόσθετους ελέγχους
-EXTRA_PROFIT_MARGIN = 20  # Μεταβλητή για μαξιλαράκι ζημίας για trailing profit
+EXTRA_PROFIT_MARGIN = 60  # Μεταβλητή για μαξιλαράκι ζημίας για trailing profit
 
 DAILY_PROFIT_TARGET = 500
 MAX_TRADES_PER_DAY = 100  # Μέγιστος αριθμός συναλλαγών ανά ημέρα
@@ -122,8 +122,54 @@ highest_price = 0
 trailing_profit_active = False
 
 
+# Βασική διαδρομή του έργου
+if os.name == 'nt':  # Windows
+    BASE_DIR = os.getenv('BASE_DIR', r'Z:\bots\scalping-bot')
+else:  # Όλα τα υπόλοιπα λειτουργικά συστήματα (Linux, macOS)
+    BASE_DIR = os.getenv('BASE_DIR', '/opt/python/scalping-bot')
+
+
+# Decimal Configuration for each bot
+decimal_config_path = f"{BASE_DIR}/decimal_config.json"
+
+
+# Διαδρομή για αρχείο Lock
+LOCK_FILE_PATH = f"{BASE_DIR}/"
+
+
+# Διαδρομή για το αρχείο βαρύτητας
+weights_file = f"{BASE_DIR}/indicator_weights.json"
+
+
+# Api Keys file path
+json_path = f"{BASE_DIR}/api_keys.json"
+
+
+# Logs file path
+logs_file_path = f"{BASE_DIR}/{CRYPTO_FULLNAME}/{CRYPTO_NAME}_bot.log"
+
+
+# Διαδρομή για το cooldownfile
+cooldown_file = f"{BASE_DIR}/{CRYPTO_FULLNAME}/cooldown_state.json"
+
+
+# Διαδρομή για το state file
+state_file = f"{BASE_DIR}/{CRYPTO_FULLNAME}/state.json"
+
+
+# Διαδρομή για το pause flag
+pause_file = f"{BASE_DIR}/{CRYPTO_FULLNAME}/pause.flag"
+
+
+# Διαδρομή για το αρχείο .csv
+csv_file_path = f"{BASE_DIR}/{CRYPTO_FULLNAME}/crypto_scores.csv"
+
+
+
+
+
 # Load decimal configuration from external JSON file
-with open("/opt/python/scalping-bot/decimal_config.json", "r") as f:
+with open(decimal_config_path, "r") as f:
     DECIMAL_CONFIG = json.load(f)
 
 # Get decimals for the current cryptocurrency
@@ -133,7 +179,7 @@ current_decimals = DECIMAL_CONFIG.get(CRYPTO_NAME, {}).get("decimals", 2)  # Def
 
 
 
-# Μετατροπή του string σε logging level
+# Convert the string to a logging level
 logging_level = getattr(logging, LEVEL_LOGGING.upper(), logging.INFO)
 
 
@@ -142,9 +188,7 @@ logging.basicConfig(
     level=logging_level,
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[
-        logging.FileHandler(
-            f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/{CRYPTO_NAME}_bot.log"
-        ),  # Log to file
+        logging.FileHandler(logs_file_path),  # Log to file
         logging.StreamHandler(),  # Log to console
     ],
 )
@@ -152,28 +196,8 @@ logging.basicConfig(
 
 
 
-# Διαδρομή για το cooldownfile
-cooldown_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/cooldown_state.json"
-
-
-# Διαδρομή για το state file
-state_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/state.json"
-
-
-# Διαδρομή για το pause flag
-pause_file = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/pause.flag"
-
-
-# Διαδρομή για το αρχείο βαρύτητας
-weights_file = f"/opt/python/scalping-bot/indicator_weights.json"
-
-
-# Διαδρομή για το αρχείο .csv
-csv_file_path = f"/opt/python/scalping-bot/{CRYPTO_FULLNAME}/crypto_scores.csv"
-
-
-# Συνάρτηση για να φορτώσει τα κλειδιά από το αρχείο JSON
-def load_keys(json_path="/opt/python/scalping-bot/api_keys.json"):
+# Function to load keys from the JSON file
+def load_keys():
     try:
         with open(json_path, "r") as file:
             keys = json.load(file)
@@ -2209,15 +2233,13 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
 ##########################################################################################################################################################################
-
-            #--------------------------------------------------------------------------------------------------------------------------------------------------------------
-            # Dynamic MAX_DROP_PERCENTAGE
-            
+         
             # Logging πριν το statement
             logging.debug(f"ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE: {ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE}")
             logging.debug(f"Second_trade_price: {second_trade_price}")
 
-
+            #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+            # Dynamic MAX_DROP_PERCENTAGE
             if ENABLE_DYNAMIC_MAX_DROP_PERCENTAGE and not third_trade_price:  # Υπολογισμός μόνο αν δεν υπάρχει 3η αγορά
                 dynamic_adjustment = 0
                 
@@ -2254,13 +2276,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
 
-            #--------------------------------------------------------------------------------------------------------------------------------------------------------------
+            #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             # DOLLAR COST AVERAGE STRATEGY
-            # Υπολογισμός της τιμής ενεργοποίησης δεύτερης αγοράς
-
             logging.debug(f"Manual second buy state is: {manual_second_buy}")
             
-            # Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ------------------------------------------
+            # AΓΟΡΑ ΔΕΥΤΕΡΗΣ ΘΕΣΗΣ - Έλεγχος αν η τιμή έχει πέσει αρκετά για δεύτερη αγορά ----------------------------------------------------------------------------------------------------------------------------------------
             if not second_trade_price and (current_price <= second_buy_trigger_price or manual_second_buy):
                 if manual_second_buy:
                     logging.info(f"Manual trigger activated for second buy. Executing second buy at current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
@@ -2312,7 +2332,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                     
 
 
-            # Λογική για πώληση μετά τη 2η αγορά -------------------------------------------------------------
+
+
+            # ΠΩΛΗΣΗ ΔΕΥΤΕΡΗΣ ΘΕΣΗΣ - Λογική για πώληση μετά τη 2η αγορά ----------------------------------------------------------------------------------------------------------------------------------------------------------
             if second_trade_price:  # Εξασφαλίζουμε ότι υπάρχει 2η αγορά πριν υπολογίσουμε
 
                 # Υπολογισμός του συνολικού κόστους με fees
@@ -2447,17 +2469,11 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                                      "No sell action taken. Waiting for price to meet criteria.")                        
 
 
-                # Δεν πουλάμε ακόμη, συνεχίζουμε να παρακολουθούμε
-                #logging.info(f"[Second Position] Waiting for price to reach break-even price {second_break_even_price:.{current_decimals}f}.")
 
 
-                      
-            #--------------------------------------------------------------------------------------------------------------------------------------------------------------                   
 
-
-            # Έλεγχος για 3η αγορά του crypto -------------------------------------------------------------------
+            # ΑΓΟΡΑΣ ΤΡΙΤΗΣ ΘΕΣΗΣ - Έλεγχος για 3η αγορά του crypto ---------------------------------------------------------------------------------------------------------------------------------------------------------------
             logging.debug(f"Manual third buy state is: {manual_third_buy}")
-
             if not third_trade_price and second_trade_price and (current_price <= third_buy_trigger_price or manual_third_buy):
                 if manual_third_buy:
                     logging.info(f"Manual trigger activated for third buy. Executing third buy at current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
@@ -2507,7 +2523,8 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
 
-            # Λογική για πώληση μετά τη 3η αγορά -------------------------------------------------------------
+
+            # ΠΩΛΗΣΗ ΤΡΙΤΗΣ ΘΕΣΗΣ - Λογική για πώληση μετά τη 3η αγορά ------------------------------------------------------------------------------------------------------------------------------------------------------------
             if third_trade_price:  # Εξασφαλίζουμε ότι υπάρχει 3η αγορά πριν υπολογίσουμε
 
                 # Υπολογισμός του συνολικού κόστου με fees
@@ -2536,101 +2553,101 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
                         
-            # ===== Νέο Block: Έλεγχος Trailing Sell, για 3ή αγορά, εκτός Break-even Check =====
-            if trailing_profit_third_position_active:                       
-              
-                TRAILING_PROFIT_THIRD_PERCENTAGE = 0.02  # 2% σταθερό ποσοστό για την 3η θέση
-                
-                
-                trailing_sell_price_third_position = max(
-                    third_break_even_price,
-                    highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
-                )           
-                
-                logging.debug(f"[Third Position] Trailing sell price updated to {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
-
-
-                # Έλεγχος αν η τρέχουσα τιμή έχει πέσει κάτω από το trailing sell price
-                logging.debug(f"DEBUG: Current Price: {current_price:.8f}, Trailing Sell Price: {trailing_sell_price_third_position:.8f}")
-                logging.debug(f"DEBUG: Highest Price: {highest_price_third_position}, Trailing Sell Price: {trailing_sell_price_third_position}")
-                                    
-                if current_price <= trailing_sell_price_third_position:
+                # ===== Νέο Block: Έλεγχος Trailing Sell, για 3ή αγορά, εκτός Break-even Check =====
+                if trailing_profit_third_position_active:                       
+                  
+                    TRAILING_PROFIT_THIRD_PERCENTAGE = 0.02  # 2% σταθερό ποσοστό για την 3η θέση
                     
-                    logging.info(f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} "
-                                 f"dropped below trailing sell price {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}. "
-                                 "Evaluating break-even condition before executing sell.")                    
+                    
+                    trailing_sell_price_third_position = max(
+                        third_break_even_price,
+                        highest_price_third_position * (1 - TRAILING_PROFIT_THIRD_PERCENTAGE)
+                    )           
+                    
+                    logging.debug(f"[Third Position] Trailing sell price updated to {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
 
-                    if current_price >= third_break_even_price:
+
+                    # Έλεγχος αν η τρέχουσα τιμή έχει πέσει κάτω από το trailing sell price
+                    logging.debug(f"DEBUG: Current Price: {current_price:.8f}, Trailing Sell Price: {trailing_sell_price_third_position:.8f}")
+                    logging.debug(f"DEBUG: Highest Price: {highest_price_third_position}, Trailing Sell Price: {trailing_sell_price_third_position}")
+                                        
+                    if current_price <= trailing_sell_price_third_position:
                         
                         logging.info(f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} "
-                                     f"dropped below trailing sell price {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY} "
-                                     f"and is above break-even price {third_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}. Selling all positions.")
+                                     f"dropped below trailing sell price {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}. "
+                                     "Evaluating break-even condition before executing sell.")                    
 
+                        if current_price >= third_break_even_price:
+                            
+                            logging.info(f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} "
+                                         f"dropped below trailing sell price {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY} "
+                                         f"and is above break-even price {third_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}. Selling all positions.")
+
+                            
                         
-                    
-                        # Υπολογισμός συνολικής ποσότητας προς πώληση
-                        total_amount_to_sell = trade_amount + second_trade_amount + third_trade_amount
+                            # Υπολογισμός συνολικής ποσότητας προς πώληση
+                            total_amount_to_sell = trade_amount + second_trade_amount + third_trade_amount
 
-                        # Έκτελεση εντολής πωλήσης
-                        order_successful, execution_price, fees = place_order("sell", total_amount_to_sell, current_price)
+                            # Έκτελεση εντολής πωλήσης
+                            order_successful, execution_price, fees = place_order("sell", total_amount_to_sell, current_price)
 
-                        if order_successful:
-                            # Υπολογισμός καθαρού κέρδους
-                            profit_loss = (execution_price * total_amount_to_sell) - (trade_amount * active_trade + second_trade_amount * second_trade_price + third_trade_amount * third_trade_price + third_total_fees)
-                            daily_profit += profit_loss
-                                        
-                            logging.info(f"The sale was completed for total amount of {total_amount_to_sell} {CRYPTO_NAME}. "
-                                         f"Profit/Loss: {profit_loss:.{current_decimals}f} {CRYPTO_CURRENCY}, Fees: {fees:.{current_decimals}f}")                                         
-                                                                                 
+                            if order_successful:
+                                # Υπολογισμός καθαρού κέρδους
+                                profit_loss = (execution_price * total_amount_to_sell) - (trade_amount * active_trade + second_trade_amount * second_trade_price + third_trade_amount * third_trade_price + third_total_fees)
+                                daily_profit += profit_loss
+                                            
+                                logging.info(f"The sale was completed for total amount of {total_amount_to_sell} {CRYPTO_NAME}. "
+                                             f"Profit/Loss: {profit_loss:.{current_decimals}f} {CRYPTO_CURRENCY}, Fees: {fees:.{current_decimals}f}")                                         
+                                                                                     
 
-                            # Καθαρισμός μεταβλητών μετά τη πώληση
-                            active_trade = None
-                            trade_amount = 0
-                            second_trade_price = None
-                            second_trade_amount = 0
-                            third_trade_price = None
-                            third_trade_amount = 0
-                            average_trade_price = None
-                            highest_price = None
-                            highest_price_second_position = None
-                            highest_price_third_position = None
-                            trailing_profit_second_position_active = False
-                            trailing_profit_third_position_active = False
-                            current_trades += 1
+                                # Καθαρισμός μεταβλητών μετά τη πώληση
+                                active_trade = None
+                                trade_amount = 0
+                                second_trade_price = None
+                                second_trade_amount = 0
+                                third_trade_price = None
+                                third_trade_amount = 0
+                                average_trade_price = None
+                                highest_price = None
+                                highest_price_second_position = None
+                                highest_price_third_position = None
+                                trailing_profit_second_position_active = False
+                                trailing_profit_third_position_active = False
+                                current_trades += 1
 
-                            send_push_notification(
-                                f"ALERT: Trailing Profit Sale for third position was executed for {CRYPTO_NAME} bot at {execution_price:.{current_decimals}f} {CRYPTO_CURRENCY}. "
-                                f"The net profit after calculating and subtracting the fees is {profit_loss:.2f} {CRYPTO_CURRENCY}."
+                                send_push_notification(
+                                    f"ALERT: Trailing Profit Sale for third position was executed for {CRYPTO_NAME} bot at {execution_price:.{current_decimals}f} {CRYPTO_CURRENCY}. "
+                                    f"The net profit after calculating and subtracting the fees is {profit_loss:.2f} {CRYPTO_CURRENCY}."
+                                )
+
+                                sendgrid_email(total_amount_to_sell, "sell", execution_price, profit_loss, "N/A", "DCA Strategy")
+
+                                # Αποθήκευση της νέας κατάστασης
+                                save_state()
+
+                                # Χρονική αναμονή μετά τη πώληση για αποφυγή άμεσης αγοράς
+                                save_cooldown_state(custom_duration=1800)  # DCA strategy: 30 min cooldown
+
+                                return
+
+
+                        else:
+                            logging.info(
+                                f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} "
+                                                                                                                                                          
+                                f"is below break-even price {third_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}."
                             )
-
-                            sendgrid_email(total_amount_to_sell, "sell", execution_price, profit_loss, "N/A", "DCA Strategy")
-
-                            # Αποθήκευση της νέας κατάστασης
-                            save_state()
-
-                            # Χρονική αναμονή μετά τη πώληση για αποφυγή άμεσης αγοράς
-                            save_cooldown_state(custom_duration=1800)  # DCA strategy: 30 min cooldown
-
-                            return
+                            logging.info("No sell action taken.")
 
 
                     else:
-                        logging.info(
-                            f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} "
-                                                                                                                                                      
-                            f"is below break-even price {third_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}."
-                        )
-                        logging.info("No sell action taken.")
-
-
-                else:
-                    logging.info(f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} has not dropped below trailing sell price {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+                        logging.info(f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} has not dropped below trailing sell price {trailing_sell_price_third_position:.{current_decimals}f} {CRYPTO_CURRENCY}.")
 
 
 
-            #--------------------------------------------------------------------------------------------------------------------------------------------------------------                                      
+
             
-            # Έλεγχος για την ενεργοποίηση του stop-loss
+            # STOP LOSS MANAGEMENT - Έλεγχος για την ενεργοποίηση του stop-loss----------------------------------------------------------------------------------------------------------------------------------------------------
             if ENABLE_STOP_LOSS:
                 # Υπολογισμός της τιμής του δυναμικού stop-loss βάσει του ATR
                 if ENABLE_DYNAMIC_STOP_LOSS:
@@ -2679,119 +2696,128 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
 
-            # Υπολογισμός του scalp target price
+            # ΠΩΛΗΣΗ 1ης ΘΕΣΗΣ ΜΕ TRAILING ΕΝΕΡΓΟ - Υπολογισμός του scalp target price --------------------------------------------------------------------------------------------------------------------------------------------
             scalp_target_price = active_trade * SCALP_TARGET
+            if ENABLE_TRAILING_PROFIT:
+                try:
+                    # Έλεγχος αν το trailing profit είναι ενεργό ή αν πρέπει να ενεργοποιηθεί
+                    if not trailing_profit_active and current_price >= scalp_target_price:
+                        logging.info(f"Scalp target reached. Trailing profit activated.")
+                        trailing_profit_active = True
+                        save_state(log_info=False)  #χωρίς Logging.info
+                                                                                                                        
 
-            if ENABLE_TRAILING_PROFIT and not trailing_profit_second_position_active:
-                # Έλεγχος αν το trailing profit είναι ενεργό ή αν πρέπει να ενεργοποιηθεί
-                if not trailing_profit_active and current_price >= scalp_target_price:
-                    logging.info(f"Scalp target reached. Trailing profit activated.")
-                    trailing_profit_active = True
-                    save_state(log_info=False)  #χωρίς Logging.info
-                                                                                                                    
+                    if trailing_profit_active:
+                        if ENABLE_DYNAMIC_TRAILING_PROFIT:
+                            if second_trade_price in [None, 0] and third_trade_price in [None, 0]:
+                                # Δυναμικός υπολογισμός για την active_trade (1η θέση)
+                                atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
+                                last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
+                                logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
 
-                if trailing_profit_active:
-                    if ENABLE_DYNAMIC_TRAILING_PROFIT:
-                        if second_trade_price in [None, 0] and third_trade_price in [None, 0]:
-                            # Δυναμικός υπολογισμός για την active_trade (1η θέση)
-                            atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
-                            last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
-                            logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
+                                # Υπολογισμός δυναμικού threshold
+                                TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
+                                logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
 
-                            # Υπολογισμός δυναμικού threshold
-                            TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
-                            logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                            elif third_trade_price in [None, 0]:
+                                # Δυναμικός υπολογισμός για τη second_trade_price (2η θέση)
+                                atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
+                                last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
+                                logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
 
-                        elif third_trade_price in [None, 0]:
-                            # Δυναμικός υπολογισμός για τη second_trade_price (2η θέση)
-                            atr_period_21 = calculate_adx(df, period=21)[1]  # ATR για μεγαλύτερο period
-                            last_atr_value = atr_period_21.iloc[-1]  # Παίρνουμε την τελευταία τιμή του ATR
-                            logging.info(f"ATR (Period 21): {last_atr_value:.6f}")
+                                # Υπολογισμός δυναμικού threshold
+                                TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
+                                logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                                
 
-                            # Υπολογισμός δυναμικού threshold
-                            TRAILING_PROFIT_THRESHOLD = last_atr_value * ATR_MULTIPLIER / current_price
-                            logging.info(f"Dynamic trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
-                            
+                            else:
+                                # Λογική για την 1η θέση: Υπολογισμός με ποσοστό (1η - 2η θέση)
+                                TRAILING_PROFIT_THRESHOLD = (active_trade - second_trade_price) / active_trade
+                                logging.info(f"Dynamic (ATR) trailing profit disabled. Threshold for active_trade: {TRAILING_PROFIT_THRESHOLD:.4f}")
 
                         else:
-                            # Λογική για την 1η θέση: Υπολογισμός με ποσοστό (1η - 2η θέση)
-                            TRAILING_PROFIT_THRESHOLD = (active_trade - second_trade_price) / active_trade
-                            logging.info(f"Dynamic (ATR) trailing profit disabled. Threshold for active_trade: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                            # Χρήση στατικού threshold
+                            TRAILING_PROFIT_THRESHOLD = STATIC_TRAILING_PROFIT_THRESHOLD
+                            logging.info(f"Static trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
+                      
+                        
+                        
+                        # Ενημέρωση του trailing sell price
+                        trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
+                        trailing_sell_price = max(trailing_sell_price, active_trade + EXTRA_PROFIT_MARGIN)
+                        
+                        logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+
+                        # Έλεγχος αν πρέπει να πουλήσουμε λόγω trailing profit
+                        if current_price <= trailing_sell_price:
+                            
+                            logging.info(f"Trailing profit triggered. Selling at {current_price} {CRYPTO_CURRENCY}.")
+                            
+                            # Ελέγχουμε αν η 3η θέση υπάρχει και αν ναι, πουλάμε όλες τις θέσεις
+                            if third_trade_price or second_trade_price:  # Υπάρχει 2ή ή 3η θέση
+                                
+                                logging.info(f"There are more positions, selling all positions.")
+
+                                # Καλούμε τη συνάρτηση sell_all_positions() για να πουλήσουμε όλες τις θέσεις
+                                sell_all_positions()
+                            
+                            else:                        
+                                # Δεν υπάρχουν αλλές θεσεις - πουλάμε κανονικά μόνο την 1ή                            
+                                order_successful, execution_price, fees = place_order("sell", trade_amount, current_price)
+
+                                if order_successful and execution_price:
+                                    
+                                    # Ενημέρωση daily_profit λαμβάνοντας υπόψη και τα fees
+                                    profit_trailing = (execution_price - active_trade) * trade_amount - fees
+                                    logging.info(f"The sale was completed with a net profit of {profit_trailing:.2f} {CRYPTO_CURRENCY}.")
+                                    
+                                    daily_profit += profit_trailing
+                                    
+                                    # Αποστολή ειδοποιήσεων για την πώληση
+                                    sendgrid_email(trade_amount, "sell", execution_price, profit_trailing, "N/A", "Trailing Profit")                            
+                                    send_push_notification(
+                                        f"ALERT: Trailing Profit Sale was executed for {CRYPTO_NAME} bot at {execution_price} {CRYPTO_CURRENCY}. "
+                                        f"The net profit after calculating and subtracting the fees is {profit_trailing:.2f} {CRYPTO_CURRENCY}."
+                                    )
+                                    
+                                    # Ενημέρωση μεταβλητών
+                                    active_trade = None
+                                    trade_amount = 0
+                                    highest_price = None
+                                    trailing_profit_active = False
+                                    current_trades += 1
+                                    save_state()
+                                    
+                                    
+                                    # Χρονική αναμονή μετά την πώληση για αποφυγή άμεσης αγοράς
+                                    save_cooldown_state(custom_duration=3600)       #trailing profit 1 hour                     
+                                    
+                                    
+                                    return  # Σταματάμε εδώ αν έγινε πώληση λόγω trailing profit
+                                
+                                
+                                else:
+                                    logging.info(f"Failed to execute sell order for trailing profit at {current_price}")           
+                                           
+                        
+                        else:
+                            logging.info(f"Trailing profit active. Current price {current_price} has not dropped below trailing sell price {trailing_sell_price:.{current_decimals}f}.")
+
 
                     else:
-                        # Χρήση στατικού threshold
-                        TRAILING_PROFIT_THRESHOLD = STATIC_TRAILING_PROFIT_THRESHOLD
-                        logging.info(f"Static trailing profit enabled. Threshold: {TRAILING_PROFIT_THRESHOLD:.4f}")
-                  
-                    
-                    
-                    # Ενημέρωση του trailing sell price
-                    trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
-                    trailing_sell_price = max(trailing_sell_price, active_trade + EXTRA_PROFIT_MARGIN)
-                    
-                    logging.info(f"Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
-
-                    # Έλεγχος αν πρέπει να πουλήσουμε λόγω trailing profit
-                    if current_price <= trailing_sell_price:
-                        
-                        logging.info(f"Trailing profit triggered. Selling at {current_price} {CRYPTO_CURRENCY}.")
-                        
-                        # Ελέγχουμε αν η 3η θέση υπάρχει και αν ναι, πουλάμε όλες τις θέσεις
-                        if third_trade_price or second_trade_price:  # Υπάρχει 2ή ή 3η θέση
-                            
-                            logging.info(f"There are more positions, selling all positions.")
-
-                            # Καλούμε τη συνάρτηση sell_all_positions() για να πουλήσουμε όλες τις θέσεις
-                            sell_all_positions()
-                        
-                        else:                        
-                            # Δεν υπάρχουν αλλές θεσεις - πουλάμε κανονικά μόνο την 1ή                            
-                            order_successful, execution_price, fees = place_order("sell", trade_amount, current_price)
-
-                            if order_successful and execution_price:
-                                
-                                # Ενημέρωση daily_profit λαμβάνοντας υπόψη και τα fees
-                                profit_trailing = (execution_price - active_trade) * trade_amount - fees
-                                logging.info(f"The sale was completed with a net profit of {profit_trailing:.2f} {CRYPTO_CURRENCY}.")
-                                
-                                daily_profit += profit_trailing
-                                
-                                # Αποστολή ειδοποιήσεων για την πώληση
-                                sendgrid_email(trade_amount, "sell", execution_price, profit_trailing, "N/A", "Trailing Profit")                            
-                                send_push_notification(
-                                    f"ALERT: Trailing Profit Sale was executed for {CRYPTO_NAME} bot at {execution_price} {CRYPTO_CURRENCY}. "
-                                    f"The net profit after calculating and subtracting the fees is {profit_trailing:.2f} {CRYPTO_CURRENCY}."
-                                )
-                                
-                                # Ενημέρωση μεταβλητών
-                                active_trade = None
-                                trade_amount = 0
-                                highest_price = None
-                                trailing_profit_active = False
-                                current_trades += 1
-                                save_state()
-                                
-                                
-                                # Χρονική αναμονή μετά την πώληση για αποφυγή άμεσης αγοράς
-                                save_cooldown_state(custom_duration=3600)       #trailing profit 1 hour                     
-                                
-                                
-                                return  # Σταματάμε εδώ αν έγινε πώληση λόγω trailing profit
-                            
-                            
-                            else:
-                                logging.info(f"Failed to execute sell order for trailing profit at {current_price}")           
-                                       
-                    
-                    else:
-                        logging.info(f"Trailing profit active. Current price {current_price} has not dropped below trailing sell price {trailing_sell_price:.{current_decimals}f}.")
+                        # Αν το trailing profit δεν είναι ενεργό και η τιμή δεν έχει φτάσει το scalp target
+                        logging.info(f"Waiting for price to reach scalp target at {scalp_target_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
 
 
-                else:
-                    # Αν το trailing profit δεν είναι ενεργό και η τιμή δεν έχει φτάσει το scalp target
-                    logging.info(f"Waiting for price to reach scalp target at {scalp_target_price:.{current_decimals}f} {CRYPTO_CURRENCY}.")
+
+                except Exception as e:
+                    logging.error(f"An error occurred in the trailing profit logic: {e}")
+                    send_push_notification(f"ERROR: An issue occurred in the trailing profit logic: {e}")
 
 
+
+
+            # ΠΩΛΗΣΗ 1ης ΘΕΣΗΣ ME TRAILING ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
             else:
                 #logging.info("Trailing profit is disabled.")
                 # Υπολογισμός κέρδους πριν αφαιρεθούν τα fees
@@ -2809,36 +2835,51 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                 # Πώληση μόνο αν η τιμή έχει φτάσει το scalp target και το καθαρό κέρδος υπερβαίνει το κατώφλι
                 if current_price >= scalp_target_price and scalp_profit >= MINIMUM_PROFIT_THRESHOLD:
                     logging.info(f"Selling at {current_price} for profit (scalp target met and sufficient profit)")
-                    order_successful, execution_price, fees = place_order("sell", trade_amount, current_price)
+                    
 
-                    if order_successful and execution_price:
+                    # Ελέγχουμε αν υπάρχει 2ή ή 3ή θεση και αν ναι, πουλάμε όλες τις θέσεις
+                    if third_trade_price or second_trade_price:  # Υπάρχει 2ή ή 3η θέση
+                        logging.info(f"There are more positions, selling all positions.")
                         
-                        # Ενημέρωση daily_profit λαμβάνοντας υπόψη τα fees
-                        daily_profit += scalp_profit
-                        
-                        sendgrid_email(trade_amount, "sell", execution_price, scalp_profit, "N/A", "Scalp Target")
-                        
-                        active_trade = None
-                        trade_amount = 0
-                        highest_price = None
-                        current_trades += 1
-                        save_state()
-                        
-                        # Χρονική αναμονή μετά την πώληση για αποφυγή άμεσης αγοράς
-                        save_cooldown_state(custom_duration=3600)       #scalp target 1 hour
+                        # Καλούμε τη συνάρτηση sell_all_positions() για να πουλήσουμε όλες τις θέσεις
+                        sell_all_positions()
 
-                        logging.info("Cooldown initiated to prevent immediate re-buy.")
-                        
-                        
-                        return  # Σταματάει η εκτέλεση εδώ αν γίνει πώληση λόγω scalp target
                     else:
-                        logging.info(f"Failed to execute sell order for scalp target at {execution_price}")
+                        # Δεν υπάρχουν αλλές θεσεις - πουλάμε κανονικά μόνο την 1ή                
+                        order_successful, execution_price, fees = place_order("sell", trade_amount, current_price)
+
+                        if order_successful and execution_price:
+                            
+                            # Ενημέρωση daily_profit λαμβάνοντας υπόψη τα fees
+                            daily_profit += scalp_profit
+                            
+                            sendgrid_email(trade_amount, "sell", execution_price, scalp_profit, "N/A", "Scalp Target")
+                            
+                            active_trade = None
+                            trade_amount = 0
+                            highest_price = None
+                            current_trades += 1
+                            save_state()
+                            
+                            # Χρονική αναμονή μετά την πώληση για αποφυγή άμεσης αγοράς
+                            save_cooldown_state(custom_duration=3600)       #scalp target 1 hour
+
+                            logging.info("Cooldown initiated to prevent immediate re-buy.")
+                            
+                            
+                            return  # Σταματάει η εκτέλεση εδώ αν γίνει πώληση λόγω scalp target
+                        else:
+                            logging.info(f"Failed to execute sell order for scalp target at {execution_price}")
+
+                            
 
                 # Δεν πουλάμε ακόμη, συνεχίζουμε να παρακολουθούμε
                 logging.info(f"Current price {current_price} has not reached scalp target price {scalp_target_price:.{current_decimals}f} or minimum profit threshold not met.")
 
+
             # Καμία πώληση δεν έγινε
             logging.info(f"No sell action taken. Current price {current_price} {CRYPTO_CURRENCY} did not meet any sell criteria.")
+
 
             return  # Δεν κάνουμε νέα αγορά αν υπάρχει ανοιχτή θέση
 
@@ -2846,10 +2887,6 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
 
-        
-        
-        
-        
         ##########################################################################################################################################
         ################### ΓΙΑ ΑΓΟΡΑ####################################################
 
