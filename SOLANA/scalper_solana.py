@@ -32,7 +32,7 @@ BINANCE_PAIR = "SOLEUR"
 BINANCE_INTERVAL = "5m"
 
 # 3. Scalping variables
-SCALP_TARGET = 1.01
+SCALP_TARGET = 1.02
 TRADE_AMOUNT = 12  # Μονάδα κρυπτονομίσματος
 DYNAMIC_TRADE_ENABLED = False    # Δυναμικός υπολογισμός επένδυσης σύμφωνα με το ημερήσιο κέρδος / ζημιά                                                                                                                                                                  
 
@@ -43,7 +43,7 @@ long_ma_period = 20  # 20 περιόδων
 RSI_THRESHOLD = 30
 ADX_THRESHOLD = 25
 STOCHASTIC_OVERSOLD_THRESHOLD = 40
-BUY_THRESHOLD = 0.4     # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά
+BUY_THRESHOLD = 0.5     # Όριο για εκτέλεση αγοράς - ας πούμε ότι απαιτείται score >= 0.5 για να προχωρήσει η αγορά
 GRANULARITY = 300
 GRANULARITY_TEXT = "FIVE_MINUTE"
 ENABLE_TABULATE_INDICATORS = False      # αποτελέσματα δεικτών σε γραμμογραφημένη μορφή
@@ -2637,7 +2637,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                                     profit_loss = (execution_price * total_amount_to_sell) - (trade_amount * active_trade + second_trade_amount * second_trade_price + third_trade_amount * third_trade_price + third_total_fees)
                                     daily_profit += profit_loss
                                                 
-                                    logging.info(f"The sale was completed for total amount of {total_amount_to_sell} {CRYPTO_NAME}. "
+                                    logging.info(f"[Third Position] The sale was completed for total amount of {total_amount_to_sell} {CRYPTO_NAME}. "
                                                  f"Profit/Loss: {profit_loss:.{current_decimals}f} {CRYPTO_CURRENCY}, Fees: {fees:.{current_decimals}f}")                                         
                                                                                          
 
@@ -2674,11 +2674,10 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
                             else:
                                 logging.info(
-                                    f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} "
-                                                                                                                                                              
+                                    f"[Third Position] Current price {current_price:.{current_decimals}f} {CRYPTO_CURRENCY} "                               
                                     f"is below break-even price {third_break_even_price:.{current_decimals}f} {CRYPTO_CURRENCY}."
                                 )
-                                logging.info("No sell action taken.")
+                                logging.info("[Third Position] No sell action taken.")
 
 
                         else:
@@ -2741,7 +2740,32 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
 
 
             # ΠΩΛΗΣΗ 1ης ΘΕΣΗΣ ΜΕ TRAILING ΕΝΕΡΓΟ - Υπολογισμός του scalp target price --------------------------------------------------------------------------------------------------------------------------------------------
-            scalp_target_price = active_trade * SCALP_TARGET
+            
+            # Ορίζουμε την τιμή για το scalp_target
+            # Πρώτη περίπτωση: Μόνο η 1η θέση υπάρχει
+            if second_trade_price in [None, 0] and third_trade_price in [None, 0]:
+                scalp_target_percentage = (SCALP_TARGET - 1) * 100                
+                logging.info(f"[First Position] Using default SCALP_TARGET threshold: {scalp_target_percentage:.2f}%")
+                scalp_target_price = active_trade * SCALP_TARGET	#default scalp_target
+
+            # Δεύτερη περίπτωση: Υπάρχει μόνο 2η θέση
+            elif third_trade_price in [None, 0]:
+                new_scalp_target = 1.025
+                scalp_target_percentage = (new_scalp_target - 1) * 100                
+                logging.warning(f"[First Position] SCALP_TARGET threshold has been re-adjusted to include the impact of the 2nd order. Updated threshold: {scalp_target_percentage:.2f}%")                
+                scalp_target_price = active_trade * new_scalp_target
+
+            #Τρίτη περίπτωση: Υπάρχουν και οι δύο θέσεις
+            else:
+                new_scalp_target = 1.03
+                scalp_target_percentage = (new_scalp_target - 1) * 100                
+                logging.warning(f"[First Position] SCALP_TARGET threshold has been re-adjusted to account for the impact of both the 2nd and 3rd orders. Updated threshold: {scalp_target_percentage:.2f}%")                
+                scalp_target_price = active_trade * new_scalp_target
+            
+
+                        
+            
+            # αφου υπολογίσουμε scalp_target, ελέγχουμε αν έχει ενεργοποιηθεί το trailing profit
             if ENABLE_TRAILING_PROFIT:
                 try:
                     logging.info(f"[First Position] Entering 1st position block.")                    
@@ -2769,7 +2793,7 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                                 
                                 # Ενημέρωση του trailing sell price
                                 trailing_sell_price = highest_price * (1 - TRAILING_PROFIT_THRESHOLD)
-                                trailing_sell_price = max(trailing_sell_price, active_trade + EXTRA_PROFIT_MARGIN)
+                                trailing_sell_price = max(trailing_sell_price, active_trade)
 
                             # Δεύτερη περίπτωση: Υπάρχει μόνο 2η θέση, Ελέγχει αν δεν υπάρχει 3η θέση:
                             elif third_trade_price in [None, 0]:
@@ -2825,12 +2849,9 @@ def execute_scalping_trade(CRYPTO_SYMBOL):
                             # Όλες οι θέσεις ενεργές
                             logging.info(
                                 f"[First Position] [Case 3: All positions active] Adjusted trailing sell price is {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}."
-                            )
+                            )                       
+                            logging.info(f"[First Position] Checking if trailing profit conditions are met. Current price: {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}, Trailing sell price: {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}")
                         
-
-                        logging.info(f"[First Position] Checking if trailing profit conditions are met. Current price: {current_price:.{current_decimals}f} {CRYPTO_CURRENCY}, Trailing sell price: {trailing_sell_price:.{current_decimals}f} {CRYPTO_CURRENCY}")
-                        
-
                                                                        
                         # Έλεγχος αν πρέπει να πουλήσουμε λόγω trailing profit
                         if current_price <= trailing_sell_price:
