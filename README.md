@@ -97,19 +97,19 @@ The bot relies on **configuration parameters** stored in JSON files:
 ## Overview
 This document outlines the operational flow and logic of the trading bot from the moment it is executed until it completes its trading cycle.
 
-## 1. **Initialization & Setup**
+### 1. **Initialization & Setup**
 - The script starts by loading configuration settings, including trading parameters, API keys, and bot state.
 - It checks if there is a cooldown period active (to avoid consecutive trades).
 - The bot verifies whether it has received any **urgent sell/buy signals** from an external macro (Excel or another system).
 - If the bot is set to **paused mode**, it exits early without executing trades.
 - If **failover bot** integration is enabled, it checks whether the external decision allows trading.
 
-## 2. **Fetching Market Data**
+### 2. **Fetching Market Data**
 - The bot retrieves live candlestick data from multiple sources (Coinbase, Binance, etc.).
 - It ensures that the data is structured correctly and converts timestamps into a `DatetimeIndex`.
 - If there is insufficient data, it will attempt alternative data sources.
 
-## 3. **Technical Indicator Calculation**
+### 3. **Technical Indicator Calculation**
 - The script computes various indicators, including:
   - Moving Averages (MA)
   - Moving Average Convergence Divergence (MACD)
@@ -121,13 +121,13 @@ This document outlines the operational flow and logic of the trading bot from th
   - Directional Movement Index (ADX)
 - The bot applies resampling logic if necessary to ensure smooth indicator calculations.
 
-## 4. **Scoring System & Buy Signal Evaluation**
+### 4. **Scoring System & Buy Signal Evaluation**
 - A weighted scoring system is applied to indicators, assigning a positive or negative score based on predefined thresholds.
 - If the overall **score** exceeds the **BUY_THRESHOLD**, the bot checks for **volume confirmation**.
 - If **volume confirmation fails**, the bot evaluates **fallback conditions** (ATR, Stochastic RSI).
 - If **fallback conditions** are met, the bot proceeds with a buy order.
 
-## 5. **Order Execution: Buying Process**
+### 5. **Order Execution: Buying Process**
 - Before placing an order, the bot:
   - Checks available portfolio balance.
   - Ensures that the required amount to buy is available.
@@ -137,7 +137,7 @@ This document outlines the operational flow and logic of the trading bot from th
   - The trade amount and entry price are recorded.
   - The highest price reached post-entry is tracked for trailing sell logic.
 
-## 6. **Trailing Profit & Stop-Loss Mechanism**
+### 6. **Trailing Profit & Stop-Loss Mechanism**
 - The bot monitors price movement after entering a position.
 - If price exceeds a predefined **scalp target**, the **trailing profit mechanism** is activated.
 - If price falls below a dynamically calculated stop-loss, the bot **forces an exit**.
@@ -146,13 +146,13 @@ This document outlines the operational flow and logic of the trading bot from th
   - A new break-even price is calculated.
   - If price reaches a trailing sell condition, all positions are exited.
 
-## 7. **Profit Calculation & Exit Strategy**
+### 7. **Profit Calculation & Exit Strategy**
 - The bot dynamically adjusts trailing profit thresholds based on market volatility (ATR-based adjustment).
 - When the trailing condition is met, a **sell order** is executed.
 - Profit/Loss, including fees, is logged, and push notifications are sent.
 - After exiting a trade, the bot **enters cooldown mode** to prevent immediate re-entry.
 
-## 8. **Bot Iteration & Loop Termination**
+### 8. **Bot Iteration & Loop Termination**
 - If the daily profit target or maximum trade count is reached, the bot stops executing further trades.
 - The bot logs execution time and awaits the next scheduled run (via cronjob).
 
@@ -177,10 +177,6 @@ Contributions are welcome! This is my first attempt at building a project with P
 ## Disclaimer
 
 This bot is provided for educational purposes only. Use it at your own risk. The creators are not responsible for any financial losses incurred.
-
-
-
-
 
 
 ## 📩 Contact & Support
