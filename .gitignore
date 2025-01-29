@@ -9,9 +9,9 @@
 
 # Εξαίρεση συγκεκριμένων φακέλων
 
-AVAX/backup
-BITCOIN/backup
-DOGECOIN/backup
+AVAX/backup/
+BITCOIN/backup/
+DOGECOIN/backup/
 EXCEL/
-SOLANA/backup
+SOLANA/backup/
 
