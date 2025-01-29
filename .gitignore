@@ -6,7 +6,6 @@
 *.sh
 
 
-
 # Εξαίρεση συγκεκριμένων φακέλων
 
 AVAX/backup/
@@ -14,4 +13,5 @@ BITCOIN/backup/
 DOGECOIN/backup/
 EXCEL/
 SOLANA/backup/
-
+ETHEREUM/templates
+ETHEREUM/__pycache__
