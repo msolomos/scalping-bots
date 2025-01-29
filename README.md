@@ -170,13 +170,21 @@ The entire execution process is designed for **efficiency, risk mitigation, and 
 
 
 
+## Contributions
+
+Contributions are welcome! This is my first attempt at building a project with Python, and I would greatly appreciate any help, feedback, or suggestions to improve the bot. Whether it's optimizing the code, adding new features, or simply pointing out areas of improvement, your input is invaluable. Feel free to submit issues or pull requests to make this project even better.
+
+## Disclaimer
+
+This bot is provided for educational purposes only. Use it at your own risk. The creators are not responsible for any financial losses incurred.
+
 
 
 
 
 
 ## 📩 Contact & Support
-For questions, issues, or contributions, reach out via **[GitHub Issues](https://github.com/msolomos/salping-bots/issues)**.
+For questions, issues, or contributions, reach out via **[GitHub Issues](https://github.com/msolomos/scalping-bots/issues)**.
 
 ---
 This bot is continuously evolving. 🚀 Stay tuned for updates!
