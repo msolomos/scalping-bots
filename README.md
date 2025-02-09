@@ -1,10 +1,10 @@
-# Scalping & DCA Trading Bot - README
+# Scalping Trading Bot - README
 
 ## 📌 Overview
-This bot is an advanced **scalping and Dollar Cost Averaging (DCA) trading system**, designed to execute trades based on technical indicators, volume confirmation, and fallback conditions. It operates on a **score-based system**, evaluating trade signals before executing buy/sell orders.
+This bot is an advanced **scalping trading system**, designed to execute trades based on technical indicators, volume confirmation, and fallback conditions. It operates on a **score-based system**, evaluating trade signals before executing buy/sell orders.
 
 ## 🚀 Features
-- **Scalping & DCA Strategy**: Executes trades based on a calculated entry score.
+- **Scalping Strategy**: Executes trades based on a calculated entry score (base).
 - **Trailing Profit & Stop-Loss**: Supports dynamic trailing profit levels and stop-loss mechanisms.
 - **Technical Indicators**: Uses MACD, RSI, Bollinger Bands, VWAP, ATR, and Stochastic indicators.
 - **Volume Confirmation**: Ensures strong buy/sell signals.
@@ -73,16 +73,19 @@ The bot relies on **configuration parameters** stored in JSON files:
 | **Stochastic** | Confirms momentum strength |
 
 
+
 ## 🏦 DCA Strategy
 - If price **drops below a threshold**, it executes a **second buy order** to lower the average price.
 - If the price continues to fall, a **third buy order** is placed.
 - The **break-even price** is dynamically calculated.
 - Sells all positions when the price reaches the desired **trailing profit** or scalp target.
 
+
 ## 📡 Logging & Alerts
 - Logs all trade decisions and calculations.
 - Sends **push notifications** for important trade events.
 - Detailed logging of indicators, scores, and executed trades.
+
 
 ## 📌 Failover & Safety Mechanisms
 - **Failover Mode**: If an external bot suggests a "Pause", this bot will **skip execution**.
